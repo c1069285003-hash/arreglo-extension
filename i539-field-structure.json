@@ -1,0 +1,2468 @@
+[
+  {
+    "fieldCount": 5,
+    "fields": [
+      {
+        "id": "gettingStarted.basisOfEligibility.currentNonImmigrantStatus",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "gettingStarted.basisOfEligibility.currentNonImmigrantStatus",
+        "required": true,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.basisOfEligibility.currentNonImmigrantStatus\"]",
+        "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+        "type": "text",
+        "value": "",
+        "options": [
+          {
+            "index": 1,
+            "value": "1B1",
+            "text": "1B1 - H1 B Spec Occ, Singapore/Chile"
+          },
+          {
+            "index": 2,
+            "value": "1B2",
+            "text": "1B2 - Spec Occ Related To Dod"
+          },
+          {
+            "index": 3,
+            "value": "1B3",
+            "text": "1B3 - Spec Occ, Fashion Models"
+          },
+          {
+            "index": 4,
+            "value": "1B4",
+            "text": "1B4 - H 1 B4 Unique Pgm Artist/Ent"
+          },
+          {
+            "index": 5,
+            "value": "1B5",
+            "text": "1B5 - H 1 B5 Alien Athlete"
+          },
+          {
+            "index": 6,
+            "value": "1BS",
+            "text": "1BS - Support Person Of H 1"
+          },
+          {
+            "index": 7,
+            "value": "B1",
+            "text": "B1 - Temporary Visitor For Business (Including Peace Corps)."
+          },
+          {
+            "index": 8,
+            "value": "B1A",
+            "text": "B1A - Ni Persnl/Dom Srvant Of Ni Emp"
+          },
+          {
+            "index": 9,
+            "value": "B1B",
+            "text": "B1B - Ni Domestic Servant Of Usc"
+          },
+          {
+            "index": 10,
+            "value": "B1C",
+            "text": "B1C - Ni Employed By Foreign Airline"
+          },
+          {
+            "index": 11,
+            "value": "B1D",
+            "text": "B1D - Ni Missionaries"
+          },
+          {
+            "index": 12,
+            "value": "B2",
+            "text": "B2 - Temporary Visitor For Pleasure."
+          },
+          {
+            "index": 13,
+            "value": "CW1",
+            "text": "CW1 - Commonwealth Of Northern Mariana Islands Transitional Worker"
+          },
+          {
+            "index": 14,
+            "value": "CW2",
+            "text": "CW2 - Spouses And Children Of Transitional Workers In Cnmi"
+          },
+          {
+            "index": 15,
+            "value": "E1",
+            "text": "E1 - Treaty Trader, Spouse And Children."
+          },
+          {
+            "index": 16,
+            "value": "E1S",
+            "text": "E1S - Spouse Of A Treaty Trader"
+          },
+          {
+            "index": 17,
+            "value": "E1Y",
+            "text": "E1Y - Child Of A Treaty Trader"
+          },
+          {
+            "index": 18,
+            "value": "E2",
+            "text": "E2 - Treaty Investor, Spouse And Children."
+          },
+          {
+            "index": 19,
+            "value": "E2C",
+            "text": "E2C - Commonwealth Of Northern Mariana Islands Investor, Spouse Or Child"
+          },
+          {
+            "index": 20,
+            "value": "E2S",
+            "text": "E2S - Spouse Of Treaty Investor"
+          },
+          {
+            "index": 21,
+            "value": "E2Y",
+            "text": "E2Y - Child Of Treaty Investor"
+          },
+          {
+            "index": 22,
+            "value": "E3",
+            "text": "E3 - Australian Treaty Alien Coming To The United States Solely To Perform Services In A Specialty Occupation"
+          },
+          {
+            "index": 23,
+            "value": "E3D",
+            "text": "E3D - Spouse And Children Of E3"
+          },
+          {
+            "index": 24,
+            "value": "E3S",
+            "text": "E3S - Spouse Of E3"
+          },
+          {
+            "index": 25,
+            "value": "E3Y",
+            "text": "E3Y - Child Of E3"
+          },
+          {
+            "index": 26,
+            "value": "F1",
+            "text": "F1 - Student, Academic Or Language Program."
+          },
+          {
+            "index": 27,
+            "value": "F2",
+            "text": "F2 - Spouse Or Child Of F 1."
+          },
+          {
+            "index": 28,
+            "value": "H1C",
+            "text": "H1C - Registered Nurse Who Will Work In Facilities That Serve Health Professional Shortage Areas Under Provisions Of The Nursing Relief For Disadvantage Areas Act Of 1999"
+          },
+          {
+            "index": 29,
+            "value": "H2A",
+            "text": "H2A - Worker To Perform Agricultural Services Or Labor Of A Temporary Or Seasonal Nature When Services Are Unavailable In The U.S. And Will Not Adversely Affect Wages And Working Conditions Of U.S. Workers."
+          },
+          {
+            "index": 30,
+            "value": "H2B",
+            "text": "H2B - Nonagricultural Worker Performing Services Of A Temporary Nature Or Labor Unavailable In The United States."
+          },
+          {
+            "index": 31,
+            "value": "H3",
+            "text": "H3 - Temporary Trainee To Receive Instruction In Any Field Except Medical Education."
+          },
+          {
+            "index": 32,
+            "value": "H4",
+            "text": "H4 - The Spouse And Children Of An H Nonimmigrant. See 8 Cfr 214.2(h)(9)(Iv)."
+          },
+          {
+            "index": 33,
+            "value": "I",
+            "text": "I - Representative Of Foreign Information Media, Spouse And Children."
+          },
+          {
+            "index": 34,
+            "value": "J1",
+            "text": "J1 - Exchange Visitor."
+          },
+          {
+            "index": 35,
+            "value": "J2",
+            "text": "J2 - Spouse Or Child Of J 1."
+          },
+          {
+            "index": 36,
+            "value": "K3",
+            "text": "K3 - Spouse Of A U.S. Citizen Who Is A Beneficary Of A Petition For Status As The Immediate Relative Of A U.S. Citizen (I 130)."
+          },
+          {
+            "index": 37,
+            "value": "K4",
+            "text": "K4 - Child Accompanying Or Following To Join A K 3 Alien."
+          },
+          {
+            "index": 38,
+            "value": "L1",
+            "text": "L1 - Intracompany Transferee (Executive, Managerial, And Specialized Personnel Entering To Render Services To A Branch, Parent, Subsidiary, Or Affiliate Of The Company Of Previous Employment Outside The United States)."
+          },
+          {
+            "index": 39,
+            "value": "L1A",
+            "text": "L1A - Manager Or Executive"
+          },
+          {
+            "index": 40,
+            "value": "L1B",
+            "text": "L1B - Specialized Knowledge Alien"
+          },
+          {
+            "index": 41,
+            "value": "L2",
+            "text": "L2 - Spouse Or Child Of L 1."
+          },
+          {
+            "index": 42,
+            "value": "L2S",
+            "text": "L2S - Spouse Of L1"
+          },
+          {
+            "index": 43,
+            "value": "L2Y",
+            "text": "L2Y - Child Of L1"
+          },
+          {
+            "index": 44,
+            "value": "M1",
+            "text": "M1 - Student Pursuing A Full Course Of Study At An Established Vocational Or Other Recognized Nonacademic Institution (Other Than In A Language Training Program)."
+          },
+          {
+            "index": 45,
+            "value": "M2",
+            "text": "M2 - Spouse Or Child Of M1."
+          },
+          {
+            "index": 46,
+            "value": "N8",
+            "text": "N8 - Parent Of An Alien Classified Sk3 Or Sn3."
+          },
+          {
+            "index": 47,
+            "value": "N9",
+            "text": "N9 - Child Of N 8 Or Of An Alien Classified Sk1, Sk2, Sk4, Sn1, Sn2, Or Sn4."
+          },
+          {
+            "index": 48,
+            "value": "O1",
+            "text": "O1 - Temporary Worker With Extraordinary Ability/Achievement In The Sciences, Arts, Education, Business, Or Athletics."
+          },
+          {
+            "index": 49,
+            "value": "O1A",
+            "text": "O1A - Extraordinary Alien Non Arts"
+          },
+          {
+            "index": 50,
+            "value": "O1B",
+            "text": "O1B - Extraordinary Alien In Arts"
+          },
+          {
+            "index": 51,
+            "value": "O2",
+            "text": "O2 - Temporary Worker Accompanying Or Assisting O 1."
+          },
+          {
+            "index": 52,
+            "value": "O3",
+            "text": "O3 - Spouse Or Child Of O 1 Or O 2."
+          },
+          {
+            "index": 53,
+            "value": "P1",
+            "text": "P1 - Temporary Worker, Internationally Recognized Athlete Or Entertainer For A Specific Competition Or Performance."
+          },
+          {
+            "index": 54,
+            "value": "P1A",
+            "text": "P1A - Alien With Athletic Event"
+          },
+          {
+            "index": 55,
+            "value": "P1B",
+            "text": "P1B - Alien With Entertainment Group"
+          },
+          {
+            "index": 56,
+            "value": "P1S",
+            "text": "P1S - Support Person Of P 1"
+          },
+          {
+            "index": 57,
+            "value": "P2",
+            "text": "P2 - Temporary Worker, Artist Or Entertainer Under A Reciprocal Exchange Program With A Similar Organization Of A Foreign State."
+          },
+          {
+            "index": 58,
+            "value": "P2S",
+            "text": "P2S - Support Person Of P 2"
+          },
+          {
+            "index": 59,
+            "value": "P3",
+            "text": "P3 - Temporary Worker, Artist Or Entertainer Under A Program That Is \"Culturally Unique\"."
+          },
+          {
+            "index": 60,
+            "value": "P3S",
+            "text": "P3S - Support Person Of P 3"
+          },
+          {
+            "index": 61,
+            "value": "P4",
+            "text": "P4 - Spouse Or Child Of P 1, P 2, Or P 3."
+          },
+          {
+            "index": 62,
+            "value": "Q1",
+            "text": "Q1 - Temporary Worker In An International Cultural Exchange Program."
+          },
+          {
+            "index": 63,
+            "value": "R1",
+            "text": "R1 - Temporary Worker To Perform Work In Religious Occupations."
+          },
+          {
+            "index": 64,
+            "value": "R2",
+            "text": "R2 - Spouse And Children Of R1."
+          },
+          {
+            "index": 65,
+            "value": "TD",
+            "text": "TD - Spouse Or Child Of Tn."
+          },
+          {
+            "index": 66,
+            "value": "TN1",
+            "text": "TN1 - Nafta Principal (Canada)"
+          },
+          {
+            "index": 67,
+            "value": "TN2",
+            "text": "TN2 - Nafta Principal (Mexico)"
+          },
+          {
+            "index": 68,
+            "value": "UU",
+            "text": "UU - Unknown Or Not Reported"
+          }
+        ],
+        "optionCount": 68
+      },
+      {
+        "id": "gettingStarted.basisOfEligibility.currentNonImmigrantStatusExpirationDate",
+        "kind": "text",
+        "label": "When does your current nonimmigrant status expire?: MM/DD/YYYY",
+        "maxlength": null,
+        "name": "gettingStarted.basisOfEligibility.currentNonImmigrantStatusExpirationDate",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.basisOfEligibility.currentNonImmigrantStatusExpirationDate\"]",
+        "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+        "type": "text",
+        "value": "MM/DD/YYYY"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "gettingStarted.basisOfEligibility.isGrantedDurationOfStatus",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.basisOfEligibility.isGrantedDurationOfStatus\"]",
+        "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "gettingStarted.basisOfEligibility.isOnlyApplicant",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.basisOfEligibility.isOnlyApplicant\"]",
+        "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *"
+      },
+      {
+        "id": "gettingStarted.basisOfEligibility.currentNonImmigrantStatus",
+        "kind": "combobox",
+        "label": "",
+        "name": "gettingStarted.basisOfEligibility.currentNonImmigrantStatus",
+        "note": "React combo box: options may be virtualized; this extractor records the control, not the full option list.",
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.basisOfEligibility.currentNonImmigrantStatus\"]",
+        "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+        "value": "",
+        "options": [
+          {
+            "index": 1,
+            "value": "1B1",
+            "text": "1B1 - H1 B Spec Occ, Singapore/Chile"
+          },
+          {
+            "index": 2,
+            "value": "1B2",
+            "text": "1B2 - Spec Occ Related To Dod"
+          },
+          {
+            "index": 3,
+            "value": "1B3",
+            "text": "1B3 - Spec Occ, Fashion Models"
+          },
+          {
+            "index": 4,
+            "value": "1B4",
+            "text": "1B4 - H 1 B4 Unique Pgm Artist/Ent"
+          },
+          {
+            "index": 5,
+            "value": "1B5",
+            "text": "1B5 - H 1 B5 Alien Athlete"
+          },
+          {
+            "index": 6,
+            "value": "1BS",
+            "text": "1BS - Support Person Of H 1"
+          },
+          {
+            "index": 7,
+            "value": "B1",
+            "text": "B1 - Temporary Visitor For Business (Including Peace Corps)."
+          },
+          {
+            "index": 8,
+            "value": "B1A",
+            "text": "B1A - Ni Persnl/Dom Srvant Of Ni Emp"
+          },
+          {
+            "index": 9,
+            "value": "B1B",
+            "text": "B1B - Ni Domestic Servant Of Usc"
+          },
+          {
+            "index": 10,
+            "value": "B1C",
+            "text": "B1C - Ni Employed By Foreign Airline"
+          },
+          {
+            "index": 11,
+            "value": "B1D",
+            "text": "B1D - Ni Missionaries"
+          },
+          {
+            "index": 12,
+            "value": "B2",
+            "text": "B2 - Temporary Visitor For Pleasure."
+          },
+          {
+            "index": 13,
+            "value": "CW1",
+            "text": "CW1 - Commonwealth Of Northern Mariana Islands Transitional Worker"
+          },
+          {
+            "index": 14,
+            "value": "CW2",
+            "text": "CW2 - Spouses And Children Of Transitional Workers In Cnmi"
+          },
+          {
+            "index": 15,
+            "value": "E1",
+            "text": "E1 - Treaty Trader, Spouse And Children."
+          },
+          {
+            "index": 16,
+            "value": "E1S",
+            "text": "E1S - Spouse Of A Treaty Trader"
+          },
+          {
+            "index": 17,
+            "value": "E1Y",
+            "text": "E1Y - Child Of A Treaty Trader"
+          },
+          {
+            "index": 18,
+            "value": "E2",
+            "text": "E2 - Treaty Investor, Spouse And Children."
+          },
+          {
+            "index": 19,
+            "value": "E2C",
+            "text": "E2C - Commonwealth Of Northern Mariana Islands Investor, Spouse Or Child"
+          },
+          {
+            "index": 20,
+            "value": "E2S",
+            "text": "E2S - Spouse Of Treaty Investor"
+          },
+          {
+            "index": 21,
+            "value": "E2Y",
+            "text": "E2Y - Child Of Treaty Investor"
+          },
+          {
+            "index": 22,
+            "value": "E3",
+            "text": "E3 - Australian Treaty Alien Coming To The United States Solely To Perform Services In A Specialty Occupation"
+          },
+          {
+            "index": 23,
+            "value": "E3D",
+            "text": "E3D - Spouse And Children Of E3"
+          },
+          {
+            "index": 24,
+            "value": "E3S",
+            "text": "E3S - Spouse Of E3"
+          },
+          {
+            "index": 25,
+            "value": "E3Y",
+            "text": "E3Y - Child Of E3"
+          },
+          {
+            "index": 26,
+            "value": "F1",
+            "text": "F1 - Student, Academic Or Language Program."
+          },
+          {
+            "index": 27,
+            "value": "F2",
+            "text": "F2 - Spouse Or Child Of F 1."
+          },
+          {
+            "index": 28,
+            "value": "H1C",
+            "text": "H1C - Registered Nurse Who Will Work In Facilities That Serve Health Professional Shortage Areas Under Provisions Of The Nursing Relief For Disadvantage Areas Act Of 1999"
+          },
+          {
+            "index": 29,
+            "value": "H2A",
+            "text": "H2A - Worker To Perform Agricultural Services Or Labor Of A Temporary Or Seasonal Nature When Services Are Unavailable In The U.S. And Will Not Adversely Affect Wages And Working Conditions Of U.S. Workers."
+          },
+          {
+            "index": 30,
+            "value": "H2B",
+            "text": "H2B - Nonagricultural Worker Performing Services Of A Temporary Nature Or Labor Unavailable In The United States."
+          },
+          {
+            "index": 31,
+            "value": "H3",
+            "text": "H3 - Temporary Trainee To Receive Instruction In Any Field Except Medical Education."
+          },
+          {
+            "index": 32,
+            "value": "H4",
+            "text": "H4 - The Spouse And Children Of An H Nonimmigrant. See 8 Cfr 214.2(h)(9)(Iv)."
+          },
+          {
+            "index": 33,
+            "value": "I",
+            "text": "I - Representative Of Foreign Information Media, Spouse And Children."
+          },
+          {
+            "index": 34,
+            "value": "J1",
+            "text": "J1 - Exchange Visitor."
+          },
+          {
+            "index": 35,
+            "value": "J2",
+            "text": "J2 - Spouse Or Child Of J 1."
+          },
+          {
+            "index": 36,
+            "value": "K3",
+            "text": "K3 - Spouse Of A U.S. Citizen Who Is A Beneficary Of A Petition For Status As The Immediate Relative Of A U.S. Citizen (I 130)."
+          },
+          {
+            "index": 37,
+            "value": "K4",
+            "text": "K4 - Child Accompanying Or Following To Join A K 3 Alien."
+          },
+          {
+            "index": 38,
+            "value": "L1",
+            "text": "L1 - Intracompany Transferee (Executive, Managerial, And Specialized Personnel Entering To Render Services To A Branch, Parent, Subsidiary, Or Affiliate Of The Company Of Previous Employment Outside The United States)."
+          },
+          {
+            "index": 39,
+            "value": "L1A",
+            "text": "L1A - Manager Or Executive"
+          },
+          {
+            "index": 40,
+            "value": "L1B",
+            "text": "L1B - Specialized Knowledge Alien"
+          },
+          {
+            "index": 41,
+            "value": "L2",
+            "text": "L2 - Spouse Or Child Of L 1."
+          },
+          {
+            "index": 42,
+            "value": "L2S",
+            "text": "L2S - Spouse Of L1"
+          },
+          {
+            "index": 43,
+            "value": "L2Y",
+            "text": "L2Y - Child Of L1"
+          },
+          {
+            "index": 44,
+            "value": "M1",
+            "text": "M1 - Student Pursuing A Full Course Of Study At An Established Vocational Or Other Recognized Nonacademic Institution (Other Than In A Language Training Program)."
+          },
+          {
+            "index": 45,
+            "value": "M2",
+            "text": "M2 - Spouse Or Child Of M1."
+          },
+          {
+            "index": 46,
+            "value": "N8",
+            "text": "N8 - Parent Of An Alien Classified Sk3 Or Sn3."
+          },
+          {
+            "index": 47,
+            "value": "N9",
+            "text": "N9 - Child Of N 8 Or Of An Alien Classified Sk1, Sk2, Sk4, Sn1, Sn2, Or Sn4."
+          },
+          {
+            "index": 48,
+            "value": "O1",
+            "text": "O1 - Temporary Worker With Extraordinary Ability/Achievement In The Sciences, Arts, Education, Business, Or Athletics."
+          },
+          {
+            "index": 49,
+            "value": "O1A",
+            "text": "O1A - Extraordinary Alien Non Arts"
+          },
+          {
+            "index": 50,
+            "value": "O1B",
+            "text": "O1B - Extraordinary Alien In Arts"
+          },
+          {
+            "index": 51,
+            "value": "O2",
+            "text": "O2 - Temporary Worker Accompanying Or Assisting O 1."
+          },
+          {
+            "index": 52,
+            "value": "O3",
+            "text": "O3 - Spouse Or Child Of O 1 Or O 2."
+          },
+          {
+            "index": 53,
+            "value": "P1",
+            "text": "P1 - Temporary Worker, Internationally Recognized Athlete Or Entertainer For A Specific Competition Or Performance."
+          },
+          {
+            "index": 54,
+            "value": "P1A",
+            "text": "P1A - Alien With Athletic Event"
+          },
+          {
+            "index": 55,
+            "value": "P1B",
+            "text": "P1B - Alien With Entertainment Group"
+          },
+          {
+            "index": 56,
+            "value": "P1S",
+            "text": "P1S - Support Person Of P 1"
+          },
+          {
+            "index": 57,
+            "value": "P2",
+            "text": "P2 - Temporary Worker, Artist Or Entertainer Under A Reciprocal Exchange Program With A Similar Organization Of A Foreign State."
+          },
+          {
+            "index": 58,
+            "value": "P2S",
+            "text": "P2S - Support Person Of P 2"
+          },
+          {
+            "index": 59,
+            "value": "P3",
+            "text": "P3 - Temporary Worker, Artist Or Entertainer Under A Program That Is \"Culturally Unique\"."
+          },
+          {
+            "index": 60,
+            "value": "P3S",
+            "text": "P3S - Support Person Of P 3"
+          },
+          {
+            "index": 61,
+            "value": "P4",
+            "text": "P4 - Spouse Or Child Of P 1, P 2, Or P 3."
+          },
+          {
+            "index": 62,
+            "value": "Q1",
+            "text": "Q1 - Temporary Worker In An International Cultural Exchange Program."
+          },
+          {
+            "index": 63,
+            "value": "R1",
+            "text": "R1 - Temporary Worker To Perform Work In Religious Occupations."
+          },
+          {
+            "index": 64,
+            "value": "R2",
+            "text": "R2 - Spouse And Children Of R1."
+          },
+          {
+            "index": 65,
+            "value": "TD",
+            "text": "TD - Spouse Or Child Of Tn."
+          },
+          {
+            "index": 66,
+            "value": "TN1",
+            "text": "TN1 - Nafta Principal (Canada)"
+          },
+          {
+            "index": 67,
+            "value": "TN2",
+            "text": "TN2 - Nafta Principal (Mexico)"
+          },
+          {
+            "index": 68,
+            "value": "UU",
+            "text": "UU - Unknown Or Not Reported"
+          }
+        ],
+        "optionCount": 68
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/basis-of-eligibility",
+    "dropdownOptions": {
+      "currentNonImmigrantStatus": [
+        {
+          "index": 1,
+          "value": "1B1",
+          "text": "1B1 - H1 B Spec Occ, Singapore/Chile"
+        },
+        {
+          "index": 2,
+          "value": "1B2",
+          "text": "1B2 - Spec Occ Related To Dod"
+        },
+        {
+          "index": 3,
+          "value": "1B3",
+          "text": "1B3 - Spec Occ, Fashion Models"
+        },
+        {
+          "index": 4,
+          "value": "1B4",
+          "text": "1B4 - H 1 B4 Unique Pgm Artist/Ent"
+        },
+        {
+          "index": 5,
+          "value": "1B5",
+          "text": "1B5 - H 1 B5 Alien Athlete"
+        },
+        {
+          "index": 6,
+          "value": "1BS",
+          "text": "1BS - Support Person Of H 1"
+        },
+        {
+          "index": 7,
+          "value": "B1",
+          "text": "B1 - Temporary Visitor For Business (Including Peace Corps)."
+        },
+        {
+          "index": 8,
+          "value": "B1A",
+          "text": "B1A - Ni Persnl/Dom Srvant Of Ni Emp"
+        },
+        {
+          "index": 9,
+          "value": "B1B",
+          "text": "B1B - Ni Domestic Servant Of Usc"
+        },
+        {
+          "index": 10,
+          "value": "B1C",
+          "text": "B1C - Ni Employed By Foreign Airline"
+        },
+        {
+          "index": 11,
+          "value": "B1D",
+          "text": "B1D - Ni Missionaries"
+        },
+        {
+          "index": 12,
+          "value": "B2",
+          "text": "B2 - Temporary Visitor For Pleasure."
+        },
+        {
+          "index": 13,
+          "value": "CW1",
+          "text": "CW1 - Commonwealth Of Northern Mariana Islands Transitional Worker"
+        },
+        {
+          "index": 14,
+          "value": "CW2",
+          "text": "CW2 - Spouses And Children Of Transitional Workers In Cnmi"
+        },
+        {
+          "index": 15,
+          "value": "E1",
+          "text": "E1 - Treaty Trader, Spouse And Children."
+        },
+        {
+          "index": 16,
+          "value": "E1S",
+          "text": "E1S - Spouse Of A Treaty Trader"
+        },
+        {
+          "index": 17,
+          "value": "E1Y",
+          "text": "E1Y - Child Of A Treaty Trader"
+        },
+        {
+          "index": 18,
+          "value": "E2",
+          "text": "E2 - Treaty Investor, Spouse And Children."
+        },
+        {
+          "index": 19,
+          "value": "E2C",
+          "text": "E2C - Commonwealth Of Northern Mariana Islands Investor, Spouse Or Child"
+        },
+        {
+          "index": 20,
+          "value": "E2S",
+          "text": "E2S - Spouse Of Treaty Investor"
+        },
+        {
+          "index": 21,
+          "value": "E2Y",
+          "text": "E2Y - Child Of Treaty Investor"
+        },
+        {
+          "index": 22,
+          "value": "E3",
+          "text": "E3 - Australian Treaty Alien Coming To The United States Solely To Perform Services In A Specialty Occupation"
+        },
+        {
+          "index": 23,
+          "value": "E3D",
+          "text": "E3D - Spouse And Children Of E3"
+        },
+        {
+          "index": 24,
+          "value": "E3S",
+          "text": "E3S - Spouse Of E3"
+        },
+        {
+          "index": 25,
+          "value": "E3Y",
+          "text": "E3Y - Child Of E3"
+        },
+        {
+          "index": 26,
+          "value": "F1",
+          "text": "F1 - Student, Academic Or Language Program."
+        },
+        {
+          "index": 27,
+          "value": "F2",
+          "text": "F2 - Spouse Or Child Of F 1."
+        },
+        {
+          "index": 28,
+          "value": "H1C",
+          "text": "H1C - Registered Nurse Who Will Work In Facilities That Serve Health Professional Shortage Areas Under Provisions Of The Nursing Relief For Disadvantage Areas Act Of 1999"
+        },
+        {
+          "index": 29,
+          "value": "H2A",
+          "text": "H2A - Worker To Perform Agricultural Services Or Labor Of A Temporary Or Seasonal Nature When Services Are Unavailable In The U.S. And Will Not Adversely Affect Wages And Working Conditions Of U.S. Workers."
+        },
+        {
+          "index": 30,
+          "value": "H2B",
+          "text": "H2B - Nonagricultural Worker Performing Services Of A Temporary Nature Or Labor Unavailable In The United States."
+        },
+        {
+          "index": 31,
+          "value": "H3",
+          "text": "H3 - Temporary Trainee To Receive Instruction In Any Field Except Medical Education."
+        },
+        {
+          "index": 32,
+          "value": "H4",
+          "text": "H4 - The Spouse And Children Of An H Nonimmigrant. See 8 Cfr 214.2(h)(9)(Iv)."
+        },
+        {
+          "index": 33,
+          "value": "I",
+          "text": "I - Representative Of Foreign Information Media, Spouse And Children."
+        },
+        {
+          "index": 34,
+          "value": "J1",
+          "text": "J1 - Exchange Visitor."
+        },
+        {
+          "index": 35,
+          "value": "J2",
+          "text": "J2 - Spouse Or Child Of J 1."
+        },
+        {
+          "index": 36,
+          "value": "K3",
+          "text": "K3 - Spouse Of A U.S. Citizen Who Is A Beneficary Of A Petition For Status As The Immediate Relative Of A U.S. Citizen (I 130)."
+        },
+        {
+          "index": 37,
+          "value": "K4",
+          "text": "K4 - Child Accompanying Or Following To Join A K 3 Alien."
+        },
+        {
+          "index": 38,
+          "value": "L1",
+          "text": "L1 - Intracompany Transferee (Executive, Managerial, And Specialized Personnel Entering To Render Services To A Branch, Parent, Subsidiary, Or Affiliate Of The Company Of Previous Employment Outside The United States)."
+        },
+        {
+          "index": 39,
+          "value": "L1A",
+          "text": "L1A - Manager Or Executive"
+        },
+        {
+          "index": 40,
+          "value": "L1B",
+          "text": "L1B - Specialized Knowledge Alien"
+        },
+        {
+          "index": 41,
+          "value": "L2",
+          "text": "L2 - Spouse Or Child Of L 1."
+        },
+        {
+          "index": 42,
+          "value": "L2S",
+          "text": "L2S - Spouse Of L1"
+        },
+        {
+          "index": 43,
+          "value": "L2Y",
+          "text": "L2Y - Child Of L1"
+        },
+        {
+          "index": 44,
+          "value": "M1",
+          "text": "M1 - Student Pursuing A Full Course Of Study At An Established Vocational Or Other Recognized Nonacademic Institution (Other Than In A Language Training Program)."
+        },
+        {
+          "index": 45,
+          "value": "M2",
+          "text": "M2 - Spouse Or Child Of M1."
+        },
+        {
+          "index": 46,
+          "value": "N8",
+          "text": "N8 - Parent Of An Alien Classified Sk3 Or Sn3."
+        },
+        {
+          "index": 47,
+          "value": "N9",
+          "text": "N9 - Child Of N 8 Or Of An Alien Classified Sk1, Sk2, Sk4, Sn1, Sn2, Or Sn4."
+        },
+        {
+          "index": 48,
+          "value": "O1",
+          "text": "O1 - Temporary Worker With Extraordinary Ability/Achievement In The Sciences, Arts, Education, Business, Or Athletics."
+        },
+        {
+          "index": 49,
+          "value": "O1A",
+          "text": "O1A - Extraordinary Alien Non Arts"
+        },
+        {
+          "index": 50,
+          "value": "O1B",
+          "text": "O1B - Extraordinary Alien In Arts"
+        },
+        {
+          "index": 51,
+          "value": "O2",
+          "text": "O2 - Temporary Worker Accompanying Or Assisting O 1."
+        },
+        {
+          "index": 52,
+          "value": "O3",
+          "text": "O3 - Spouse Or Child Of O 1 Or O 2."
+        },
+        {
+          "index": 53,
+          "value": "P1",
+          "text": "P1 - Temporary Worker, Internationally Recognized Athlete Or Entertainer For A Specific Competition Or Performance."
+        },
+        {
+          "index": 54,
+          "value": "P1A",
+          "text": "P1A - Alien With Athletic Event"
+        },
+        {
+          "index": 55,
+          "value": "P1B",
+          "text": "P1B - Alien With Entertainment Group"
+        },
+        {
+          "index": 56,
+          "value": "P1S",
+          "text": "P1S - Support Person Of P 1"
+        },
+        {
+          "index": 57,
+          "value": "P2",
+          "text": "P2 - Temporary Worker, Artist Or Entertainer Under A Reciprocal Exchange Program With A Similar Organization Of A Foreign State."
+        },
+        {
+          "index": 58,
+          "value": "P2S",
+          "text": "P2S - Support Person Of P 2"
+        },
+        {
+          "index": 59,
+          "value": "P3",
+          "text": "P3 - Temporary Worker, Artist Or Entertainer Under A Program That Is \"Culturally Unique\"."
+        },
+        {
+          "index": 60,
+          "value": "P3S",
+          "text": "P3S - Support Person Of P 3"
+        },
+        {
+          "index": 61,
+          "value": "P4",
+          "text": "P4 - Spouse Or Child Of P 1, P 2, Or P 3."
+        },
+        {
+          "index": 62,
+          "value": "Q1",
+          "text": "Q1 - Temporary Worker In An International Cultural Exchange Program."
+        },
+        {
+          "index": 63,
+          "value": "R1",
+          "text": "R1 - Temporary Worker To Perform Work In Religious Occupations."
+        },
+        {
+          "index": 64,
+          "value": "R2",
+          "text": "R2 - Spouse And Children Of R1."
+        },
+        {
+          "index": 65,
+          "value": "TD",
+          "text": "TD - Spouse Or Child Of Tn."
+        },
+        {
+          "index": 66,
+          "value": "TN1",
+          "text": "TN1 - Nafta Principal (Canada)"
+        },
+        {
+          "index": 67,
+          "value": "TN2",
+          "text": "TN2 - Nafta Principal (Mexico)"
+        },
+        {
+          "index": 68,
+          "value": "UU",
+          "text": "UU - Unknown Or Not Reported"
+        }
+      ]
+    }
+  },
+  {
+    "fieldCount": 5,
+    "fields": [
+      {
+        "id": "gettingStarted.basisOfEligibility.currentNonImmigrantStatus",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "gettingStarted.basisOfEligibility.currentNonImmigrantStatus",
+        "required": true,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.basisOfEligibility.currentNonImmigrantStatus\"]",
+        "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+        "type": "text",
+        "value": "B2 - Temporary Visitor For Pleasure."
+      },
+      {
+        "id": "gettingStarted.basisOfEligibility.currentNonImmigrantStatusExpirationDate",
+        "kind": "text",
+        "label": "When does your current nonimmigrant status expire?: MM/DD/YYYY",
+        "maxlength": null,
+        "name": "gettingStarted.basisOfEligibility.currentNonImmigrantStatusExpirationDate",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.basisOfEligibility.currentNonImmigrantStatusExpirationDate\"]",
+        "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+        "type": "text",
+        "value": "MM/DD/YYYY"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "gettingStarted.basisOfEligibility.isGrantedDurationOfStatus",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.basisOfEligibility.isGrantedDurationOfStatus\"]",
+        "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "gettingStarted.basisOfEligibility.isOnlyApplicant",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.basisOfEligibility.isOnlyApplicant\"]",
+        "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *"
+      },
+      {
+        "id": "gettingStarted.basisOfEligibility.currentNonImmigrantStatus",
+        "kind": "combobox",
+        "label": "",
+        "name": "gettingStarted.basisOfEligibility.currentNonImmigrantStatus",
+        "note": "React combo box: options may be virtualized; this extractor records the control. If options are present, they are stored on this field.",
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.basisOfEligibility.currentNonImmigrantStatus\"]",
+        "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+        "value": "B2 - Temporary Visitor For Pleasure."
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/basis-of-eligibility",
+    "sampleTag": "primary-path",
+    "assumptions": {
+      "currentNonImmigrantStatus": "B2",
+      "isGrantedDurationOfStatus": "false",
+      "isOnlyApplicant": "true"
+    }
+  },
+  {
+    "fieldCount": 2,
+    "fields": [
+      {
+        "id": "gettingStarted.reasonForRequest.requestedDateOfExtension",
+        "kind": "text",
+        "label": "What date are you requesting your current or requested status be extended until?: MM/DD/YYYY",
+        "maxlength": null,
+        "name": "gettingStarted.reasonForRequest.requestedDateOfExtension",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.reasonForRequest.requestedDateOfExtension\"]",
+        "subSection": "What are you applying for? * | What date are you requesting your current or requested status be extended until?",
+        "type": "text",
+        "value": "MM/DD/YYYY"
+      },
+      {
+        "kind": "radio",
+        "label": "An extension of stay in my current status",
+        "name": "gettingStarted.reasonForRequest.applicationType",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "An extension of stay in my current status",
+            "value": "extensionOfStay"
+          },
+          {
+            "checked": false,
+            "optionLabel": "A change of status",
+            "value": "changeOfStatus"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"gettingStarted.reasonForRequest.applicationType\"]",
+        "subSection": "What are you applying for? * | What date are you requesting your current or requested status be extended until?"
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "What are you applying for? * | What date are you requesting your current or requested status be extended until?",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/reason-for-request",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "formikFactoryUIMeta.gettingStarted.preparerAndInterpreterInformation.hasHelper",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"formikFactoryUIMeta.gettingStarted.preparerAndInterpreterInformation.hasHelper\"]",
+        "subSection": "Is someone assisting you with completing this application?"
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "Is someone assisting you with completing this application?",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/preparer-and-interpreter-information",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 3,
+    "fields": [
+      {
+        "id": "applicant.yourName.name.firstName",
+        "kind": "text",
+        "label": "Given name (first name)",
+        "maxlength": null,
+        "name": "applicant.yourName.name.firstName",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourName.name.firstName\"]",
+        "subSection": "What is your current legal name?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourName.name.middleName",
+        "kind": "text",
+        "label": "Middle name (if applicable)",
+        "maxlength": null,
+        "name": "applicant.yourName.name.middleName",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourName.name.middleName\"]",
+        "subSection": "What is your current legal name?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourName.name.lastName",
+        "kind": "text",
+        "label": "Family name (last name) *",
+        "maxlength": null,
+        "name": "applicant.yourName.name.lastName",
+        "required": true,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourName.name.lastName\"]",
+        "subSection": "What is your current legal name?",
+        "type": "text",
+        "value": ""
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "What is your current legal name?",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-name",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 20,
+    "fields": [
+      {
+        "id": "applicant.yourContactInformation.contactInformation.daytimePhone",
+        "kind": "text",
+        "label": "Daytime telephone number",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.contactInformation.daytimePhone",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.contactInformation.daytimePhone\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.contactInformation.mobilePhone",
+        "kind": "text",
+        "label": "Mobile telephone number",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.contactInformation.mobilePhone",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.contactInformation.mobilePhone\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.contactInformation.emailAddress",
+        "kind": "text",
+        "label": "Email address",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.contactInformation.emailAddress",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.contactInformation.emailAddress\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": "lihongli1972@yahoo.com"
+      },
+      {
+        "id": "applicant.yourContactInformation.mailingAddress.inCareOfName",
+        "kind": "text",
+        "label": "In care of name (if any)",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.mailingAddress.inCareOfName",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.mailingAddress.inCareOfName\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.mailingAddress.addressLineOne",
+        "kind": "text",
+        "label": "Address line 1 *",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.mailingAddress.addressLineOne",
+        "required": true,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.mailingAddress.addressLineOne\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.mailingAddress.addressLineTwo",
+        "kind": "text",
+        "label": "Address line 2",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.mailingAddress.addressLineTwo",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.mailingAddress.addressLineTwo\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.mailingAddress.city",
+        "kind": "text",
+        "label": "City or town *",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.mailingAddress.city",
+        "required": true,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.mailingAddress.city\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.mailingAddress.state",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.mailingAddress.state",
+        "required": true,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.mailingAddress.state\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.mailingAddress.zipCode",
+        "kind": "text",
+        "label": "ZIP code *",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.mailingAddress.zipCode",
+        "required": true,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.mailingAddress.zipCode\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.foreignPhysicalAddress.country",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.foreignPhysicalAddress.country",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.country\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.foreignPhysicalAddress.addressLineOne",
+        "kind": "text",
+        "label": "Address line 1",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.foreignPhysicalAddress.addressLineOne",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.addressLineOne\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.foreignPhysicalAddress.addressLineTwo",
+        "kind": "text",
+        "label": "Address line 2",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.foreignPhysicalAddress.addressLineTwo",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.addressLineTwo\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.foreignPhysicalAddress.city",
+        "kind": "text",
+        "label": "City or town",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.foreignPhysicalAddress.city",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.city\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.foreignPhysicalAddress.province",
+        "kind": "text",
+        "label": "Province",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.foreignPhysicalAddress.province",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.province\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.foreignPhysicalAddress.postalCode",
+        "kind": "text",
+        "label": "Postal code",
+        "maxlength": null,
+        "name": "applicant.yourContactInformation.foreignPhysicalAddress.postalCode",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.postalCode\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "kind": "checkbox",
+        "label": "This is the same as my daytime telephone number.",
+        "name": "formikFactoryUIMeta.applicant.yourContactInformation.contactInformation.sameAsDaytimePhone",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "This is the same as my daytime telephone number.",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.yourContactInformation.contactInformation.sameAsDaytimePhone\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?"
+      },
+      {
+        "kind": "checkbox",
+        "label": "I do not have an email address.",
+        "name": "formikFactoryUIMeta.applicant.yourContactInformation.contactInformation.noEmail",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "I do not have an email address.",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.yourContactInformation.contactInformation.noEmail\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "applicant.yourContactInformation.isMailingEqualToPhysical",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.isMailingEqualToPhysical\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?"
+      },
+      {
+        "id": "applicant.yourContactInformation.mailingAddress.state",
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.yourContactInformation.mailingAddress.state",
+        "note": "React combo box: options may be virtualized; this extractor records the control. If options are present, they are stored on this field.",
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.mailingAddress.state\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourContactInformation.foreignPhysicalAddress.country",
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.yourContactInformation.foreignPhysicalAddress.country",
+        "note": "React combo box: options may be virtualized; this extractor records the control. If options are present, they are stored on this field.",
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.country\"]",
+        "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+        "value": ""
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 3,
+    "fields": [
+      {
+        "id": "applicant.whenAndWhereYouWereBorn.dob",
+        "kind": "text",
+        "label": "What is your date of birth?: MM/DD/YYYY",
+        "maxlength": null,
+        "name": "applicant.whenAndWhereYouWereBorn.dob",
+        "required": true,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.whenAndWhereYouWereBorn.dob\"]",
+        "subSection": "What is your date of birth? * | What is your country of birth? *",
+        "type": "text",
+        "value": "MM/DD/YYYY"
+      },
+      {
+        "id": "applicant.whenAndWhereYouWereBorn.birthAddress.country",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.whenAndWhereYouWereBorn.birthAddress.country",
+        "required": true,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.whenAndWhereYouWereBorn.birthAddress.country\"]",
+        "subSection": "What is your date of birth? * | What is your country of birth? *",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.whenAndWhereYouWereBorn.birthAddress.country",
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.whenAndWhereYouWereBorn.birthAddress.country",
+        "note": "React combo box: options may be virtualized; this extractor records the control. If options are present, they are stored on this field.",
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.whenAndWhereYouWereBorn.birthAddress.country\"]",
+        "subSection": "What is your date of birth? * | What is your country of birth? *",
+        "value": ""
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "What is your date of birth? * | What is your country of birth? *",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/when-and-where-you-were-born",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 11,
+    "fields": [
+      {
+        "id": "applicant.yourImmigrationInformation.yourImmigrationInformation1.countryOfCitizenshipOrNationality",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.yourImmigrationInformation.yourImmigrationInformation1.countryOfCitizenshipOrNationality",
+        "required": true,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.countryOfCitizenshipOrNationality\"]",
+        "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.dateOfLastArrival",
+        "kind": "text",
+        "label": "When did you last arrive into the United States?",
+        "maxlength": null,
+        "name": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.dateOfLastArrival",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.dateOfLastArrival\"]",
+        "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+        "type": "text",
+        "value": "MM/DD/YYYY"
+      },
+      {
+        "id": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.i94Number",
+        "kind": "text",
+        "label": "What is your Form I-94 Arrival-Departure Record Number?",
+        "maxlength": null,
+        "name": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.i94Number",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.i94Number\"]",
+        "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.passport.number",
+        "kind": "text",
+        "label": "What is the passport number listed on your Form I-94?",
+        "maxlength": null,
+        "name": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.passport.number",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.passport.number\"]",
+        "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.travelDocumentNumber",
+        "kind": "text",
+        "label": "What is your travel document number?",
+        "maxlength": null,
+        "name": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.travelDocumentNumber",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.travelDocumentNumber\"]",
+        "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.countryOfIssuance",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.countryOfIssuance",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.countryOfIssuance\"]",
+        "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.expirationDate",
+        "kind": "text",
+        "label": "What is the expiration date for the passport or travel document on your Form I-94?: MM/DD/YYYY",
+        "maxlength": null,
+        "name": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.expirationDate",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.expirationDate\"]",
+        "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+        "type": "text",
+        "value": "MM/DD/YYYY"
+      },
+      {
+        "kind": "checkbox",
+        "label": "I do not have a passport number listed on my Form I-94.",
+        "name": "formikFactoryUIMeta.applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.passport.none",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "I do not have a passport number listed on my Form I-94.",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.passport.none\"]",
+        "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?"
+      },
+      {
+        "kind": "checkbox",
+        "label": "I do not have a travel document number.",
+        "name": "formikFactoryUIMeta.applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.noTravelDocumentNumber",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "I do not have a travel document number.",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.noTravelDocumentNumber\"]",
+        "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?"
+      },
+      {
+        "id": "applicant.yourImmigrationInformation.yourImmigrationInformation1.countryOfCitizenshipOrNationality",
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.yourImmigrationInformation.yourImmigrationInformation1.countryOfCitizenshipOrNationality",
+        "note": "React combo box: options may be virtualized; this extractor records the control. If options are present, they are stored on this field.",
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.countryOfCitizenshipOrNationality\"]",
+        "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.countryOfIssuance",
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.countryOfIssuance",
+        "note": "React combo box: options may be virtualized; this extractor records the control. If options are present, they are stored on this field.",
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.countryOfIssuance\"]",
+        "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+        "value": ""
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "applicant.yourImmigrationInformation.yourImmigrationInformation2.isCurrentPassportDifferent",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation2.isCurrentPassportDifferent\"]",
+        "subSection": "Is your current passport different from the one you used in your most recent entry into the United States?"
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "Is your current passport different from the one you used in your most recent entry into the United States?",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information/your-immigration-information-page-2",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 8,
+    "fields": [
+      {
+        "id": "applicant.otherInformation.alienNumber.number",
+        "kind": "text",
+        "label": "What is your A-Number? Enter with the first numeric character of your A-Number.",
+        "maxlength": null,
+        "name": "applicant.otherInformation.alienNumber.number",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.otherInformation.alienNumber.number\"]",
+        "subSection": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.otherInformation.socialSecurityNumber.number",
+        "kind": "text",
+        "label": "What is your U.S. Social Security number?",
+        "maxlength": null,
+        "name": "applicant.otherInformation.socialSecurityNumber.number",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.otherInformation.socialSecurityNumber.number\"]",
+        "subSection": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.otherInformation.uscisNumber.number",
+        "kind": "text",
+        "label": "What is your USCIS Online Account Number?",
+        "maxlength": null,
+        "name": "applicant.otherInformation.uscisNumber.number",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.otherInformation.uscisNumber.number\"]",
+        "subSection": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.otherInformation.schoolName",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.otherInformation.schoolName",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.otherInformation.schoolName\"]",
+        "subSection": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.otherInformation.sevisNumber",
+        "kind": "text",
+        "label": "What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+        "maxlength": null,
+        "name": "applicant.otherInformation.sevisNumber",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"applicant.otherInformation.sevisNumber\"]",
+        "subSection": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "kind": "checkbox",
+        "label": "I do not have or know my A-Number.",
+        "name": "formikFactoryUIMeta.applicant.otherInformation.alienNumber.none",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "I do not have or know my A-Number.",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.otherInformation.alienNumber.none\"]",
+        "subSection": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)"
+      },
+      {
+        "kind": "checkbox",
+        "label": "I do not have or know my U.S. Social Security number.",
+        "name": "formikFactoryUIMeta.applicant.otherInformation.socialSecurityNumber.none",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "I do not have or know my U.S. Social Security number.",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.otherInformation.socialSecurityNumber.none\"]",
+        "subSection": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)"
+      },
+      {
+        "kind": "checkbox",
+        "label": "I do not have or know my USCIS Online Account Number.",
+        "name": "formikFactoryUIMeta.applicant.otherInformation.uscisNumber.none",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "I do not have or know my USCIS Online Account Number.",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.otherInformation.uscisNumber.none\"]",
+        "subSection": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)"
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/other-information",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 5,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInTortureOrGenocide.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInTortureOrGenocide.question\"]",
+        "subSection": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in killing any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in intentionally and severely injuring any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in engaging in any kind of sexual contact or relations with any person who did not consent or was unable to consent, or was being forced or threatened? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in limiting or denying any person's ability to exercise religious beliefs? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInKillingAnyPerson.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInKillingAnyPerson.question\"]",
+        "subSection": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in killing any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in intentionally and severely injuring any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in engaging in any kind of sexual contact or relations with any person who did not consent or was unable to consent, or was being forced or threatened? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in limiting or denying any person's ability to exercise religious beliefs? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInInjuringAnyPerson.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInInjuringAnyPerson.question\"]",
+        "subSection": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in killing any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in intentionally and severely injuring any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in engaging in any kind of sexual contact or relations with any person who did not consent or was unable to consent, or was being forced or threatened? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in limiting or denying any person's ability to exercise religious beliefs? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInForcedSexualContact.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInForcedSexualContact.question\"]",
+        "subSection": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in killing any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in intentionally and severely injuring any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in engaging in any kind of sexual contact or relations with any person who did not consent or was unable to consent, or was being forced or threatened? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in limiting or denying any person's ability to exercise religious beliefs? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInDenyingReligiousBeliefs.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInDenyingReligiousBeliefs.question\"]",
+        "subSection": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in killing any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in intentionally and severely injuring any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in engaging in any kind of sexual contact or relations with any person who did not consent or was unable to consent, or was being forced or threatened? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in limiting or denying any person's ability to exercise religious beliefs? *"
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in killing any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in intentionally and severely injuring any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in engaging in any kind of sexual contact or relations with any person who did not consent or was unable to consent, or was being forced or threatened? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in limiting or denying any person's ability to exercise religious beliefs? *",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 5,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInMilitary.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInMilitary.question\"]",
+        "subSection": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? * | Have you EVER worked, volunteered, or otherwise served in any prison, jail, prison camp, detention facility, labor camp, or any other situation that involved detaining persons? * | Have you EVER been a member of, assisted, or participated in any group, unit, or organization of any kind in which you or other persons used or threatened to use any type of weapon against any person or threatened to do so? * | Have you EVER sold, provided, or transported weapons, or assisted any person in selling, providing, or transporting weapons, which, you knew or believed would be used against another person? * | Have you EVER received any weapons training, paramilitary training, or other military-type training? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInPrison.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInPrison.question\"]",
+        "subSection": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? * | Have you EVER worked, volunteered, or otherwise served in any prison, jail, prison camp, detention facility, labor camp, or any other situation that involved detaining persons? * | Have you EVER been a member of, assisted, or participated in any group, unit, or organization of any kind in which you or other persons used or threatened to use any type of weapon against any person or threatened to do so? * | Have you EVER sold, provided, or transported weapons, or assisted any person in selling, providing, or transporting weapons, which, you knew or believed would be used against another person? * | Have you EVER received any weapons training, paramilitary training, or other military-type training? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInOrganizationWithWeapons.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInOrganizationWithWeapons.question\"]",
+        "subSection": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? * | Have you EVER worked, volunteered, or otherwise served in any prison, jail, prison camp, detention facility, labor camp, or any other situation that involved detaining persons? * | Have you EVER been a member of, assisted, or participated in any group, unit, or organization of any kind in which you or other persons used or threatened to use any type of weapon against any person or threatened to do so? * | Have you EVER sold, provided, or transported weapons, or assisted any person in selling, providing, or transporting weapons, which, you knew or believed would be used against another person? * | Have you EVER received any weapons training, paramilitary training, or other military-type training? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasTransportedWeapons.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasTransportedWeapons.question\"]",
+        "subSection": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? * | Have you EVER worked, volunteered, or otherwise served in any prison, jail, prison camp, detention facility, labor camp, or any other situation that involved detaining persons? * | Have you EVER been a member of, assisted, or participated in any group, unit, or organization of any kind in which you or other persons used or threatened to use any type of weapon against any person or threatened to do so? * | Have you EVER sold, provided, or transported weapons, or assisted any person in selling, providing, or transporting weapons, which, you knew or believed would be used against another person? * | Have you EVER received any weapons training, paramilitary training, or other military-type training? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasWeaponsTraining.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasWeaponsTraining.question\"]",
+        "subSection": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? * | Have you EVER worked, volunteered, or otherwise served in any prison, jail, prison camp, detention facility, labor camp, or any other situation that involved detaining persons? * | Have you EVER been a member of, assisted, or participated in any group, unit, or organization of any kind in which you or other persons used or threatened to use any type of weapon against any person or threatened to do so? * | Have you EVER sold, provided, or transported weapons, or assisted any person in selling, providing, or transporting weapons, which, you knew or believed would be used against another person? * | Have you EVER received any weapons training, paramilitary training, or other military-type training? *"
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? * | Have you EVER worked, volunteered, or otherwise served in any prison, jail, prison camp, detention facility, labor camp, or any other situation that involved detaining persons? * | Have you EVER been a member of, assisted, or participated in any group, unit, or organization of any kind in which you or other persons used or threatened to use any type of weapon against any person or threatened to do so? * | Have you EVER sold, provided, or transported weapons, or assisted any person in selling, providing, or transporting weapons, which, you knew or believed would be used against another person? * | Have you EVER received any weapons training, paramilitary training, or other military-type training? *",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations/party-and-group-affiliations-page-2",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 2,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.immigrationProceedings.hasViolatedNonImmigrantStatus.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.immigrationProceedings.hasViolatedNonImmigrantStatus.question\"]",
+        "subSection": "Have you EVER violated the terms of the nonimmigrant status you now hold? * | Are you now in removal proceedings? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.immigrationProceedings.isInRemovalProceedings.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.immigrationProceedings.isInRemovalProceedings.question\"]",
+        "subSection": "Have you EVER violated the terms of the nonimmigrant status you now hold? * | Are you now in removal proceedings? *"
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "Have you EVER violated the terms of the nonimmigrant status you now hold? * | Are you now in removal proceedings? *",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/immigration-proceedings",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "moralCharacter.crimesAndOffenses.hasBeenArrestedOrConvicted.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"moralCharacter.crimesAndOffenses.hasBeenArrestedOrConvicted.question\"]",
+        "subSection": "Have you EVER been arrested or convicted of any criminal offense since last entering the United States? *"
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "Have you EVER been arrested or convicted of any criminal offense since last entering the United States? *",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/crimes-and-offenses",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 2,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "yourApplication.informationAboutRequest.informationAboutRequestPage1.isBasedOnGrantedFamilyPetition",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage1.isBasedOnGrantedFamilyPetition\"]",
+        "subSection": "Is this application based on an extension or change of status already granted to your spouse, child, or parent? | Is this application based on a separate petition or application to provide your spouse, child, or parent an extension or change in status? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes, filed with this Form I-539",
+        "name": "yourApplication.informationAboutRequest.informationAboutRequestPage1.basedOnSeparateFamilyPetition",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes, filed with this Form I-539",
+            "value": "filedWithThisI539"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "no"
+          },
+          {
+            "checked": false,
+            "optionLabel": "Yes, filed previously and pending with U.S. Citizenship and Immigration Services (USCIS)",
+            "value": "filedPreviouslyAndPending"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage1.basedOnSeparateFamilyPetition\"]",
+        "subSection": "Is this application based on an extension or change of status already granted to your spouse, child, or parent? | Is this application based on a separate petition or application to provide your spouse, child, or parent an extension or change in status? *"
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "Is this application based on an extension or change of status already granted to your spouse, child, or parent? | Is this application based on a separate petition or application to provide your spouse, child, or parent an extension or change in status? *",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/your-application/information-about-request",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 5,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "yourApplication.informationAboutRequest.informationAboutRequestPage2.isApplicantForImmigrantVisa.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage2.isApplicantForImmigrantVisa.question\"]",
+        "subSection": "Are you, or any other person included on the application, an applicant for an immigrant visa? * | Has an immigrant petition EVER been filed for you? * | Have you EVER filed Form I-485, Application to Register Permanent Residence or Adjust Status? * | Have you EVER been employed in the United States since last admitted or granted an extension or change of status? * | Are you currently or have you EVER been a J-1 exchange visitor or a J-2 dependent of a J-1 exchange visitor? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "yourApplication.informationAboutRequest.informationAboutRequestPage2.hasImmigrantPetitionBeenFiled.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage2.hasImmigrantPetitionBeenFiled.question\"]",
+        "subSection": "Are you, or any other person included on the application, an applicant for an immigrant visa? * | Has an immigrant petition EVER been filed for you? * | Have you EVER filed Form I-485, Application to Register Permanent Residence or Adjust Status? * | Have you EVER been employed in the United States since last admitted or granted an extension or change of status? * | Are you currently or have you EVER been a J-1 exchange visitor or a J-2 dependent of a J-1 exchange visitor? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "yourApplication.informationAboutRequest.informationAboutRequestPage2.hasI485BeenFiled.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage2.hasI485BeenFiled.question\"]",
+        "subSection": "Are you, or any other person included on the application, an applicant for an immigrant visa? * | Has an immigrant petition EVER been filed for you? * | Have you EVER filed Form I-485, Application to Register Permanent Residence or Adjust Status? * | Have you EVER been employed in the United States since last admitted or granted an extension or change of status? * | Are you currently or have you EVER been a J-1 exchange visitor or a J-2 dependent of a J-1 exchange visitor? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "yourApplication.informationAboutRequest.informationAboutRequestPage2.isEmployedInUs.isEmployedInUsQuestion",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage2.isEmployedInUs.isEmployedInUsQuestion\"]",
+        "subSection": "Are you, or any other person included on the application, an applicant for an immigrant visa? * | Has an immigrant petition EVER been filed for you? * | Have you EVER filed Form I-485, Application to Register Permanent Residence or Adjust Status? * | Have you EVER been employed in the United States since last admitted or granted an extension or change of status? * | Are you currently or have you EVER been a J-1 exchange visitor or a J-2 dependent of a J-1 exchange visitor? *"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "yourApplication.informationAboutRequest.informationAboutRequestPage2.isExchangeVisitorOrDependent.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage2.isExchangeVisitorOrDependent.question\"]",
+        "subSection": "Are you, or any other person included on the application, an applicant for an immigrant visa? * | Has an immigrant petition EVER been filed for you? * | Have you EVER filed Form I-485, Application to Register Permanent Residence or Adjust Status? * | Have you EVER been employed in the United States since last admitted or granted an extension or change of status? * | Are you currently or have you EVER been a J-1 exchange visitor or a J-2 dependent of a J-1 exchange visitor? *"
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "Are you, or any other person included on the application, an applicant for an immigrant visa? * | Has an immigrant petition EVER been filed for you? * | Have you EVER filed Form I-485, Application to Register Permanent Residence or Adjust Status? * | Have you EVER been employed in the United States since last admitted or granted an extension or change of status? * | Are you currently or have you EVER been a J-1 exchange visitor or a J-2 dependent of a J-1 exchange visitor? *",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/your-application/information-about-request/information-about-request-page-2",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "id": "desktop-drop",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "#desktop-drop",
+        "subSection": "Form I-94, Nonimmigrant Arrival/Departure Record* | File requirements",
+        "type": "file",
+        "value": ""
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "Form I-94, Nonimmigrant Arrival/Departure Record* | File requirements",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/evidence/form-i-94",
+    "sampleTag": "primary-path"
+  },
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "id": "desktop-drop",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "",
+        "required": false,
+        "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+        "selector": "#desktop-drop",
+        "subSection": "Additional Evidence You Want To Provide | File requirements",
+        "type": "file",
+        "value": ""
+      }
+    ],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "Additional Evidence You Want To Provide | File requirements",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/evidence/additional-evidence",
+    "sampleTag": "direct-nav"
+  },
+  {
+    "fieldCount": 0,
+    "fields": [],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "You may provide additional information for your application",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/additional-information/additional-information",
+    "sampleTag": "direct-nav"
+  },
+  {
+    "fieldCount": 0,
+    "fields": [],
+    "section": "I-539, Application To Extend/Change Nonimmigrant Status",
+    "subSection": "",
+    "url": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/review-and-submit/review-your-application",
+    "sampleTag": "direct-nav"
+  }
+]

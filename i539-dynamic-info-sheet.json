@@ -1,0 +1,2082 @@
+{
+  "form": "I-539",
+  "title": "I-539 Dynamic Info Sheet / I-539 动态个人信息表",
+  "source": "/Users/angielee/Downloads/YiminAPP 2/i539-field-structure.json",
+  "generatedAt": "2026-06-30T17:17:12.570Z",
+  "fieldCount": 76,
+  "fields": [
+    {
+      "crmKey": "i539_gettingStarted_basisOfEligibility_currentNonImmigrantStatus",
+      "zhLabel": "当前非移民身份",
+      "enLabel": "What is your current nonimmigrant status? *",
+      "sectionZh": "资格基础",
+      "sectionEn": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+      "inputType": "text",
+      "required": true,
+      "uscisName": "gettingStarted.basisOfEligibility.currentNonImmigrantStatus",
+      "uscisSelector": "[name=\"gettingStarted.basisOfEligibility.currentNonImmigrantStatus\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "options": [
+        {
+          "index": 1,
+          "value": "1B1",
+          "text": "1B1 - H1 B Spec Occ, Singapore/Chile"
+        },
+        {
+          "index": 2,
+          "value": "1B2",
+          "text": "1B2 - Spec Occ Related To Dod"
+        },
+        {
+          "index": 3,
+          "value": "1B3",
+          "text": "1B3 - Spec Occ, Fashion Models"
+        },
+        {
+          "index": 4,
+          "value": "1B4",
+          "text": "1B4 - H 1 B4 Unique Pgm Artist/Ent"
+        },
+        {
+          "index": 5,
+          "value": "1B5",
+          "text": "1B5 - H 1 B5 Alien Athlete"
+        },
+        {
+          "index": 6,
+          "value": "1BS",
+          "text": "1BS - Support Person Of H 1"
+        },
+        {
+          "index": 7,
+          "value": "B1",
+          "text": "B1 - Temporary Visitor For Business (Including Peace Corps)."
+        },
+        {
+          "index": 8,
+          "value": "B1A",
+          "text": "B1A - Ni Persnl/Dom Srvant Of Ni Emp"
+        },
+        {
+          "index": 9,
+          "value": "B1B",
+          "text": "B1B - Ni Domestic Servant Of Usc"
+        },
+        {
+          "index": 10,
+          "value": "B1C",
+          "text": "B1C - Ni Employed By Foreign Airline"
+        },
+        {
+          "index": 11,
+          "value": "B1D",
+          "text": "B1D - Ni Missionaries"
+        },
+        {
+          "index": 12,
+          "value": "B2",
+          "text": "B2 - Temporary Visitor For Pleasure."
+        },
+        {
+          "index": 13,
+          "value": "CW1",
+          "text": "CW1 - Commonwealth Of Northern Mariana Islands Transitional Worker"
+        },
+        {
+          "index": 14,
+          "value": "CW2",
+          "text": "CW2 - Spouses And Children Of Transitional Workers In Cnmi"
+        },
+        {
+          "index": 15,
+          "value": "E1",
+          "text": "E1 - Treaty Trader, Spouse And Children."
+        },
+        {
+          "index": 16,
+          "value": "E1S",
+          "text": "E1S - Spouse Of A Treaty Trader"
+        },
+        {
+          "index": 17,
+          "value": "E1Y",
+          "text": "E1Y - Child Of A Treaty Trader"
+        },
+        {
+          "index": 18,
+          "value": "E2",
+          "text": "E2 - Treaty Investor, Spouse And Children."
+        },
+        {
+          "index": 19,
+          "value": "E2C",
+          "text": "E2C - Commonwealth Of Northern Mariana Islands Investor, Spouse Or Child"
+        },
+        {
+          "index": 20,
+          "value": "E2S",
+          "text": "E2S - Spouse Of Treaty Investor"
+        },
+        {
+          "index": 21,
+          "value": "E2Y",
+          "text": "E2Y - Child Of Treaty Investor"
+        },
+        {
+          "index": 22,
+          "value": "E3",
+          "text": "E3 - Australian Treaty Alien Coming To The United States Solely To Perform Services In A Specialty Occupation"
+        },
+        {
+          "index": 23,
+          "value": "E3D",
+          "text": "E3D - Spouse And Children Of E3"
+        },
+        {
+          "index": 24,
+          "value": "E3S",
+          "text": "E3S - Spouse Of E3"
+        },
+        {
+          "index": 25,
+          "value": "E3Y",
+          "text": "E3Y - Child Of E3"
+        },
+        {
+          "index": 26,
+          "value": "F1",
+          "text": "F1 - Student, Academic Or Language Program."
+        },
+        {
+          "index": 27,
+          "value": "F2",
+          "text": "F2 - Spouse Or Child Of F 1."
+        },
+        {
+          "index": 28,
+          "value": "H1C",
+          "text": "H1C - Registered Nurse Who Will Work In Facilities That Serve Health Professional Shortage Areas Under Provisions Of The Nursing Relief For Disadvantage Areas Act Of 1999"
+        },
+        {
+          "index": 29,
+          "value": "H2A",
+          "text": "H2A - Worker To Perform Agricultural Services Or Labor Of A Temporary Or Seasonal Nature When Services Are Unavailable In The U.S. And Will Not Adversely Affect Wages And Working Conditions Of U.S. Workers."
+        },
+        {
+          "index": 30,
+          "value": "H2B",
+          "text": "H2B - Nonagricultural Worker Performing Services Of A Temporary Nature Or Labor Unavailable In The United States."
+        },
+        {
+          "index": 31,
+          "value": "H3",
+          "text": "H3 - Temporary Trainee To Receive Instruction In Any Field Except Medical Education."
+        },
+        {
+          "index": 32,
+          "value": "H4",
+          "text": "H4 - The Spouse And Children Of An H Nonimmigrant. See 8 Cfr 214.2(h)(9)(Iv)."
+        },
+        {
+          "index": 33,
+          "value": "I",
+          "text": "I - Representative Of Foreign Information Media, Spouse And Children."
+        },
+        {
+          "index": 34,
+          "value": "J1",
+          "text": "J1 - Exchange Visitor."
+        },
+        {
+          "index": 35,
+          "value": "J2",
+          "text": "J2 - Spouse Or Child Of J 1."
+        },
+        {
+          "index": 36,
+          "value": "K3",
+          "text": "K3 - Spouse Of A U.S. Citizen Who Is A Beneficary Of A Petition For Status As The Immediate Relative Of A U.S. Citizen (I 130)."
+        },
+        {
+          "index": 37,
+          "value": "K4",
+          "text": "K4 - Child Accompanying Or Following To Join A K 3 Alien."
+        },
+        {
+          "index": 38,
+          "value": "L1",
+          "text": "L1 - Intracompany Transferee (Executive, Managerial, And Specialized Personnel Entering To Render Services To A Branch, Parent, Subsidiary, Or Affiliate Of The Company Of Previous Employment Outside The United States)."
+        },
+        {
+          "index": 39,
+          "value": "L1A",
+          "text": "L1A - Manager Or Executive"
+        },
+        {
+          "index": 40,
+          "value": "L1B",
+          "text": "L1B - Specialized Knowledge Alien"
+        },
+        {
+          "index": 41,
+          "value": "L2",
+          "text": "L2 - Spouse Or Child Of L 1."
+        },
+        {
+          "index": 42,
+          "value": "L2S",
+          "text": "L2S - Spouse Of L1"
+        },
+        {
+          "index": 43,
+          "value": "L2Y",
+          "text": "L2Y - Child Of L1"
+        },
+        {
+          "index": 44,
+          "value": "M1",
+          "text": "M1 - Student Pursuing A Full Course Of Study At An Established Vocational Or Other Recognized Nonacademic Institution (Other Than In A Language Training Program)."
+        },
+        {
+          "index": 45,
+          "value": "M2",
+          "text": "M2 - Spouse Or Child Of M1."
+        },
+        {
+          "index": 46,
+          "value": "N8",
+          "text": "N8 - Parent Of An Alien Classified Sk3 Or Sn3."
+        },
+        {
+          "index": 47,
+          "value": "N9",
+          "text": "N9 - Child Of N 8 Or Of An Alien Classified Sk1, Sk2, Sk4, Sn1, Sn2, Or Sn4."
+        },
+        {
+          "index": 48,
+          "value": "O1",
+          "text": "O1 - Temporary Worker With Extraordinary Ability/Achievement In The Sciences, Arts, Education, Business, Or Athletics."
+        },
+        {
+          "index": 49,
+          "value": "O1A",
+          "text": "O1A - Extraordinary Alien Non Arts"
+        },
+        {
+          "index": 50,
+          "value": "O1B",
+          "text": "O1B - Extraordinary Alien In Arts"
+        },
+        {
+          "index": 51,
+          "value": "O2",
+          "text": "O2 - Temporary Worker Accompanying Or Assisting O 1."
+        },
+        {
+          "index": 52,
+          "value": "O3",
+          "text": "O3 - Spouse Or Child Of O 1 Or O 2."
+        },
+        {
+          "index": 53,
+          "value": "P1",
+          "text": "P1 - Temporary Worker, Internationally Recognized Athlete Or Entertainer For A Specific Competition Or Performance."
+        },
+        {
+          "index": 54,
+          "value": "P1A",
+          "text": "P1A - Alien With Athletic Event"
+        },
+        {
+          "index": 55,
+          "value": "P1B",
+          "text": "P1B - Alien With Entertainment Group"
+        },
+        {
+          "index": 56,
+          "value": "P1S",
+          "text": "P1S - Support Person Of P 1"
+        },
+        {
+          "index": 57,
+          "value": "P2",
+          "text": "P2 - Temporary Worker, Artist Or Entertainer Under A Reciprocal Exchange Program With A Similar Organization Of A Foreign State."
+        },
+        {
+          "index": 58,
+          "value": "P2S",
+          "text": "P2S - Support Person Of P 2"
+        },
+        {
+          "index": 59,
+          "value": "P3",
+          "text": "P3 - Temporary Worker, Artist Or Entertainer Under A Program That Is \"Culturally Unique\"."
+        },
+        {
+          "index": 60,
+          "value": "P3S",
+          "text": "P3S - Support Person Of P 3"
+        },
+        {
+          "index": 61,
+          "value": "P4",
+          "text": "P4 - Spouse Or Child Of P 1, P 2, Or P 3."
+        },
+        {
+          "index": 62,
+          "value": "Q1",
+          "text": "Q1 - Temporary Worker In An International Cultural Exchange Program."
+        },
+        {
+          "index": 63,
+          "value": "R1",
+          "text": "R1 - Temporary Worker To Perform Work In Religious Occupations."
+        },
+        {
+          "index": 64,
+          "value": "R2",
+          "text": "R2 - Spouse And Children Of R1."
+        },
+        {
+          "index": 65,
+          "value": "TD",
+          "text": "TD - Spouse Or Child Of Tn."
+        },
+        {
+          "index": 66,
+          "value": "TN1",
+          "text": "TN1 - Nafta Principal (Canada)"
+        },
+        {
+          "index": 67,
+          "value": "TN2",
+          "text": "TN2 - Nafta Principal (Mexico)"
+        },
+        {
+          "index": 68,
+          "value": "UU",
+          "text": "UU - Unknown Or Not Reported"
+        }
+      ],
+      "optionCount": 68,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/basis-of-eligibility"
+    },
+    {
+      "crmKey": "i539_gettingStarted_basisOfEligibility_currentNonImmigrantStatusExpirationDate",
+      "zhLabel": "当前非移民身份",
+      "enLabel": "When does your current nonimmigrant status expire?: MM/DD/YYYY",
+      "sectionZh": "资格基础",
+      "sectionEn": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+      "inputType": "date",
+      "required": false,
+      "uscisName": "gettingStarted.basisOfEligibility.currentNonImmigrantStatusExpirationDate",
+      "uscisSelector": "[name=\"gettingStarted.basisOfEligibility.currentNonImmigrantStatusExpirationDate\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/basis-of-eligibility"
+    },
+    {
+      "crmKey": "i539_gettingStarted_basisOfEligibility_isGrantedDurationOfStatus",
+      "zhLabel": "当前非移民身份",
+      "enLabel": "What is your current nonimmigrant status? *",
+      "sectionZh": "资格基础",
+      "sectionEn": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "gettingStarted.basisOfEligibility.isGrantedDurationOfStatus",
+      "uscisSelector": "[name=\"gettingStarted.basisOfEligibility.isGrantedDurationOfStatus\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/basis-of-eligibility"
+    },
+    {
+      "crmKey": "i539_gettingStarted_basisOfEligibility_isOnlyApplicant",
+      "zhLabel": "当前非移民身份",
+      "enLabel": "What is your current nonimmigrant status? *",
+      "sectionZh": "资格基础",
+      "sectionEn": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "gettingStarted.basisOfEligibility.isOnlyApplicant",
+      "uscisSelector": "[name=\"gettingStarted.basisOfEligibility.isOnlyApplicant\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/basis-of-eligibility"
+    },
+    {
+      "crmKey": "i539_gettingStarted_basisOfEligibility_currentNonImmigrantStatus",
+      "zhLabel": "当前非移民身份",
+      "enLabel": "What is your current nonimmigrant status? *",
+      "sectionZh": "资格基础",
+      "sectionEn": "What is your current nonimmigrant status? * | Were you granted Duration of Status (D/S)? | When does your current nonimmigrant status expire? | Are you the only applicant applying with this Form? *",
+      "inputType": "combobox",
+      "required": false,
+      "uscisName": "gettingStarted.basisOfEligibility.currentNonImmigrantStatus",
+      "uscisSelector": "[name=\"gettingStarted.basisOfEligibility.currentNonImmigrantStatus\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "options": [
+        {
+          "index": 1,
+          "value": "1B1",
+          "text": "1B1 - H1 B Spec Occ, Singapore/Chile"
+        },
+        {
+          "index": 2,
+          "value": "1B2",
+          "text": "1B2 - Spec Occ Related To Dod"
+        },
+        {
+          "index": 3,
+          "value": "1B3",
+          "text": "1B3 - Spec Occ, Fashion Models"
+        },
+        {
+          "index": 4,
+          "value": "1B4",
+          "text": "1B4 - H 1 B4 Unique Pgm Artist/Ent"
+        },
+        {
+          "index": 5,
+          "value": "1B5",
+          "text": "1B5 - H 1 B5 Alien Athlete"
+        },
+        {
+          "index": 6,
+          "value": "1BS",
+          "text": "1BS - Support Person Of H 1"
+        },
+        {
+          "index": 7,
+          "value": "B1",
+          "text": "B1 - Temporary Visitor For Business (Including Peace Corps)."
+        },
+        {
+          "index": 8,
+          "value": "B1A",
+          "text": "B1A - Ni Persnl/Dom Srvant Of Ni Emp"
+        },
+        {
+          "index": 9,
+          "value": "B1B",
+          "text": "B1B - Ni Domestic Servant Of Usc"
+        },
+        {
+          "index": 10,
+          "value": "B1C",
+          "text": "B1C - Ni Employed By Foreign Airline"
+        },
+        {
+          "index": 11,
+          "value": "B1D",
+          "text": "B1D - Ni Missionaries"
+        },
+        {
+          "index": 12,
+          "value": "B2",
+          "text": "B2 - Temporary Visitor For Pleasure."
+        },
+        {
+          "index": 13,
+          "value": "CW1",
+          "text": "CW1 - Commonwealth Of Northern Mariana Islands Transitional Worker"
+        },
+        {
+          "index": 14,
+          "value": "CW2",
+          "text": "CW2 - Spouses And Children Of Transitional Workers In Cnmi"
+        },
+        {
+          "index": 15,
+          "value": "E1",
+          "text": "E1 - Treaty Trader, Spouse And Children."
+        },
+        {
+          "index": 16,
+          "value": "E1S",
+          "text": "E1S - Spouse Of A Treaty Trader"
+        },
+        {
+          "index": 17,
+          "value": "E1Y",
+          "text": "E1Y - Child Of A Treaty Trader"
+        },
+        {
+          "index": 18,
+          "value": "E2",
+          "text": "E2 - Treaty Investor, Spouse And Children."
+        },
+        {
+          "index": 19,
+          "value": "E2C",
+          "text": "E2C - Commonwealth Of Northern Mariana Islands Investor, Spouse Or Child"
+        },
+        {
+          "index": 20,
+          "value": "E2S",
+          "text": "E2S - Spouse Of Treaty Investor"
+        },
+        {
+          "index": 21,
+          "value": "E2Y",
+          "text": "E2Y - Child Of Treaty Investor"
+        },
+        {
+          "index": 22,
+          "value": "E3",
+          "text": "E3 - Australian Treaty Alien Coming To The United States Solely To Perform Services In A Specialty Occupation"
+        },
+        {
+          "index": 23,
+          "value": "E3D",
+          "text": "E3D - Spouse And Children Of E3"
+        },
+        {
+          "index": 24,
+          "value": "E3S",
+          "text": "E3S - Spouse Of E3"
+        },
+        {
+          "index": 25,
+          "value": "E3Y",
+          "text": "E3Y - Child Of E3"
+        },
+        {
+          "index": 26,
+          "value": "F1",
+          "text": "F1 - Student, Academic Or Language Program."
+        },
+        {
+          "index": 27,
+          "value": "F2",
+          "text": "F2 - Spouse Or Child Of F 1."
+        },
+        {
+          "index": 28,
+          "value": "H1C",
+          "text": "H1C - Registered Nurse Who Will Work In Facilities That Serve Health Professional Shortage Areas Under Provisions Of The Nursing Relief For Disadvantage Areas Act Of 1999"
+        },
+        {
+          "index": 29,
+          "value": "H2A",
+          "text": "H2A - Worker To Perform Agricultural Services Or Labor Of A Temporary Or Seasonal Nature When Services Are Unavailable In The U.S. And Will Not Adversely Affect Wages And Working Conditions Of U.S. Workers."
+        },
+        {
+          "index": 30,
+          "value": "H2B",
+          "text": "H2B - Nonagricultural Worker Performing Services Of A Temporary Nature Or Labor Unavailable In The United States."
+        },
+        {
+          "index": 31,
+          "value": "H3",
+          "text": "H3 - Temporary Trainee To Receive Instruction In Any Field Except Medical Education."
+        },
+        {
+          "index": 32,
+          "value": "H4",
+          "text": "H4 - The Spouse And Children Of An H Nonimmigrant. See 8 Cfr 214.2(h)(9)(Iv)."
+        },
+        {
+          "index": 33,
+          "value": "I",
+          "text": "I - Representative Of Foreign Information Media, Spouse And Children."
+        },
+        {
+          "index": 34,
+          "value": "J1",
+          "text": "J1 - Exchange Visitor."
+        },
+        {
+          "index": 35,
+          "value": "J2",
+          "text": "J2 - Spouse Or Child Of J 1."
+        },
+        {
+          "index": 36,
+          "value": "K3",
+          "text": "K3 - Spouse Of A U.S. Citizen Who Is A Beneficary Of A Petition For Status As The Immediate Relative Of A U.S. Citizen (I 130)."
+        },
+        {
+          "index": 37,
+          "value": "K4",
+          "text": "K4 - Child Accompanying Or Following To Join A K 3 Alien."
+        },
+        {
+          "index": 38,
+          "value": "L1",
+          "text": "L1 - Intracompany Transferee (Executive, Managerial, And Specialized Personnel Entering To Render Services To A Branch, Parent, Subsidiary, Or Affiliate Of The Company Of Previous Employment Outside The United States)."
+        },
+        {
+          "index": 39,
+          "value": "L1A",
+          "text": "L1A - Manager Or Executive"
+        },
+        {
+          "index": 40,
+          "value": "L1B",
+          "text": "L1B - Specialized Knowledge Alien"
+        },
+        {
+          "index": 41,
+          "value": "L2",
+          "text": "L2 - Spouse Or Child Of L 1."
+        },
+        {
+          "index": 42,
+          "value": "L2S",
+          "text": "L2S - Spouse Of L1"
+        },
+        {
+          "index": 43,
+          "value": "L2Y",
+          "text": "L2Y - Child Of L1"
+        },
+        {
+          "index": 44,
+          "value": "M1",
+          "text": "M1 - Student Pursuing A Full Course Of Study At An Established Vocational Or Other Recognized Nonacademic Institution (Other Than In A Language Training Program)."
+        },
+        {
+          "index": 45,
+          "value": "M2",
+          "text": "M2 - Spouse Or Child Of M1."
+        },
+        {
+          "index": 46,
+          "value": "N8",
+          "text": "N8 - Parent Of An Alien Classified Sk3 Or Sn3."
+        },
+        {
+          "index": 47,
+          "value": "N9",
+          "text": "N9 - Child Of N 8 Or Of An Alien Classified Sk1, Sk2, Sk4, Sn1, Sn2, Or Sn4."
+        },
+        {
+          "index": 48,
+          "value": "O1",
+          "text": "O1 - Temporary Worker With Extraordinary Ability/Achievement In The Sciences, Arts, Education, Business, Or Athletics."
+        },
+        {
+          "index": 49,
+          "value": "O1A",
+          "text": "O1A - Extraordinary Alien Non Arts"
+        },
+        {
+          "index": 50,
+          "value": "O1B",
+          "text": "O1B - Extraordinary Alien In Arts"
+        },
+        {
+          "index": 51,
+          "value": "O2",
+          "text": "O2 - Temporary Worker Accompanying Or Assisting O 1."
+        },
+        {
+          "index": 52,
+          "value": "O3",
+          "text": "O3 - Spouse Or Child Of O 1 Or O 2."
+        },
+        {
+          "index": 53,
+          "value": "P1",
+          "text": "P1 - Temporary Worker, Internationally Recognized Athlete Or Entertainer For A Specific Competition Or Performance."
+        },
+        {
+          "index": 54,
+          "value": "P1A",
+          "text": "P1A - Alien With Athletic Event"
+        },
+        {
+          "index": 55,
+          "value": "P1B",
+          "text": "P1B - Alien With Entertainment Group"
+        },
+        {
+          "index": 56,
+          "value": "P1S",
+          "text": "P1S - Support Person Of P 1"
+        },
+        {
+          "index": 57,
+          "value": "P2",
+          "text": "P2 - Temporary Worker, Artist Or Entertainer Under A Reciprocal Exchange Program With A Similar Organization Of A Foreign State."
+        },
+        {
+          "index": 58,
+          "value": "P2S",
+          "text": "P2S - Support Person Of P 2"
+        },
+        {
+          "index": 59,
+          "value": "P3",
+          "text": "P3 - Temporary Worker, Artist Or Entertainer Under A Program That Is \"Culturally Unique\"."
+        },
+        {
+          "index": 60,
+          "value": "P3S",
+          "text": "P3S - Support Person Of P 3"
+        },
+        {
+          "index": 61,
+          "value": "P4",
+          "text": "P4 - Spouse Or Child Of P 1, P 2, Or P 3."
+        },
+        {
+          "index": 62,
+          "value": "Q1",
+          "text": "Q1 - Temporary Worker In An International Cultural Exchange Program."
+        },
+        {
+          "index": 63,
+          "value": "R1",
+          "text": "R1 - Temporary Worker To Perform Work In Religious Occupations."
+        },
+        {
+          "index": 64,
+          "value": "R2",
+          "text": "R2 - Spouse And Children Of R1."
+        },
+        {
+          "index": 65,
+          "value": "TD",
+          "text": "TD - Spouse Or Child Of Tn."
+        },
+        {
+          "index": 66,
+          "value": "TN1",
+          "text": "TN1 - Nafta Principal (Canada)"
+        },
+        {
+          "index": 67,
+          "value": "TN2",
+          "text": "TN2 - Nafta Principal (Mexico)"
+        },
+        {
+          "index": 68,
+          "value": "UU",
+          "text": "UU - Unknown Or Not Reported"
+        }
+      ],
+      "optionCount": 68,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/basis-of-eligibility"
+    },
+    {
+      "crmKey": "i539_gettingStarted_reasonForRequest_requestedDateOfExtension",
+      "zhLabel": "请求身份延长至日期",
+      "enLabel": "What date are you requesting your current or requested status be extended until?: MM/DD/YYYY",
+      "sectionZh": "申请原因",
+      "sectionEn": "What are you applying for? * | What date are you requesting your current or requested status be extended until?",
+      "inputType": "date",
+      "required": false,
+      "uscisName": "gettingStarted.reasonForRequest.requestedDateOfExtension",
+      "uscisSelector": "[name=\"gettingStarted.reasonForRequest.requestedDateOfExtension\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/reason-for-request"
+    },
+    {
+      "crmKey": "i539_gettingStarted_reasonForRequest_applicationType",
+      "zhLabel": "待翻译/确认",
+      "enLabel": "An extension of stay in my current status",
+      "sectionZh": "申请原因",
+      "sectionEn": "What are you applying for? * | What date are you requesting your current or requested status be extended until?",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "gettingStarted.reasonForRequest.applicationType",
+      "uscisSelector": "[name=\"gettingStarted.reasonForRequest.applicationType\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "An extension of stay in my current status",
+          "value": "extensionOfStay"
+        },
+        {
+          "checked": false,
+          "optionLabel": "A change of status",
+          "value": "changeOfStatus"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/reason-for-request"
+    },
+    {
+      "crmKey": "i539_gettingStarted_preparerAndInterpreterInformation_hasHelper",
+      "zhLabel": "是否有人协助填写申请",
+      "enLabel": "Is someone assisting you with completing this application?",
+      "sectionZh": "代填人与翻译",
+      "sectionEn": "Is someone assisting you with completing this application?",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "formikFactoryUIMeta.gettingStarted.preparerAndInterpreterInformation.hasHelper",
+      "uscisSelector": "[name=\"formikFactoryUIMeta.gettingStarted.preparerAndInterpreterInformation.hasHelper\"]",
+      "dynamicCondition": "Yes 会展开代填人/翻译信息 | Yes may reveal preparer/interpreter details",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/getting-started/preparer-and-interpreter-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourName_name_firstName",
+      "zhLabel": "名",
+      "enLabel": "Given name (first name)",
+      "sectionZh": "姓名",
+      "sectionEn": "What is your current legal name?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourName.name.firstName",
+      "uscisSelector": "[name=\"applicant.yourName.name.firstName\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-name"
+    },
+    {
+      "crmKey": "i539_applicant_yourName_name_middleName",
+      "zhLabel": "中间名",
+      "enLabel": "Middle name (if applicable)",
+      "sectionZh": "姓名",
+      "sectionEn": "What is your current legal name?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourName.name.middleName",
+      "uscisSelector": "[name=\"applicant.yourName.name.middleName\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-name"
+    },
+    {
+      "crmKey": "i539_applicant_yourName_name_lastName",
+      "zhLabel": "姓",
+      "enLabel": "Family name (last name) *",
+      "sectionZh": "姓名",
+      "sectionEn": "What is your current legal name?",
+      "inputType": "text",
+      "required": true,
+      "uscisName": "applicant.yourName.name.lastName",
+      "uscisSelector": "[name=\"applicant.yourName.name.lastName\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-name"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_contactInformation_daytimePhone",
+      "zhLabel": "日间电话",
+      "enLabel": "Daytime telephone number",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.contactInformation.daytimePhone",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.contactInformation.daytimePhone\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_contactInformation_mobilePhone",
+      "zhLabel": "手机号码",
+      "enLabel": "Mobile telephone number",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.contactInformation.mobilePhone",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.contactInformation.mobilePhone\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_contactInformation_emailAddress",
+      "zhLabel": "电子邮箱",
+      "enLabel": "Email address",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.contactInformation.emailAddress",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.contactInformation.emailAddress\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_mailingAddress_inCareOfName",
+      "zhLabel": "转交收件人",
+      "enLabel": "In care of name (if any)",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.mailingAddress.inCareOfName",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.mailingAddress.inCareOfName\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_mailingAddress_addressLineOne",
+      "zhLabel": "地址第一行",
+      "enLabel": "Address line 1 *",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": true,
+      "uscisName": "applicant.yourContactInformation.mailingAddress.addressLineOne",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.mailingAddress.addressLineOne\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_mailingAddress_addressLineTwo",
+      "zhLabel": "地址第二行",
+      "enLabel": "Address line 2",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.mailingAddress.addressLineTwo",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.mailingAddress.addressLineTwo\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_mailingAddress_city",
+      "zhLabel": "城市/镇",
+      "enLabel": "City or town *",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": true,
+      "uscisName": "applicant.yourContactInformation.mailingAddress.city",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.mailingAddress.city\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_mailingAddress_state",
+      "zhLabel": "州",
+      "enLabel": "How can we contact you?",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": true,
+      "uscisName": "applicant.yourContactInformation.mailingAddress.state",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.mailingAddress.state\"]",
+      "dynamicCondition": "美国邮寄地址州选择 | U.S. mailing state selector",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_mailingAddress_zipCode",
+      "zhLabel": "邮编",
+      "enLabel": "ZIP code *",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": true,
+      "uscisName": "applicant.yourContactInformation.mailingAddress.zipCode",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.mailingAddress.zipCode\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_foreignPhysicalAddress_country",
+      "zhLabel": "待翻译/确认",
+      "enLabel": "How can we contact you?",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.foreignPhysicalAddress.country",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.country\"]",
+      "dynamicCondition": "当需要境外实际地址时显示 | Shows when foreign physical address is needed",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_foreignPhysicalAddress_addressLineOne",
+      "zhLabel": "地址第一行",
+      "enLabel": "Address line 1",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.foreignPhysicalAddress.addressLineOne",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.addressLineOne\"]",
+      "dynamicCondition": "当需要境外实际地址时显示 | Shows when foreign physical address is needed",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_foreignPhysicalAddress_addressLineTwo",
+      "zhLabel": "地址第二行",
+      "enLabel": "Address line 2",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.foreignPhysicalAddress.addressLineTwo",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.addressLineTwo\"]",
+      "dynamicCondition": "当需要境外实际地址时显示 | Shows when foreign physical address is needed",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_foreignPhysicalAddress_city",
+      "zhLabel": "城市/镇",
+      "enLabel": "City or town",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.foreignPhysicalAddress.city",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.city\"]",
+      "dynamicCondition": "当需要境外实际地址时显示 | Shows when foreign physical address is needed",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_foreignPhysicalAddress_province",
+      "zhLabel": "省/州/地区",
+      "enLabel": "Province",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.foreignPhysicalAddress.province",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.province\"]",
+      "dynamicCondition": "当需要境外实际地址时显示 | Shows when foreign physical address is needed",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_foreignPhysicalAddress_postalCode",
+      "zhLabel": "邮政编码",
+      "enLabel": "Postal code",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.foreignPhysicalAddress.postalCode",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.postalCode\"]",
+      "dynamicCondition": "当需要境外实际地址时显示 | Shows when foreign physical address is needed",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_contactInformation_sameAsDaytimePhone",
+      "zhLabel": "日间电话",
+      "enLabel": "This is the same as my daytime telephone number.",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "checkbox",
+      "required": false,
+      "uscisName": "formikFactoryUIMeta.applicant.yourContactInformation.contactInformation.sameAsDaytimePhone",
+      "uscisSelector": "[name=\"formikFactoryUIMeta.applicant.yourContactInformation.contactInformation.sameAsDaytimePhone\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "This is the same as my daytime telephone number.",
+          "value": "false"
+        }
+      ],
+      "optionCount": 1,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_contactInformation_noEmail",
+      "zhLabel": "电子邮箱",
+      "enLabel": "I do not have an email address.",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "checkbox",
+      "required": false,
+      "uscisName": "formikFactoryUIMeta.applicant.yourContactInformation.contactInformation.noEmail",
+      "uscisSelector": "[name=\"formikFactoryUIMeta.applicant.yourContactInformation.contactInformation.noEmail\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "I do not have an email address.",
+          "value": "false"
+        }
+      ],
+      "optionCount": 1,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_isMailingEqualToPhysical",
+      "zhLabel": "待翻译/确认",
+      "enLabel": "How can we contact you?",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.isMailingEqualToPhysical",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.isMailingEqualToPhysical\"]",
+      "dynamicCondition": "控制美国实际地址是否另填 | Controls whether physical address is separate",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_mailingAddress_state",
+      "zhLabel": "州",
+      "enLabel": "How can we contact you?",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "combobox",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.mailingAddress.state",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.mailingAddress.state\"]",
+      "dynamicCondition": "美国邮寄地址州选择 | U.S. mailing state selector",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourContactInformation_foreignPhysicalAddress_country",
+      "zhLabel": "待翻译/确认",
+      "enLabel": "How can we contact you?",
+      "sectionZh": "联系方式与地址",
+      "sectionEn": "How can we contact you? | What is your current U.S. mailing address? (Safe Address, if applicable) | Is your current U.S. mailing address the same as your U.S. physical address? | What is your physical address abroad?",
+      "inputType": "combobox",
+      "required": false,
+      "uscisName": "applicant.yourContactInformation.foreignPhysicalAddress.country",
+      "uscisSelector": "[name=\"applicant.yourContactInformation.foreignPhysicalAddress.country\"]",
+      "dynamicCondition": "当需要境外实际地址时显示 | Shows when foreign physical address is needed",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-contact-information"
+    },
+    {
+      "crmKey": "i539_applicant_whenAndWhereYouWereBorn_dob",
+      "zhLabel": "出生日期",
+      "enLabel": "What is your date of birth?: MM/DD/YYYY",
+      "sectionZh": "出生信息",
+      "sectionEn": "What is your date of birth? * | What is your country of birth? *",
+      "inputType": "date",
+      "required": true,
+      "uscisName": "applicant.whenAndWhereYouWereBorn.dob",
+      "uscisSelector": "[name=\"applicant.whenAndWhereYouWereBorn.dob\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/when-and-where-you-were-born"
+    },
+    {
+      "crmKey": "i539_applicant_whenAndWhereYouWereBorn_birthAddress_country",
+      "zhLabel": "出生日期",
+      "enLabel": "What is your date of birth? *",
+      "sectionZh": "出生信息",
+      "sectionEn": "What is your date of birth? * | What is your country of birth? *",
+      "inputType": "text",
+      "required": true,
+      "uscisName": "applicant.whenAndWhereYouWereBorn.birthAddress.country",
+      "uscisSelector": "[name=\"applicant.whenAndWhereYouWereBorn.birthAddress.country\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/when-and-where-you-were-born"
+    },
+    {
+      "crmKey": "i539_applicant_whenAndWhereYouWereBorn_birthAddress_country",
+      "zhLabel": "出生日期",
+      "enLabel": "What is your date of birth? *",
+      "sectionZh": "出生信息",
+      "sectionEn": "What is your date of birth? * | What is your country of birth? *",
+      "inputType": "combobox",
+      "required": false,
+      "uscisName": "applicant.whenAndWhereYouWereBorn.birthAddress.country",
+      "uscisSelector": "[name=\"applicant.whenAndWhereYouWereBorn.birthAddress.country\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/when-and-where-you-were-born"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation1_countryOfCitizenshipOrNationality",
+      "zhLabel": "国籍/公民身份国家",
+      "enLabel": "What is your country of citizenship or nationality? *",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+      "inputType": "text",
+      "required": true,
+      "uscisName": "applicant.yourImmigrationInformation.yourImmigrationInformation1.countryOfCitizenshipOrNationality",
+      "uscisSelector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.countryOfCitizenshipOrNationality\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation1_recentEntry_dateOfLastArrival",
+      "zhLabel": "州",
+      "enLabel": "When did you last arrive into the United States?",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+      "inputType": "date",
+      "required": false,
+      "uscisName": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.dateOfLastArrival",
+      "uscisSelector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.dateOfLastArrival\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation1_recentEntry_i94Number",
+      "zhLabel": "I-94 到达/离境记录号码",
+      "enLabel": "What is your Form I-94 Arrival-Departure Record Number?",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.i94Number",
+      "uscisSelector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.i94Number\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation1_recentEntry_passport_number",
+      "zhLabel": "护照号码",
+      "enLabel": "What is the passport number listed on your Form I-94?",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.passport.number",
+      "uscisSelector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.passport.number\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation1_recentEntry_travelDocumentNumber",
+      "zhLabel": "旅行证件号码",
+      "enLabel": "What is your travel document number?",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.travelDocumentNumber",
+      "uscisSelector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.travelDocumentNumber\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation1_recentEntry_countryOfIssuance",
+      "zhLabel": "国籍/公民身份国家",
+      "enLabel": "What is your country of citizenship or nationality? *",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.countryOfIssuance",
+      "uscisSelector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.countryOfIssuance\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation1_recentEntry_expirationDate",
+      "zhLabel": "护照或旅行证件到期日",
+      "enLabel": "What is the expiration date for the passport or travel document on your Form I-94?: MM/DD/YYYY",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+      "inputType": "date",
+      "required": false,
+      "uscisName": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.expirationDate",
+      "uscisSelector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.expirationDate\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation1_recentEntry_passport_none",
+      "zhLabel": "护照号码",
+      "enLabel": "I do not have a passport number listed on my Form I-94.",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+      "inputType": "checkbox",
+      "required": false,
+      "uscisName": "formikFactoryUIMeta.applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.passport.none",
+      "uscisSelector": "[name=\"formikFactoryUIMeta.applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.passport.none\"]",
+      "dynamicCondition": "勾选后通常隐藏/禁用对应号码输入 | Usually disables the related number field",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "I do not have a passport number listed on my Form I-94.",
+          "value": "false"
+        }
+      ],
+      "optionCount": 1,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation1_recentEntry_noTravelDocumentNumber",
+      "zhLabel": "旅行证件号码",
+      "enLabel": "I do not have a travel document number.",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+      "inputType": "checkbox",
+      "required": false,
+      "uscisName": "formikFactoryUIMeta.applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.noTravelDocumentNumber",
+      "uscisSelector": "[name=\"formikFactoryUIMeta.applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.noTravelDocumentNumber\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "I do not have a travel document number.",
+          "value": "false"
+        }
+      ],
+      "optionCount": 1,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation1_countryOfCitizenshipOrNationality",
+      "zhLabel": "国籍/公民身份国家",
+      "enLabel": "What is your country of citizenship or nationality? *",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+      "inputType": "combobox",
+      "required": false,
+      "uscisName": "applicant.yourImmigrationInformation.yourImmigrationInformation1.countryOfCitizenshipOrNationality",
+      "uscisSelector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.countryOfCitizenshipOrNationality\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation1_recentEntry_countryOfIssuance",
+      "zhLabel": "国籍/公民身份国家",
+      "enLabel": "What is your country of citizenship or nationality? *",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "What is your country of citizenship or nationality? * | Provide information about your most recent entry into the United States. | Provide information about your most recent entry into the United States. | What is the expiration date for the passport or travel document on your Form I-94?",
+      "inputType": "combobox",
+      "required": false,
+      "uscisName": "applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.countryOfIssuance",
+      "uscisSelector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation1.recentEntry.countryOfIssuance\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information"
+    },
+    {
+      "crmKey": "i539_applicant_yourImmigrationInformation_yourImmigrationInformation2_isCurrentPassportDifferent",
+      "zhLabel": "州",
+      "enLabel": "Is your current passport different from the one you used in your most recent entry into the United States?",
+      "sectionZh": "入境与身份信息",
+      "sectionEn": "Is your current passport different from the one you used in your most recent entry into the United States?",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "applicant.yourImmigrationInformation.yourImmigrationInformation2.isCurrentPassportDifferent",
+      "uscisSelector": "[name=\"applicant.yourImmigrationInformation.yourImmigrationInformation2.isCurrentPassportDifferent\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/your-immigration-information/your-immigration-information-page-2"
+    },
+    {
+      "crmKey": "i539_applicant_otherInformation_alienNumber_number",
+      "zhLabel": "A号码",
+      "enLabel": "What is your A-Number? Enter with the first numeric character of your A-Number.",
+      "sectionZh": "其他号码与学校信息",
+      "sectionEn": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.otherInformation.alienNumber.number",
+      "uscisSelector": "[name=\"applicant.otherInformation.alienNumber.number\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/other-information"
+    },
+    {
+      "crmKey": "i539_applicant_otherInformation_socialSecurityNumber_number",
+      "zhLabel": "美国社安号",
+      "enLabel": "What is your U.S. Social Security number?",
+      "sectionZh": "其他号码与学校信息",
+      "sectionEn": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.otherInformation.socialSecurityNumber.number",
+      "uscisSelector": "[name=\"applicant.otherInformation.socialSecurityNumber.number\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/other-information"
+    },
+    {
+      "crmKey": "i539_applicant_otherInformation_uscisNumber_number",
+      "zhLabel": "USCIS在线账号号码",
+      "enLabel": "What is your USCIS Online Account Number?",
+      "sectionZh": "其他号码与学校信息",
+      "sectionEn": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.otherInformation.uscisNumber.number",
+      "uscisSelector": "[name=\"applicant.otherInformation.uscisNumber.number\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/other-information"
+    },
+    {
+      "crmKey": "i539_applicant_otherInformation_schoolName",
+      "zhLabel": "A号码",
+      "enLabel": "What is your A-Number?",
+      "sectionZh": "其他号码与学校信息",
+      "sectionEn": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.otherInformation.schoolName",
+      "uscisSelector": "[name=\"applicant.otherInformation.schoolName\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/other-information"
+    },
+    {
+      "crmKey": "i539_applicant_otherInformation_sevisNumber",
+      "zhLabel": "SEVIS号码",
+      "enLabel": "What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+      "sectionZh": "其他号码与学校信息",
+      "sectionEn": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+      "inputType": "text",
+      "required": false,
+      "uscisName": "applicant.otherInformation.sevisNumber",
+      "uscisSelector": "[name=\"applicant.otherInformation.sevisNumber\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/other-information"
+    },
+    {
+      "crmKey": "i539_applicant_otherInformation_alienNumber_none",
+      "zhLabel": "A号码",
+      "enLabel": "I do not have or know my A-Number.",
+      "sectionZh": "其他号码与学校信息",
+      "sectionEn": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+      "inputType": "checkbox",
+      "required": false,
+      "uscisName": "formikFactoryUIMeta.applicant.otherInformation.alienNumber.none",
+      "uscisSelector": "[name=\"formikFactoryUIMeta.applicant.otherInformation.alienNumber.none\"]",
+      "dynamicCondition": "勾选后通常隐藏/禁用对应号码输入 | Usually disables the related number field",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "I do not have or know my A-Number.",
+          "value": "false"
+        }
+      ],
+      "optionCount": 1,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/other-information"
+    },
+    {
+      "crmKey": "i539_applicant_otherInformation_socialSecurityNumber_none",
+      "zhLabel": "美国社安号",
+      "enLabel": "I do not have or know my U.S. Social Security number.",
+      "sectionZh": "其他号码与学校信息",
+      "sectionEn": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+      "inputType": "checkbox",
+      "required": false,
+      "uscisName": "formikFactoryUIMeta.applicant.otherInformation.socialSecurityNumber.none",
+      "uscisSelector": "[name=\"formikFactoryUIMeta.applicant.otherInformation.socialSecurityNumber.none\"]",
+      "dynamicCondition": "勾选后通常隐藏/禁用对应号码输入 | Usually disables the related number field",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "I do not have or know my U.S. Social Security number.",
+          "value": "false"
+        }
+      ],
+      "optionCount": 1,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/other-information"
+    },
+    {
+      "crmKey": "i539_applicant_otherInformation_uscisNumber_none",
+      "zhLabel": "USCIS在线账号号码",
+      "enLabel": "I do not have or know my USCIS Online Account Number.",
+      "sectionZh": "其他号码与学校信息",
+      "sectionEn": "What is your A-Number? | What is your U.S. Social Security number? | What is your USCIS Online Account Number? | What is the name of the school you will attend as an Academic Student, Vocational Student, or Exchange Visitor? (if applicable) | What is your Student and Exchange Visitor Information System (SEVIS) Number? (if applicable)",
+      "inputType": "checkbox",
+      "required": false,
+      "uscisName": "formikFactoryUIMeta.applicant.otherInformation.uscisNumber.none",
+      "uscisSelector": "[name=\"formikFactoryUIMeta.applicant.otherInformation.uscisNumber.none\"]",
+      "dynamicCondition": "勾选后通常隐藏/禁用对应号码输入 | Usually disables the related number field",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "I do not have or know my USCIS Online Account Number.",
+          "value": "false"
+        }
+      ],
+      "optionCount": 1,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/about-you/other-information"
+    },
+    {
+      "crmKey": "i539_moralCharacter_partyAndGroupAffiliations_partyAndGroupAffiliationsPage1_hasParticipatedInTortureOrGenocide_question",
+      "zhLabel": "是否参与酷刑或种族灭绝相关行为",
+      "enLabel": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? *",
+      "sectionZh": "品格与组织/武装相关问题",
+      "sectionEn": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in killing any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in intentionally and severely injuring any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in engaging in any kind of sexual contact or relations with any person who did not consent or was unable to consent, or was being forced or threatened? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in limiting or denying any person's ability to exercise religious beliefs? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInTortureOrGenocide.question",
+      "uscisSelector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInTortureOrGenocide.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations"
+    },
+    {
+      "crmKey": "i539_moralCharacter_partyAndGroupAffiliations_partyAndGroupAffiliationsPage1_hasParticipatedInKillingAnyPerson_question",
+      "zhLabel": "是否参与酷刑或种族灭绝相关行为",
+      "enLabel": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? *",
+      "sectionZh": "品格与组织/武装相关问题",
+      "sectionEn": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in killing any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in intentionally and severely injuring any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in engaging in any kind of sexual contact or relations with any person who did not consent or was unable to consent, or was being forced or threatened? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in limiting or denying any person's ability to exercise religious beliefs? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInKillingAnyPerson.question",
+      "uscisSelector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInKillingAnyPerson.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations"
+    },
+    {
+      "crmKey": "i539_moralCharacter_partyAndGroupAffiliations_partyAndGroupAffiliationsPage1_hasParticipatedInInjuringAnyPerson_question",
+      "zhLabel": "是否参与酷刑或种族灭绝相关行为",
+      "enLabel": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? *",
+      "sectionZh": "品格与组织/武装相关问题",
+      "sectionEn": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in killing any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in intentionally and severely injuring any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in engaging in any kind of sexual contact or relations with any person who did not consent or was unable to consent, or was being forced or threatened? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in limiting or denying any person's ability to exercise religious beliefs? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInInjuringAnyPerson.question",
+      "uscisSelector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInInjuringAnyPerson.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations"
+    },
+    {
+      "crmKey": "i539_moralCharacter_partyAndGroupAffiliations_partyAndGroupAffiliationsPage1_hasParticipatedInForcedSexualContact_question",
+      "zhLabel": "是否参与酷刑或种族灭绝相关行为",
+      "enLabel": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? *",
+      "sectionZh": "品格与组织/武装相关问题",
+      "sectionEn": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in killing any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in intentionally and severely injuring any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in engaging in any kind of sexual contact or relations with any person who did not consent or was unable to consent, or was being forced or threatened? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in limiting or denying any person's ability to exercise religious beliefs? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInForcedSexualContact.question",
+      "uscisSelector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInForcedSexualContact.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations"
+    },
+    {
+      "crmKey": "i539_moralCharacter_partyAndGroupAffiliations_partyAndGroupAffiliationsPage1_hasParticipatedInDenyingReligiousBeliefs_question",
+      "zhLabel": "是否参与酷刑或种族灭绝相关行为",
+      "enLabel": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? *",
+      "sectionZh": "品格与组织/武装相关问题",
+      "sectionEn": "Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in acts involving torture or genocide? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in killing any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in intentionally and severely injuring any person? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in engaging in any kind of sexual contact or relations with any person who did not consent or was unable to consent, or was being forced or threatened? * | Have you EVER ordered, incited, called for, committed, assisted, helped with, or otherwise participated in limiting or denying any person's ability to exercise religious beliefs? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInDenyingReligiousBeliefs.question",
+      "uscisSelector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage1.hasParticipatedInDenyingReligiousBeliefs.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations"
+    },
+    {
+      "crmKey": "i539_moralCharacter_partyAndGroupAffiliations_partyAndGroupAffiliationsPage2_hasServedInMilitary_question",
+      "zhLabel": "是否参与军队/准军事/武装团体",
+      "enLabel": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? *",
+      "sectionZh": "品格与组织/武装相关问题",
+      "sectionEn": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? * | Have you EVER worked, volunteered, or otherwise served in any prison, jail, prison camp, detention facility, labor camp, or any other situation that involved detaining persons? * | Have you EVER been a member of, assisted, or participated in any group, unit, or organization of any kind in which you or other persons used or threatened to use any type of weapon against any person or threatened to do so? * | Have you EVER sold, provided, or transported weapons, or assisted any person in selling, providing, or transporting weapons, which, you knew or believed would be used against another person? * | Have you EVER received any weapons training, paramilitary training, or other military-type training? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInMilitary.question",
+      "uscisSelector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInMilitary.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations/party-and-group-affiliations-page-2"
+    },
+    {
+      "crmKey": "i539_moralCharacter_partyAndGroupAffiliations_partyAndGroupAffiliationsPage2_hasServedInPrison_question",
+      "zhLabel": "是否参与军队/准军事/武装团体",
+      "enLabel": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? *",
+      "sectionZh": "品格与组织/武装相关问题",
+      "sectionEn": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? * | Have you EVER worked, volunteered, or otherwise served in any prison, jail, prison camp, detention facility, labor camp, or any other situation that involved detaining persons? * | Have you EVER been a member of, assisted, or participated in any group, unit, or organization of any kind in which you or other persons used or threatened to use any type of weapon against any person or threatened to do so? * | Have you EVER sold, provided, or transported weapons, or assisted any person in selling, providing, or transporting weapons, which, you knew or believed would be used against another person? * | Have you EVER received any weapons training, paramilitary training, or other military-type training? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInPrison.question",
+      "uscisSelector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInPrison.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations/party-and-group-affiliations-page-2"
+    },
+    {
+      "crmKey": "i539_moralCharacter_partyAndGroupAffiliations_partyAndGroupAffiliationsPage2_hasServedInOrganizationWithWeapons_question",
+      "zhLabel": "是否参与军队/准军事/武装团体",
+      "enLabel": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? *",
+      "sectionZh": "品格与组织/武装相关问题",
+      "sectionEn": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? * | Have you EVER worked, volunteered, or otherwise served in any prison, jail, prison camp, detention facility, labor camp, or any other situation that involved detaining persons? * | Have you EVER been a member of, assisted, or participated in any group, unit, or organization of any kind in which you or other persons used or threatened to use any type of weapon against any person or threatened to do so? * | Have you EVER sold, provided, or transported weapons, or assisted any person in selling, providing, or transporting weapons, which, you knew or believed would be used against another person? * | Have you EVER received any weapons training, paramilitary training, or other military-type training? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInOrganizationWithWeapons.question",
+      "uscisSelector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasServedInOrganizationWithWeapons.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations/party-and-group-affiliations-page-2"
+    },
+    {
+      "crmKey": "i539_moralCharacter_partyAndGroupAffiliations_partyAndGroupAffiliationsPage2_hasTransportedWeapons_question",
+      "zhLabel": "是否参与军队/准军事/武装团体",
+      "enLabel": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? *",
+      "sectionZh": "品格与组织/武装相关问题",
+      "sectionEn": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? * | Have you EVER worked, volunteered, or otherwise served in any prison, jail, prison camp, detention facility, labor camp, or any other situation that involved detaining persons? * | Have you EVER been a member of, assisted, or participated in any group, unit, or organization of any kind in which you or other persons used or threatened to use any type of weapon against any person or threatened to do so? * | Have you EVER sold, provided, or transported weapons, or assisted any person in selling, providing, or transporting weapons, which, you knew or believed would be used against another person? * | Have you EVER received any weapons training, paramilitary training, or other military-type training? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasTransportedWeapons.question",
+      "uscisSelector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasTransportedWeapons.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations/party-and-group-affiliations-page-2"
+    },
+    {
+      "crmKey": "i539_moralCharacter_partyAndGroupAffiliations_partyAndGroupAffiliationsPage2_hasWeaponsTraining_question",
+      "zhLabel": "是否参与军队/准军事/武装团体",
+      "enLabel": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? *",
+      "sectionZh": "品格与组织/武装相关问题",
+      "sectionEn": "Have you EVER served in, been a member of, assisted, or participated in any military unit, paramilitary unit, police unit, self-defense unit, vigilante unit, rebel group, guerrilla group, militia, insurgent organization, or any other armed group? * | Have you EVER worked, volunteered, or otherwise served in any prison, jail, prison camp, detention facility, labor camp, or any other situation that involved detaining persons? * | Have you EVER been a member of, assisted, or participated in any group, unit, or organization of any kind in which you or other persons used or threatened to use any type of weapon against any person or threatened to do so? * | Have you EVER sold, provided, or transported weapons, or assisted any person in selling, providing, or transporting weapons, which, you knew or believed would be used against another person? * | Have you EVER received any weapons training, paramilitary training, or other military-type training? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasWeaponsTraining.question",
+      "uscisSelector": "[name=\"moralCharacter.partyAndGroupAffiliations.partyAndGroupAffiliationsPage2.hasWeaponsTraining.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/party-and-group-affiliations/party-and-group-affiliations-page-2"
+    },
+    {
+      "crmKey": "i539_moralCharacter_immigrationProceedings_hasViolatedNonImmigrantStatus_question",
+      "zhLabel": "是否违反当前非移民身份条款",
+      "enLabel": "Have you EVER violated the terms of the nonimmigrant status you now hold? *",
+      "sectionZh": "移民程序与身份违规",
+      "sectionEn": "Have you EVER violated the terms of the nonimmigrant status you now hold? * | Are you now in removal proceedings? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.immigrationProceedings.hasViolatedNonImmigrantStatus.question",
+      "uscisSelector": "[name=\"moralCharacter.immigrationProceedings.hasViolatedNonImmigrantStatus.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/immigration-proceedings"
+    },
+    {
+      "crmKey": "i539_moralCharacter_immigrationProceedings_isInRemovalProceedings_question",
+      "zhLabel": "是否违反当前非移民身份条款",
+      "enLabel": "Have you EVER violated the terms of the nonimmigrant status you now hold? *",
+      "sectionZh": "移民程序与身份违规",
+      "sectionEn": "Have you EVER violated the terms of the nonimmigrant status you now hold? * | Are you now in removal proceedings? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.immigrationProceedings.isInRemovalProceedings.question",
+      "uscisSelector": "[name=\"moralCharacter.immigrationProceedings.isInRemovalProceedings.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/immigration-proceedings"
+    },
+    {
+      "crmKey": "i539_moralCharacter_crimesAndOffenses_hasBeenArrestedOrConvicted_question",
+      "zhLabel": "州",
+      "enLabel": "Have you EVER been arrested or convicted of any criminal offense since last entering the United States? *",
+      "sectionZh": "犯罪与逮捕",
+      "sectionEn": "Have you EVER been arrested or convicted of any criminal offense since last entering the United States? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "moralCharacter.crimesAndOffenses.hasBeenArrestedOrConvicted.question",
+      "uscisSelector": "[name=\"moralCharacter.crimesAndOffenses.hasBeenArrestedOrConvicted.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/moral-character/crimes-and-offenses"
+    },
+    {
+      "crmKey": "i539_yourApplication_informationAboutRequest_informationAboutRequestPage1_isBasedOnGrantedFamilyPetition",
+      "zhLabel": "是否基于亲属已获准延期/转身份",
+      "enLabel": "Is this application based on an extension or change of status already granted to your spouse, child, or parent?",
+      "sectionZh": "申请请求信息",
+      "sectionEn": "Is this application based on an extension or change of status already granted to your spouse, child, or parent? | Is this application based on a separate petition or application to provide your spouse, child, or parent an extension or change in status? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "yourApplication.informationAboutRequest.informationAboutRequestPage1.isBasedOnGrantedFamilyPetition",
+      "uscisSelector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage1.isBasedOnGrantedFamilyPetition\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/your-application/information-about-request"
+    },
+    {
+      "crmKey": "i539_yourApplication_informationAboutRequest_informationAboutRequestPage1_basedOnSeparateFamilyPetition",
+      "zhLabel": "待翻译/确认",
+      "enLabel": "Yes, filed with this Form I-539",
+      "sectionZh": "申请请求信息",
+      "sectionEn": "Is this application based on an extension or change of status already granted to your spouse, child, or parent? | Is this application based on a separate petition or application to provide your spouse, child, or parent an extension or change in status? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "yourApplication.informationAboutRequest.informationAboutRequestPage1.basedOnSeparateFamilyPetition",
+      "uscisSelector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage1.basedOnSeparateFamilyPetition\"]",
+      "dynamicCondition": "Always / 默认显示",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes, filed with this Form I-539",
+          "value": "filedWithThisI539"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "no"
+        },
+        {
+          "checked": false,
+          "optionLabel": "Yes, filed previously and pending with U.S. Citizenship and Immigration Services (USCIS)",
+          "value": "filedPreviouslyAndPending"
+        }
+      ],
+      "optionCount": 3,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/your-application/information-about-request"
+    },
+    {
+      "crmKey": "i539_yourApplication_informationAboutRequest_informationAboutRequestPage2_isApplicantForImmigrantVisa_question",
+      "zhLabel": "是否为移民签证申请人",
+      "enLabel": "Are you, or any other person included on the application, an applicant for an immigrant visa? *",
+      "sectionZh": "申请请求信息",
+      "sectionEn": "Are you, or any other person included on the application, an applicant for an immigrant visa? * | Has an immigrant petition EVER been filed for you? * | Have you EVER filed Form I-485, Application to Register Permanent Residence or Adjust Status? * | Have you EVER been employed in the United States since last admitted or granted an extension or change of status? * | Are you currently or have you EVER been a J-1 exchange visitor or a J-2 dependent of a J-1 exchange visitor? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "yourApplication.informationAboutRequest.informationAboutRequestPage2.isApplicantForImmigrantVisa.question",
+      "uscisSelector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage2.isApplicantForImmigrantVisa.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/your-application/information-about-request/information-about-request-page-2"
+    },
+    {
+      "crmKey": "i539_yourApplication_informationAboutRequest_informationAboutRequestPage2_hasImmigrantPetitionBeenFiled_question",
+      "zhLabel": "是否为移民签证申请人",
+      "enLabel": "Are you, or any other person included on the application, an applicant for an immigrant visa? *",
+      "sectionZh": "申请请求信息",
+      "sectionEn": "Are you, or any other person included on the application, an applicant for an immigrant visa? * | Has an immigrant petition EVER been filed for you? * | Have you EVER filed Form I-485, Application to Register Permanent Residence or Adjust Status? * | Have you EVER been employed in the United States since last admitted or granted an extension or change of status? * | Are you currently or have you EVER been a J-1 exchange visitor or a J-2 dependent of a J-1 exchange visitor? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "yourApplication.informationAboutRequest.informationAboutRequestPage2.hasImmigrantPetitionBeenFiled.question",
+      "uscisSelector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage2.hasImmigrantPetitionBeenFiled.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/your-application/information-about-request/information-about-request-page-2"
+    },
+    {
+      "crmKey": "i539_yourApplication_informationAboutRequest_informationAboutRequestPage2_hasI485BeenFiled_question",
+      "zhLabel": "是否为移民签证申请人",
+      "enLabel": "Are you, or any other person included on the application, an applicant for an immigrant visa? *",
+      "sectionZh": "申请请求信息",
+      "sectionEn": "Are you, or any other person included on the application, an applicant for an immigrant visa? * | Has an immigrant petition EVER been filed for you? * | Have you EVER filed Form I-485, Application to Register Permanent Residence or Adjust Status? * | Have you EVER been employed in the United States since last admitted or granted an extension or change of status? * | Are you currently or have you EVER been a J-1 exchange visitor or a J-2 dependent of a J-1 exchange visitor? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "yourApplication.informationAboutRequest.informationAboutRequestPage2.hasI485BeenFiled.question",
+      "uscisSelector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage2.hasI485BeenFiled.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/your-application/information-about-request/information-about-request-page-2"
+    },
+    {
+      "crmKey": "i539_yourApplication_informationAboutRequest_informationAboutRequestPage2_isEmployedInUs_isEmployedInUsQuestion",
+      "zhLabel": "是否为移民签证申请人",
+      "enLabel": "Are you, or any other person included on the application, an applicant for an immigrant visa? *",
+      "sectionZh": "申请请求信息",
+      "sectionEn": "Are you, or any other person included on the application, an applicant for an immigrant visa? * | Has an immigrant petition EVER been filed for you? * | Have you EVER filed Form I-485, Application to Register Permanent Residence or Adjust Status? * | Have you EVER been employed in the United States since last admitted or granted an extension or change of status? * | Are you currently or have you EVER been a J-1 exchange visitor or a J-2 dependent of a J-1 exchange visitor? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "yourApplication.informationAboutRequest.informationAboutRequestPage2.isEmployedInUs.isEmployedInUsQuestion",
+      "uscisSelector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage2.isEmployedInUs.isEmployedInUsQuestion\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/your-application/information-about-request/information-about-request-page-2"
+    },
+    {
+      "crmKey": "i539_yourApplication_informationAboutRequest_informationAboutRequestPage2_isExchangeVisitorOrDependent_question",
+      "zhLabel": "是否为移民签证申请人",
+      "enLabel": "Are you, or any other person included on the application, an applicant for an immigrant visa? *",
+      "sectionZh": "申请请求信息",
+      "sectionEn": "Are you, or any other person included on the application, an applicant for an immigrant visa? * | Has an immigrant petition EVER been filed for you? * | Have you EVER filed Form I-485, Application to Register Permanent Residence or Adjust Status? * | Have you EVER been employed in the United States since last admitted or granted an extension or change of status? * | Are you currently or have you EVER been a J-1 exchange visitor or a J-2 dependent of a J-1 exchange visitor? *",
+      "inputType": "singleChoice",
+      "required": false,
+      "uscisName": "yourApplication.informationAboutRequest.informationAboutRequestPage2.isExchangeVisitorOrDependent.question",
+      "uscisSelector": "[name=\"yourApplication.informationAboutRequest.informationAboutRequestPage2.isExchangeVisitorOrDependent.question\"]",
+      "dynamicCondition": "Yes 可能展开解释/详情字段 | Yes may reveal explanation/detail fields",
+      "options": [
+        {
+          "checked": false,
+          "optionLabel": "Yes",
+          "value": "true"
+        },
+        {
+          "checked": false,
+          "optionLabel": "No",
+          "value": "false"
+        }
+      ],
+      "optionCount": 2,
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/your-application/information-about-request/information-about-request-page-2"
+    },
+    {
+      "crmKey": "i539_desktop_drop",
+      "zhLabel": "I-94文件上传",
+      "enLabel": "Form I-94, Nonimmigrant Arrival/Departure Record*",
+      "sectionZh": "证据：I-94",
+      "sectionEn": "Form I-94, Nonimmigrant Arrival/Departure Record* | File requirements",
+      "inputType": "file",
+      "required": false,
+      "uscisName": "",
+      "uscisSelector": "#desktop-drop",
+      "dynamicCondition": "上传类字段，不用于普通文本 autofill | Upload control, not text autofill",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/evidence/form-i-94"
+    },
+    {
+      "crmKey": "i539_desktop_drop",
+      "zhLabel": "补充证据上传",
+      "enLabel": "Additional Evidence You Want To Provide",
+      "sectionZh": "证据：补充证据",
+      "sectionEn": "Additional Evidence You Want To Provide | File requirements",
+      "inputType": "file",
+      "required": false,
+      "uscisName": "",
+      "uscisSelector": "#desktop-drop",
+      "dynamicCondition": "上传类字段，不用于普通文本 autofill | Upload control, not text autofill",
+      "sourceUrl": "https://my.uscis.gov/forms/application-to-extend-change-nonimmigrant-status/13065390/evidence/additional-evidence"
+    }
+  ]
+}
