@@ -1,0 +1,2440 @@
+[
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "preparer.legalAssistance.providedWithListOfCounsel",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Legal assistance",
+        "selector": "[name=\"preparer.legalAssistance.providedWithListOfCounsel\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Legal assistance",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/getting-started/legal-assistance?"
+  },
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "preparer.familyMemberAsPreparer.familyMemberAsPreparer",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information",
+        "selector": "[name=\"preparer.familyMemberAsPreparer.familyMemberAsPreparer\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/getting-started/family-member-preparer/preparer-1"
+  },
+  {
+    "fieldCount": 10,
+    "fields": [
+      {
+        "id": "preparer.nonFamilyMemberAsPreparer.name.firstName",
+        "kind": "text",
+        "label": "Given name (first name)",
+        "maxlength": null,
+        "name": "preparer.nonFamilyMemberAsPreparer.name.firstName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information page 2",
+        "selector": "[name=\"preparer.nonFamilyMemberAsPreparer.name.firstName\"]",
+        "type": "text",
+        "value": "Lauren"
+      },
+      {
+        "id": "preparer.nonFamilyMemberAsPreparer.name.lastName",
+        "kind": "text",
+        "label": "Family name (last name)",
+        "maxlength": null,
+        "name": "preparer.nonFamilyMemberAsPreparer.name.lastName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information page 2",
+        "selector": "[name=\"preparer.nonFamilyMemberAsPreparer.name.lastName\"]",
+        "type": "text",
+        "value": "Zhou"
+      },
+      {
+        "id": "preparer.nonFamilyMemberAsPreparer.daytimePhone",
+        "kind": "text",
+        "label": "What is your preparer's daytime phone number?",
+        "maxlength": null,
+        "name": "preparer.nonFamilyMemberAsPreparer.daytimePhone",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information page 2",
+        "selector": "[name=\"preparer.nonFamilyMemberAsPreparer.daytimePhone\"]",
+        "type": "text",
+        "value": "(626) 613-7634"
+      },
+      {
+        "id": "preparer.nonFamilyMemberAsPreparer.address.addressLineOne",
+        "kind": "text",
+        "label": "Address line 1",
+        "maxlength": null,
+        "name": "preparer.nonFamilyMemberAsPreparer.address.addressLineOne",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information page 2",
+        "selector": "[name=\"preparer.nonFamilyMemberAsPreparer.address.addressLineOne\"]",
+        "type": "text",
+        "value": "3380 Flair Dr"
+      },
+      {
+        "id": "preparer.nonFamilyMemberAsPreparer.address.addressLineTwo",
+        "kind": "text",
+        "label": "Address line 2",
+        "maxlength": null,
+        "name": "preparer.nonFamilyMemberAsPreparer.address.addressLineTwo",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information page 2",
+        "selector": "[name=\"preparer.nonFamilyMemberAsPreparer.address.addressLineTwo\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "preparer.nonFamilyMemberAsPreparer.address.city",
+        "kind": "text",
+        "label": "City or town",
+        "maxlength": null,
+        "name": "preparer.nonFamilyMemberAsPreparer.address.city",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information page 2",
+        "selector": "[name=\"preparer.nonFamilyMemberAsPreparer.address.city\"]",
+        "type": "text",
+        "value": "El Monte"
+      },
+      {
+        "id": "preparer.nonFamilyMemberAsPreparer.address.state",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "preparer.nonFamilyMemberAsPreparer.address.state",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information page 2",
+        "selector": "[name=\"preparer.nonFamilyMemberAsPreparer.address.state\"]",
+        "type": "text",
+        "value": "CALIFORNIA"
+      },
+      {
+        "id": "preparer.nonFamilyMemberAsPreparer.address.zipCode",
+        "kind": "text",
+        "label": "ZIP code",
+        "maxlength": null,
+        "name": "preparer.nonFamilyMemberAsPreparer.address.zipCode",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information page 2",
+        "selector": "[name=\"preparer.nonFamilyMemberAsPreparer.address.zipCode\"]",
+        "type": "text",
+        "value": "91731"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "preparer.nonFamilyMemberAsPreparer.nonFamilyMemberAsPreparer",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information page 2",
+        "selector": "[name=\"preparer.nonFamilyMemberAsPreparer.nonFamilyMemberAsPreparer\"]"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "preparer.nonFamilyMemberAsPreparer.address.state",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information page 2",
+        "selector": "[name=\"preparer.nonFamilyMemberAsPreparer.address.state\"]",
+        "value": "CALIFORNIA"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Preparer information page 2",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/getting-started/family-member-preparer/preparer-page-2"
+  },
+  {
+    "fieldCount": 4,
+    "fields": [
+      {
+        "id": "applicant.yourName.name.firstName",
+        "kind": "text",
+        "label": "Given name (first name)",
+        "maxlength": null,
+        "name": "applicant.yourName.name.firstName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your name",
+        "selector": "[name=\"applicant.yourName.name.firstName\"]",
+        "type": "text",
+        "value": "Yuan"
+      },
+      {
+        "id": "applicant.yourName.name.middleName",
+        "kind": "text",
+        "label": "Middle name",
+        "maxlength": null,
+        "name": "applicant.yourName.name.middleName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your name",
+        "selector": "[name=\"applicant.yourName.name.middleName\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.yourName.name.lastName",
+        "kind": "text",
+        "label": "Family name (last name) *",
+        "maxlength": null,
+        "name": "applicant.yourName.name.lastName",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your name",
+        "selector": "[name=\"applicant.yourName.name.lastName\"]",
+        "type": "text",
+        "value": "Tu"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "formikFactoryUIMeta.applicant.yourName.additionalNames.hasAdditionalNames",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your name",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.yourName.additionalNames.hasAdditionalNames\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your name",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/about-you/your-name"
+  },
+  {
+    "fieldCount": 16,
+    "fields": [
+      {
+        "id": "applicant.background.physicalAddress.usAddress.addressLineOne",
+        "kind": "text",
+        "label": "Address line 1 *",
+        "maxlength": null,
+        "name": "applicant.background.physicalAddress.usAddress.addressLineOne",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.physicalAddress.usAddress.addressLineOne\"]",
+        "type": "text",
+        "value": "24 VIEW TER"
+      },
+      {
+        "id": "applicant.background.physicalAddress.usAddress.addressLineTwo",
+        "kind": "text",
+        "label": "Address line 2",
+        "maxlength": null,
+        "name": "applicant.background.physicalAddress.usAddress.addressLineTwo",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.physicalAddress.usAddress.addressLineTwo\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.background.physicalAddress.usAddress.city",
+        "kind": "text",
+        "label": "City or town *",
+        "maxlength": null,
+        "name": "applicant.background.physicalAddress.usAddress.city",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.physicalAddress.usAddress.city\"]",
+        "type": "text",
+        "value": "IRVINE"
+      },
+      {
+        "id": "applicant.background.physicalAddress.usAddress.state",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.background.physicalAddress.usAddress.state",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.physicalAddress.usAddress.state\"]",
+        "type": "text",
+        "value": "CALIFORNIA"
+      },
+      {
+        "id": "applicant.background.physicalAddress.usAddress.zipCode",
+        "kind": "text",
+        "label": "ZIP code *",
+        "maxlength": null,
+        "name": "applicant.background.physicalAddress.usAddress.zipCode",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.physicalAddress.usAddress.zipCode\"]",
+        "type": "text",
+        "value": "92603-0214"
+      },
+      {
+        "id": "applicant.background.physicalAddress.phoneNumber",
+        "kind": "text",
+        "label": "Telephone number",
+        "maxlength": null,
+        "name": "applicant.background.physicalAddress.phoneNumber",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.physicalAddress.phoneNumber\"]",
+        "type": "text",
+        "value": "(626) 235-0250"
+      },
+      {
+        "id": "applicant.background.mailingAddress.inCareOfName",
+        "kind": "text",
+        "label": "In care of name (if any)",
+        "maxlength": null,
+        "name": "applicant.background.mailingAddress.inCareOfName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.mailingAddress.inCareOfName\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.background.mailingAddress.usAddress.addressLineOne",
+        "kind": "text",
+        "label": "Address line 1",
+        "maxlength": null,
+        "name": "applicant.background.mailingAddress.usAddress.addressLineOne",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.mailingAddress.usAddress.addressLineOne\"]",
+        "type": "text",
+        "value": "24 VIEW TER"
+      },
+      {
+        "id": "applicant.background.mailingAddress.usAddress.addressLineTwo",
+        "kind": "text",
+        "label": "Address line 2",
+        "maxlength": null,
+        "name": "applicant.background.mailingAddress.usAddress.addressLineTwo",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.mailingAddress.usAddress.addressLineTwo\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.background.mailingAddress.usAddress.city",
+        "kind": "text",
+        "label": "City or town",
+        "maxlength": null,
+        "name": "applicant.background.mailingAddress.usAddress.city",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.mailingAddress.usAddress.city\"]",
+        "type": "text",
+        "value": "IRVINE"
+      },
+      {
+        "id": "applicant.background.mailingAddress.usAddress.state",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.background.mailingAddress.usAddress.state",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.mailingAddress.usAddress.state\"]",
+        "type": "text",
+        "value": "CALIFORNIA"
+      },
+      {
+        "id": "applicant.background.mailingAddress.usAddress.zipCode",
+        "kind": "text",
+        "label": "ZIP code",
+        "maxlength": null,
+        "name": "applicant.background.mailingAddress.usAddress.zipCode",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.mailingAddress.usAddress.zipCode\"]",
+        "type": "text",
+        "value": "92603-0214"
+      },
+      {
+        "id": "applicant.background.mailingAddress.phoneNumber",
+        "kind": "text",
+        "label": "Telephone number",
+        "maxlength": null,
+        "name": "applicant.background.mailingAddress.phoneNumber",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.mailingAddress.phoneNumber\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "kind": "checkbox",
+        "label": "This is the same as my physical address.",
+        "name": "formikFactoryUIMeta.applicant.background.mailingAddress.mailingAddressSameAsPhysicalAddress",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "This is the same as my physical address.",
+            "value": "true"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.background.mailingAddress.mailingAddressSameAsPhysicalAddress\"]"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.background.physicalAddress.usAddress.state",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.physicalAddress.usAddress.state\"]",
+        "value": "CALIFORNIA"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.background.mailingAddress.usAddress.state",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+        "selector": "[name=\"applicant.background.mailingAddress.usAddress.state\"]",
+        "value": "CALIFORNIA"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your contact information",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/about-you/your-background/your-background"
+  },
+  {
+    "fieldCount": 6,
+    "fields": [
+      {
+        "id": "applicant.whenAndWhereYouWereBorn.dateOfBirth",
+        "kind": "text",
+        "label": "What is your date of birth?: 12/28/1982",
+        "maxlength": null,
+        "name": "applicant.whenAndWhereYouWereBorn.dateOfBirth",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - When and where you were born",
+        "selector": "[name=\"applicant.whenAndWhereYouWereBorn.dateOfBirth\"]",
+        "type": "text",
+        "value": "12/28/1982"
+      },
+      {
+        "id": "applicant.whenAndWhereYouWereBorn.cityOfBirth",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.whenAndWhereYouWereBorn.cityOfBirth",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - When and where you were born",
+        "selector": "[name=\"applicant.whenAndWhereYouWereBorn.cityOfBirth\"]",
+        "type": "text",
+        "value": "Guiyang"
+      },
+      {
+        "id": "applicant.whenAndWhereYouWereBorn.countryOfBirth",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.whenAndWhereYouWereBorn.countryOfBirth",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - When and where you were born",
+        "selector": "[name=\"applicant.whenAndWhereYouWereBorn.countryOfBirth\"]",
+        "type": "text",
+        "value": "China"
+      },
+      {
+        "id": "applicant.whenAndWhereYouWereBorn.birthNationality",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.whenAndWhereYouWereBorn.birthNationality",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - When and where you were born",
+        "selector": "[name=\"applicant.whenAndWhereYouWereBorn.birthNationality\"]",
+        "type": "text",
+        "value": "China"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.whenAndWhereYouWereBorn.countryOfBirth",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - When and where you were born",
+        "selector": "[name=\"applicant.whenAndWhereYouWereBorn.countryOfBirth\"]",
+        "value": "China"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.whenAndWhereYouWereBorn.birthNationality",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - When and where you were born",
+        "selector": "[name=\"applicant.whenAndWhereYouWereBorn.birthNationality\"]",
+        "value": "China"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - When and where you were born",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/about-you/when-and-where-you-were-born"
+  },
+  {
+    "fieldCount": 8,
+    "fields": [
+      {
+        "id": "applicant.background2.race",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.background2.race",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Describe yourself",
+        "selector": "[name=\"applicant.background2.race\"]",
+        "type": "text",
+        "value": "Han"
+      },
+      {
+        "id": "applicant.background2.religion",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.background2.religion",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Describe yourself",
+        "selector": "[name=\"applicant.background2.religion\"]",
+        "type": "text",
+        "value": "None"
+      },
+      {
+        "id": "applicant.background2.nativeLanguage",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.background2.nativeLanguage",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Describe yourself",
+        "selector": "[name=\"applicant.background2.nativeLanguage\"]",
+        "type": "text",
+        "value": "MANDARIN"
+      },
+      {
+        "id": "applicant.background2.otherLanguages.0",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.background2.otherLanguages.0",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Describe yourself",
+        "selector": "[name=\"applicant.background2.otherLanguages.0\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "kind": "radio",
+        "label": "Male",
+        "name": "applicant.background2.gender",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Male",
+            "value": "male"
+          },
+          {
+            "checked": true,
+            "optionLabel": "Female",
+            "value": "female"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Describe yourself",
+        "selector": "[name=\"applicant.background2.gender\"]"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "applicant.background2.fluentEnglish",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Describe yourself",
+        "selector": "[name=\"applicant.background2.fluentEnglish\"]"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.background2.nativeLanguage",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Describe yourself",
+        "selector": "[name=\"applicant.background2.nativeLanguage\"]",
+        "value": "MANDARIN"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.background2.otherLanguages.0",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Describe yourself",
+        "selector": "[name=\"applicant.background2.otherLanguages.0\"]",
+        "value": ""
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Describe yourself",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/about-you/describe-yourself/your-background-page-2"
+  },
+  {
+    "fieldCount": 0,
+    "fields": [],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/about-you/your-residence-history/your-residence-history"
+  },
+  {
+    "fieldCount": 16,
+    "fields": [
+      {
+        "id": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.country",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.country",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.country\"]",
+        "type": "text",
+        "value": "China"
+      },
+      {
+        "id": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.addressLineOne",
+        "kind": "text",
+        "label": "Address line 1",
+        "maxlength": null,
+        "name": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.addressLineOne",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.addressLineOne\"]",
+        "type": "text",
+        "value": "62 Nanmingquqingyun Rd"
+      },
+      {
+        "id": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.addressLineTwo",
+        "kind": "text",
+        "label": "Address line 2",
+        "maxlength": null,
+        "name": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.addressLineTwo",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.addressLineTwo\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.city",
+        "kind": "text",
+        "label": "City or town",
+        "maxlength": null,
+        "name": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.city",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.city\"]",
+        "type": "text",
+        "value": "Guiyang"
+      },
+      {
+        "id": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.province",
+        "kind": "text",
+        "label": "Province",
+        "maxlength": null,
+        "name": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.province",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.province\"]",
+        "type": "text",
+        "value": "Guizhou"
+      },
+      {
+        "id": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.postalCode",
+        "kind": "text",
+        "label": "Postal code",
+        "maxlength": null,
+        "name": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.postalCode",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.postalCode\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.residenceHistory.residenceHistory1.dates.fromDate.month",
+        "kind": "text",
+        "label": "Month",
+        "maxlength": null,
+        "name": "applicant.residenceHistory.residenceHistory1.dates.fromDate.month",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.dates.fromDate.month\"]",
+        "type": "text",
+        "value": "December"
+      },
+      {
+        "id": "applicant.residenceHistory.residenceHistory1.dates.fromDate.year",
+        "kind": "text",
+        "label": "Year",
+        "maxlength": null,
+        "name": "applicant.residenceHistory.residenceHistory1.dates.fromDate.year",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.dates.fromDate.year\"]",
+        "type": "text",
+        "value": "2018"
+      },
+      {
+        "id": "applicant.residenceHistory.residenceHistory1.dates.toDate.month",
+        "kind": "text",
+        "label": "Month",
+        "maxlength": null,
+        "name": "applicant.residenceHistory.residenceHistory1.dates.toDate.month",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.dates.toDate.month\"]",
+        "type": "text",
+        "value": "February"
+      },
+      {
+        "id": "applicant.residenceHistory.residenceHistory1.dates.toDate.year",
+        "kind": "text",
+        "label": "Year",
+        "maxlength": null,
+        "name": "applicant.residenceHistory.residenceHistory1.dates.toDate.year",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.dates.toDate.year\"]",
+        "type": "text",
+        "value": "2026"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "formikFactoryUIMeta.applicant.residenceHistory.residenceHistory1.isFromCountryWhereFearedPersecution",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.residenceHistory.residenceHistory1.isFromCountryWhereFearedPersecution\"]"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.country",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.country\"]",
+        "value": "China"
+      },
+      {
+        "kind": "combobox",
+        "label": "Month",
+        "name": "applicant.residenceHistory.residenceHistory1.dates.fromDate.month",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.dates.fromDate.month\"]",
+        "value": "December"
+      },
+      {
+        "kind": "combobox",
+        "label": "Year",
+        "name": "applicant.residenceHistory.residenceHistory1.dates.fromDate.year",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.dates.fromDate.year\"]",
+        "value": "2018"
+      },
+      {
+        "kind": "combobox",
+        "label": "Month",
+        "name": "applicant.residenceHistory.residenceHistory1.dates.toDate.month",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.dates.toDate.month\"]",
+        "value": "February"
+      },
+      {
+        "kind": "combobox",
+        "label": "Year",
+        "name": "applicant.residenceHistory.residenceHistory1.dates.toDate.year",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+        "selector": "[name=\"applicant.residenceHistory.residenceHistory1.dates.toDate.year\"]",
+        "value": "2026"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Where you have lived page 2",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/about-you/your-residence-history/your-residence-history-page-2"
+  },
+  {
+    "fieldCount": 0,
+    "fields": [],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your school history",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/about-you/your-school-history"
+  },
+  {
+    "fieldCount": 0,
+    "fields": [],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your employment history",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/about-you/employment-history"
+  },
+  {
+    "fieldCount": 12,
+    "fields": [
+      {
+        "id": "applicant.immigrationInformation.immigrationInformation1.presentNationality",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.immigrationInformation.immigrationInformation1.presentNationality",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation1.presentNationality\"]",
+        "type": "text",
+        "value": "China"
+      },
+      {
+        "id": "applicant.immigrationInformation.immigrationInformation1.dateOfLastDeparture",
+        "kind": "text",
+        "label": "When did you last leave your country?: 02/19/2026",
+        "maxlength": null,
+        "name": "applicant.immigrationInformation.immigrationInformation1.dateOfLastDeparture",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation1.dateOfLastDeparture\"]",
+        "type": "text",
+        "value": "02/19/2026"
+      },
+      {
+        "id": "applicant.immigrationInformation.immigrationInformation1.i94Number",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.immigrationInformation.immigrationInformation1.i94Number",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation1.i94Number\"]",
+        "type": "text",
+        "value": "948858855A4"
+      },
+      {
+        "id": "applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateOfEntry",
+        "kind": "text",
+        "label": "Date of last entry",
+        "maxlength": null,
+        "name": "applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateOfEntry",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateOfEntry\"]",
+        "type": "text",
+        "value": "02/19/2026"
+      },
+      {
+        "id": "applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.placeOfEntry.referenceSelectOption",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.placeOfEntry.referenceSelectOption",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.placeOfEntry.referenceSelectOption\"]",
+        "type": "text",
+        "value": "LOS ANGELES CA"
+      },
+      {
+        "id": "applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.status",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.status",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.status\"]",
+        "type": "text",
+        "value": "B2 - VISITOR FOR PLEASURE"
+      },
+      {
+        "id": "applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateStatusExpires",
+        "kind": "text",
+        "label": "Date this status expires",
+        "maxlength": null,
+        "name": "applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateStatusExpires",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateStatusExpires\"]",
+        "type": "text",
+        "value": "08/18/2026"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation1.hasPassportOrTravelDocument",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation1.hasPassportOrTravelDocument\"]"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation1.otherEntries",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation1.otherEntries\"]"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.immigrationInformation.immigrationInformation1.presentNationality",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation1.presentNationality\"]",
+        "value": "China"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.placeOfEntry.referenceSelectOption",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.placeOfEntry.referenceSelectOption\"]",
+        "value": "LOS ANGELES CA"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.status",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.status\"]",
+        "value": "B2 - VISITOR FOR PLEASURE"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your immigration information",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/about-you/immigration-information/immigration-information"
+  },
+  {
+    "fieldCount": 7,
+    "fields": [
+      {
+        "id": "applicant.immigrationInformation.immigrationInformation2.alienNumber.number",
+        "kind": "text",
+        "label": "What is your A-Number, if any? Enter with the first numeric character of your A-Number.",
+        "maxlength": null,
+        "name": "applicant.immigrationInformation.immigrationInformation2.alienNumber.number",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Other information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation2.alienNumber.number\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.immigrationInformation.immigrationInformation2.socialSecurityNumber.number",
+        "kind": "text",
+        "label": "What is your U.S. Social Security number, if any?",
+        "maxlength": null,
+        "name": "applicant.immigrationInformation.immigrationInformation2.socialSecurityNumber.number",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Other information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation2.socialSecurityNumber.number\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.immigrationInformation.immigrationInformation2.uscisNumber.number",
+        "kind": "text",
+        "label": "What is your USCIS Online Account Number, if any?",
+        "maxlength": null,
+        "name": "applicant.immigrationInformation.immigrationInformation2.uscisNumber.number",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Other information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation2.uscisNumber.number\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "kind": "radio",
+        "label": "I have  been in immigration court proceedings.",
+        "name": "applicant.immigrationInformation.immigrationInformation2.immigrationCourtProceedings",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "I have  been in immigration court proceedings.",
+            "value": "never"
+          },
+          {
+            "checked": false,
+            "optionLabel": "I am now in immigration court proceedings.",
+            "value": "current"
+          },
+          {
+            "checked": false,
+            "optionLabel": "I am not in immigration court proceedings now, but I have been in the past.",
+            "value": "previous"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Other information",
+        "selector": "[name=\"applicant.immigrationInformation.immigrationInformation2.immigrationCourtProceedings\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "I do not have or know my A-Number.",
+        "name": "formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation2.alienNumber.none",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "I do not have or know my A-Number.",
+            "value": "true"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Other information",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation2.alienNumber.none\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "I do not have or know my U.S. Social Security number.",
+        "name": "formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation2.socialSecurityNumber.none",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "I do not have or know my U.S. Social Security number.",
+            "value": "true"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Other information",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation2.socialSecurityNumber.none\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "I do not have or know my USCIS Online Account Number.",
+        "name": "formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation2.uscisNumber.none",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "I do not have or know my USCIS Online Account Number.",
+            "value": "true"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Other information",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation2.uscisNumber.none\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Other information",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/about-you/immigration-information-page-2/immigration-information-page-2"
+  },
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Single",
+        "name": "applicant.maritalStatus.maritalStatus",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Single",
+            "value": "single"
+          },
+          {
+            "checked": false,
+            "optionLabel": "Married",
+            "value": "married"
+          },
+          {
+            "checked": true,
+            "optionLabel": "Divorced",
+            "value": "divorced"
+          },
+          {
+            "checked": false,
+            "optionLabel": "Widowed",
+            "value": "widowed"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Marital status",
+        "selector": "[name=\"applicant.maritalStatus.maritalStatus\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Marital status",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/your-marital-status"
+  },
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "applicant.children.doYouHaveChildren",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your children",
+        "selector": "[name=\"applicant.children.doYouHaveChildren\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your children",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/your-children/your-children"
+  },
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "id": "applicant.childrenDetails.numberOfChildren",
+        "kind": "text",
+        "label": "Number of children *",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.numberOfChildren",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.numberOfChildren\"]",
+        "type": "text",
+        "value": "1"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/children-information/children-information",
+    "branch": {
+      "source": "doYouHaveChildren",
+      "selected": "true",
+      "note": "original branch"
+    }
+  },
+  {
+    "fieldCount": 8,
+    "fields": [
+      {
+        "id": "applicant.mother.name.firstName",
+        "kind": "text",
+        "label": "Given name (first name)",
+        "maxlength": null,
+        "name": "applicant.mother.name.firstName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents",
+        "selector": "[name=\"applicant.mother.name.firstName\"]",
+        "type": "text",
+        "value": "Zongping"
+      },
+      {
+        "id": "applicant.mother.name.middleName",
+        "kind": "text",
+        "label": "Middle name (if applicable)",
+        "maxlength": null,
+        "name": "applicant.mother.name.middleName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents",
+        "selector": "[name=\"applicant.mother.name.middleName\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.mother.name.lastName",
+        "kind": "text",
+        "label": "Family name (last name)",
+        "maxlength": null,
+        "name": "applicant.mother.name.lastName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents",
+        "selector": "[name=\"applicant.mother.name.lastName\"]",
+        "type": "text",
+        "value": "Tu"
+      },
+      {
+        "id": "applicant.mother.placeOfBirth",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.mother.placeOfBirth",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents",
+        "selector": "[name=\"applicant.mother.placeOfBirth\"]",
+        "type": "text",
+        "value": "Guiyang"
+      },
+      {
+        "id": "applicant.mother.countryOfBirth",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.mother.countryOfBirth",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents",
+        "selector": "[name=\"applicant.mother.countryOfBirth\"]",
+        "type": "text",
+        "value": "China"
+      },
+      {
+        "id": "applicant.mother.currentLocation",
+        "kind": "text",
+        "label": "Where is your mother currently located?",
+        "maxlength": null,
+        "name": "applicant.mother.currentLocation",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents",
+        "selector": "[name=\"applicant.mother.currentLocation\"]",
+        "type": "text",
+        "value": "Guiyang, China"
+      },
+      {
+        "kind": "checkbox",
+        "label": "My mother is deceased.",
+        "name": "applicant.mother.noCurrentLocation",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "My mother is deceased.",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents",
+        "selector": "[name=\"applicant.mother.noCurrentLocation\"]"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.mother.countryOfBirth",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents",
+        "selector": "[name=\"applicant.mother.countryOfBirth\"]",
+        "value": "China"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/your-parents/your-mother"
+  },
+  {
+    "fieldCount": 8,
+    "fields": [
+      {
+        "id": "applicant.father.name.firstName",
+        "kind": "text",
+        "label": "Given name (first name)",
+        "maxlength": null,
+        "name": "applicant.father.name.firstName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents page 2",
+        "selector": "[name=\"applicant.father.name.firstName\"]",
+        "type": "text",
+        "value": "Xingcheng"
+      },
+      {
+        "id": "applicant.father.name.middleName",
+        "kind": "text",
+        "label": "Middle name (if applicable)",
+        "maxlength": null,
+        "name": "applicant.father.name.middleName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents page 2",
+        "selector": "[name=\"applicant.father.name.middleName\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.father.name.lastName",
+        "kind": "text",
+        "label": "Family name (last name)",
+        "maxlength": null,
+        "name": "applicant.father.name.lastName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents page 2",
+        "selector": "[name=\"applicant.father.name.lastName\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.father.placeOfBirth",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.father.placeOfBirth",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents page 2",
+        "selector": "[name=\"applicant.father.placeOfBirth\"]",
+        "type": "text",
+        "value": "Guiyang"
+      },
+      {
+        "id": "applicant.father.countryOfBirth",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.father.countryOfBirth",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents page 2",
+        "selector": "[name=\"applicant.father.countryOfBirth\"]",
+        "type": "text",
+        "value": "China"
+      },
+      {
+        "id": "applicant.father.currentLocation",
+        "kind": "text",
+        "label": "Where is your father currently located?",
+        "maxlength": null,
+        "name": "applicant.father.currentLocation",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents page 2",
+        "selector": "[name=\"applicant.father.currentLocation\"]",
+        "type": "text",
+        "value": "Guiyang, China"
+      },
+      {
+        "kind": "checkbox",
+        "label": "My father is deceased.",
+        "name": "applicant.father.noCurrentLocation",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "My father is deceased.",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents page 2",
+        "selector": "[name=\"applicant.father.noCurrentLocation\"]"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.father.countryOfBirth",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents page 2",
+        "selector": "[name=\"applicant.father.countryOfBirth\"]",
+        "value": "China"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your parents page 2",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/your-parents/your-father"
+  },
+  {
+    "fieldCount": 0,
+    "fields": [],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your siblings",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/your-siblings"
+  },
+  {
+    "fieldCount": 13,
+    "fields": [
+      {
+        "id": "eligibility.reasonForAsylum.experiencedMistreatment.additionalExplanation",
+        "kind": "textarea",
+        "label": "Explain in detail (1) what happened; (2) when the harm or mistreatment of threats occurred; (3) who caused the harm or mistreatment or threats; and (4) why you believe the harm or mistreatment or threats occurred.",
+        "maxlength": 4000,
+        "name": "eligibility.reasonForAsylum.experiencedMistreatment.additionalExplanation",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"eligibility.reasonForAsylum.experiencedMistreatment.additionalExplanation\"]",
+        "type": "textarea",
+        "value": "Please refer to my statement."
+      },
+      {
+        "id": "eligibility.reasonForAsylum.fearMistreatment.additionalExplanation",
+        "kind": "textarea",
+        "label": "Explain in detail  of (1) what harm or mistreatment you fear; (2) who you believe would harm or mistreat you; and (3) why you believe you would or could be harmed or mistreated.",
+        "maxlength": 4000,
+        "name": "eligibility.reasonForAsylum.fearMistreatment.additionalExplanation",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"eligibility.reasonForAsylum.fearMistreatment.additionalExplanation\"]",
+        "type": "textarea",
+        "value": "Please refer to my statement."
+      },
+      {
+        "id": "eligibility.reasonForAsylum.afraidOfTorture.additionalExplanation",
+        "kind": "textarea",
+        "label": "Explain why you are afraid and describe the nature of the torture you fear, by whom, and why it would be inflicted.",
+        "maxlength": 4000,
+        "name": "eligibility.reasonForAsylum.afraidOfTorture.additionalExplanation",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"eligibility.reasonForAsylum.afraidOfTorture.additionalExplanation\"]",
+        "type": "textarea",
+        "value": "Please refer to my statement."
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.reasonForAsylum.conventionAgainstTorture",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"eligibility.reasonForAsylum.conventionAgainstTorture\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "Race",
+        "name": "race",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Race",
+            "value": "on"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"race\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "Political opini",
+        "name": "politicalOpinion",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Political opini",
+            "value": "on"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"politicalOpinion\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "Religi",
+        "name": "religion",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Religi",
+            "value": "on"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"religion\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "Membership in a particular social group",
+        "name": "membershipSocialGroup",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Membership in a particular social group",
+            "value": "on"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"membershipSocialGroup\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "Natiality",
+        "name": "nationality",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Natiality",
+            "value": "on"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"nationality\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "Torture Cvention",
+        "name": "tortureConvention",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Torture Cvention",
+            "value": "on"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"tortureConvention\"]"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.reasonForAsylum.experiencedMistreatment.question",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"eligibility.reasonForAsylum.experiencedMistreatment.question\"]"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.reasonForAsylum.fearMistreatment.question",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"eligibility.reasonForAsylum.fearMistreatment.question\"]"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.reasonForAsylum.afraidOfTorture.question",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+        "selector": "[name=\"eligibility.reasonForAsylum.afraidOfTorture.question\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Reason for asylum or withholding of removal",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/basis-of-eligibility/reason-for-asylum-withholding-removal"
+  },
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.associationGroups.haveYouOrFamilyMemberAssociatedToGroups.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Party or group affiliations",
+        "selector": "[name=\"eligibility.associationGroups.haveYouOrFamilyMemberAssociatedToGroups.question\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Party or group affiliations",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/basis-of-eligibility/association-groups"
+  },
+  {
+    "fieldCount": 3,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.additionalInformationForEligibility.yourOrFamilyCriminalHistory.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Crimes and offenses",
+        "selector": "[name=\"eligibility.additionalInformationForEligibility.yourOrFamilyCriminalHistory.question\"]"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.additionalInformationForEligibility.yourOrFamilyCriminalHistoryInUs.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Crimes and offenses",
+        "selector": "[name=\"eligibility.additionalInformationForEligibility.yourOrFamilyCriminalHistoryInUs.question\"]"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.additionalInformationForEligibility.yourOrFamilyCauseSufferOrHarm.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Crimes and offenses",
+        "selector": "[name=\"eligibility.additionalInformationForEligibility.yourOrFamilyCauseSufferOrHarm.question\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Crimes and offenses",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/basis-of-eligibility/additional-information-for-eligibility"
+  },
+  {
+    "fieldCount": 5,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.applicationHistory.previousAsylumApplication.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Application history",
+        "selector": "[name=\"eligibility.applicationHistory.previousAsylumApplication.question\"]"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.applicationHistory.filingOneYearAfterLastArrival.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Application history",
+        "selector": "[name=\"eligibility.applicationHistory.filingOneYearAfterLastArrival.question\"]"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.applicationHistory.travelThroughOtherCountries.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Application history",
+        "selector": "[name=\"eligibility.applicationHistory.travelThroughOtherCountries.question\"]"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.applicationHistory.lawfulStatusInOtherCountry.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Application history",
+        "selector": "[name=\"eligibility.applicationHistory.lawfulStatusInOtherCountry.question\"]"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "eligibility.applicationHistory.returnToHomeCountry.question",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Application history",
+        "selector": "[name=\"eligibility.applicationHistory.returnToHomeCountry.question\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Application history",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/basis-of-eligibility/application-history"
+  },
+  {
+    "fieldCount": 0,
+    "fields": [],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Cover letter",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/evidence/evidence-cover-letter"
+  },
+  {
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Written statement",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/evidence/evidence-written-statement",
+    "fieldCount": 2,
+    "fields": [
+      {
+        "id": "evidence.writtenStatement.0.documentType",
+        "kind": "text",
+        "label": "Select a document type",
+        "maxlength": null,
+        "name": "evidence.writtenStatement.0.documentType",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Written statement",
+        "selector": "[name=\"evidence.writtenStatement.0.documentType\"]",
+        "type": "text",
+        "value": "English translation certificate"
+      },
+      {
+        "kind": "combobox",
+        "label": "Select a document type",
+        "name": "evidence.writtenStatement.0.documentType",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Written statement",
+        "selector": "[name=\"evidence.writtenStatement.0.documentType\"]",
+        "value": "English translation certificate"
+      }
+    ]
+  },
+  {
+    "fieldCount": 4,
+    "fields": [
+      {
+        "id": "applicant.spouse.spouse1.name.firstName",
+        "kind": "text",
+        "label": "Given name (first name)",
+        "maxlength": null,
+        "name": "applicant.spouse.spouse1.name.firstName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse",
+        "selector": "[name=\"applicant.spouse.spouse1.name.firstName\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.spouse.spouse1.name.middleName",
+        "kind": "text",
+        "label": "Middle name",
+        "maxlength": null,
+        "name": "applicant.spouse.spouse1.name.middleName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse",
+        "selector": "[name=\"applicant.spouse.spouse1.name.middleName\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.spouse.spouse1.name.lastName",
+        "kind": "text",
+        "label": "Family name (last name) *",
+        "maxlength": null,
+        "name": "applicant.spouse.spouse1.name.lastName",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse",
+        "selector": "[name=\"applicant.spouse.spouse1.name.lastName\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "formikFactoryUIMeta.applicant.spouse.spouse1.hasAdditionalNames",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.spouse.spouse1.hasAdditionalNames\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/your-spouse/your-spouse",
+    "branch": {
+      "source": "maritalStatus",
+      "selected": "married",
+      "note": "conditional branch; original value was divorced"
+    }
+  },
+  {
+    "fieldCount": 14,
+    "fields": [
+      {
+        "id": "applicant.spouse.spouse2.race",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.spouse.spouse2.race",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"applicant.spouse.spouse2.race\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.spouse.spouse2.dateOfBirth",
+        "kind": "text",
+        "label": "What is your spouse's date of birth?: MM/DD/YYYY",
+        "maxlength": null,
+        "name": "applicant.spouse.spouse2.dateOfBirth",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"applicant.spouse.spouse2.dateOfBirth\"]",
+        "type": "text",
+        "value": "MM/DD/YYYY"
+      },
+      {
+        "id": "applicant.spouse.spouse2.cityOfBirth",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.spouse.spouse2.cityOfBirth",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"applicant.spouse.spouse2.cityOfBirth\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.spouse.spouse2.countryOfBirth",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.spouse.spouse2.countryOfBirth",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"applicant.spouse.spouse2.countryOfBirth\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.spouse.spouse2.presentNationality",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.spouse.spouse2.presentNationality",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"applicant.spouse.spouse2.presentNationality\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.spouse.spouse2.alienNumber.number",
+        "kind": "text",
+        "label": "What is your spouse's A-Number, if any? Enter with the first numeric character of their A-Number.",
+        "maxlength": null,
+        "name": "applicant.spouse.spouse2.alienNumber.number",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"applicant.spouse.spouse2.alienNumber.number\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.spouse.spouse2.passportNumber.number",
+        "kind": "text",
+        "label": "What is your spouse's passport number or ID card number, if any?",
+        "maxlength": null,
+        "name": "applicant.spouse.spouse2.passportNumber.number",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"applicant.spouse.spouse2.passportNumber.number\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.spouse.spouse2.socialSecurityNumber.number",
+        "kind": "text",
+        "label": "What is your spouse's U.S. Social Security number, if any?",
+        "maxlength": null,
+        "name": "applicant.spouse.spouse2.socialSecurityNumber.number",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"applicant.spouse.spouse2.socialSecurityNumber.number\"]",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "kind": "radio",
+        "label": "Male",
+        "name": "applicant.spouse.spouse2.gender",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Male",
+            "value": "male"
+          },
+          {
+            "checked": false,
+            "optionLabel": "Female",
+            "value": "female"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"applicant.spouse.spouse2.gender\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "My spouse does not have or know their A-Number.",
+        "name": "formikFactoryUIMeta.applicant.spouse.spouse2.alienNumber.none",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "My spouse does not have or know their A-Number.",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.spouse.spouse2.alienNumber.none\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "My spouse does not have a passport number or ID card number.",
+        "name": "formikFactoryUIMeta.applicant.spouse.spouse2.passportNumber.none",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "My spouse does not have a passport number or ID card number.",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.spouse.spouse2.passportNumber.none\"]"
+      },
+      {
+        "kind": "checkbox",
+        "label": "My spouse does not have a U.S. Social Security number.",
+        "name": "formikFactoryUIMeta.applicant.spouse.spouse2.socialSecurityNumber.none",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "My spouse does not have a U.S. Social Security number.",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.spouse.spouse2.socialSecurityNumber.none\"]"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.spouse.spouse2.countryOfBirth",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"applicant.spouse.spouse2.countryOfBirth\"]",
+        "value": ""
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.spouse.spouse2.presentNationality",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+        "selector": "[name=\"applicant.spouse.spouse2.presentNationality\"]",
+        "value": ""
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 2",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/your-spouse/your-spouse-page-2",
+    "branch": {
+      "source": "maritalStatus",
+      "selected": "married",
+      "note": "conditional branch; original value was divorced"
+    }
+  },
+  {
+    "fieldCount": 1,
+    "fields": [
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "applicant.spouse.spouse3.isYourSpouseInUs",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": false,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 3",
+        "selector": "[name=\"applicant.spouse.spouse3.isYourSpouseInUs\"]"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Your spouse page 3",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/your-spouse/your-spouse-page-3",
+    "branch": {
+      "source": "maritalStatus",
+      "selected": "married",
+      "note": "conditional branch; original value was divorced"
+    }
+  },
+  {
+    "fieldCount": 3,
+    "fields": [
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation1.name.firstName",
+        "kind": "text",
+        "label": "Given name (first name)",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation1.name.firstName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation1.name.firstName\"]",
+        "subSection": "Add child | What is your child's full name?",
+        "type": "text",
+        "value": "Hanyu"
+      },
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation1.name.middleName",
+        "kind": "text",
+        "label": "Middle name",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation1.name.middleName",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation1.name.middleName\"]",
+        "subSection": "Add child | What is your child's full name?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation1.name.lastName",
+        "kind": "text",
+        "label": "Family name (last name) *",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation1.name.lastName",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation1.name.lastName\"]",
+        "subSection": "Add child | What is your child's full name?",
+        "type": "text",
+        "value": "Shi"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+    "subSection": "Add child | What is your child's full name?",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/children-information/children-information",
+    "branch": {
+      "source": "doYouHaveChildren",
+      "selected": "true",
+      "note": "child detail page 1; opened existing child and will cancel after sampling"
+    }
+  },
+  {
+    "fieldCount": 15,
+    "fields": [
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.race",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.race",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.race\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?",
+        "type": "text",
+        "value": "Han"
+      },
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.dateOfBirth",
+        "kind": "text",
+        "label": "What is your child's date of birth?: 10/22/2017",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.dateOfBirth",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.dateOfBirth\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?",
+        "type": "text",
+        "value": "10/22/2017"
+      },
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.birthCityOrTownOrVillage",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.birthCityOrTownOrVillage",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.birthCityOrTownOrVillage\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?",
+        "type": "text",
+        "value": "Guiyang"
+      },
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfBirth",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfBirth",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfBirth\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?",
+        "type": "text",
+        "value": "China"
+      },
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfCitizenship",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfCitizenship",
+        "required": true,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfCitizenship\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?",
+        "type": "text",
+        "value": "China"
+      },
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.alienNumber.number",
+        "kind": "text",
+        "label": "What is your child's A-number, if any? Enter with the first numeric character of their A-Number.",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.alienNumber.number",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.alienNumber.number\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.passportNumber.number",
+        "kind": "text",
+        "label": "What is your child's passport number or ID card number, if any?",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.passportNumber.number",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.passportNumber.number\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.socialSecurityNumber.number",
+        "kind": "text",
+        "label": "What is your child's U.S. Social Security number, if any?",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.socialSecurityNumber.number",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.socialSecurityNumber.number\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "kind": "radio",
+        "label": "Male",
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.gender",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Male",
+            "value": "male"
+          },
+          {
+            "checked": true,
+            "optionLabel": "Female",
+            "value": "female"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.gender\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?"
+      },
+      {
+        "kind": "radio",
+        "label": "Single",
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.maritalStatus",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "Single",
+            "value": "single"
+          },
+          {
+            "checked": false,
+            "optionLabel": "Married",
+            "value": "married"
+          },
+          {
+            "checked": false,
+            "optionLabel": "Divorced",
+            "value": "divorced"
+          },
+          {
+            "checked": false,
+            "optionLabel": "Widowed",
+            "value": "widowed"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.maritalStatus\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?"
+      },
+      {
+        "kind": "checkbox",
+        "label": "My child does not have or know their A-Number.",
+        "name": "formikFactoryUIMeta.applicant.childrenDetails.childrenInformation.0.childrenInformation2.alienNumber.none",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "My child does not have or know their A-Number.",
+            "value": "true"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.childrenDetails.childrenInformation.0.childrenInformation2.alienNumber.none\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?"
+      },
+      {
+        "kind": "checkbox",
+        "label": "My child does not have a passport number or ID card number.",
+        "name": "formikFactoryUIMeta.applicant.childrenDetails.childrenInformation.0.childrenInformation2.passportNumber.none",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "My child does not have a passport number or ID card number.",
+            "value": "true"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.childrenDetails.childrenInformation.0.childrenInformation2.passportNumber.none\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?"
+      },
+      {
+        "kind": "checkbox",
+        "label": "My child does not have a U.S. Social Security Number.",
+        "name": "formikFactoryUIMeta.applicant.childrenDetails.childrenInformation.0.childrenInformation2.socialSecurityNumber.none",
+        "options": [
+          {
+            "checked": true,
+            "optionLabel": "My child does not have a U.S. Social Security Number.",
+            "value": "true"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"formikFactoryUIMeta.applicant.childrenDetails.childrenInformation.0.childrenInformation2.socialSecurityNumber.none\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfBirth",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfBirth\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?",
+        "value": "China"
+      },
+      {
+        "kind": "combobox",
+        "label": "",
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfCitizenship",
+        "note": "React 下拉:选项是虚拟滚动渲染的,需展开后滚动收集,此处未导出选项",
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfCitizenship\"]",
+        "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?",
+        "value": "China"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+    "subSection": "Add child | What is your child's sex? | What is your child's race, ethnic, or tribal group? | What is your child's date of birth? * | What is your child's city of birth? | What is your child's country of birth? * | What is your child's country of citizenship or nationality? * | What is your child's current marital status? * | What is your child's A-number, if any? | What is your child's passport number or ID card number, if any? | What is your child's U.S. Social Security number, if any?",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/children-information/children-information",
+    "branch": {
+      "source": "doYouHaveChildren",
+      "selected": "true",
+      "note": "child detail page 2; opened existing child and will cancel after sampling"
+    }
+  },
+  {
+    "fieldCount": 2,
+    "fields": [
+      {
+        "id": "applicant.childrenDetails.childrenInformation.0.childrenInformation3.address",
+        "kind": "text",
+        "label": "",
+        "maxlength": null,
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation3.address",
+        "required": false,
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation3.address\"]",
+        "subSection": "Add child | Is your child in the United States? * | Where is your child currently located?",
+        "type": "text",
+        "value": "Guiyang, China"
+      },
+      {
+        "kind": "radio",
+        "label": "Yes",
+        "name": "applicant.childrenDetails.childrenInformation.0.childrenInformation3.isYourChildInUs",
+        "options": [
+          {
+            "checked": false,
+            "optionLabel": "Yes",
+            "value": "true"
+          },
+          {
+            "checked": true,
+            "optionLabel": "No",
+            "value": "false"
+          }
+        ],
+        "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+        "selector": "[name=\"applicant.childrenDetails.childrenInformation.0.childrenInformation3.isYourChildInUs\"]",
+        "subSection": "Add child | Is your child in the United States? * | Where is your child currently located?"
+      }
+    ],
+    "section": "USCIS - I-589, Application for Asylum and for Withholding of Removal - Children information",
+    "subSection": "Add child | Is your child in the United States? * | Where is your child currently located?",
+    "url": "https://my.uscis.gov/forms/application-for-asylum-withholding-removal/13041577/your-family/children-information/children-information",
+    "branch": {
+      "source": "doYouHaveChildren",
+      "selected": "true",
+      "note": "child detail page 3; opened existing child and will cancel after sampling"
+    }
+  }
+]
