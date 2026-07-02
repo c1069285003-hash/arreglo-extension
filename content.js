@@ -616,6 +616,19 @@ async function fillPage(page, d, opts = {}) {
       break;
     }
 
+    case 'child_0_info': {
+      const c = (d.children||[])[0];
+      if (c) {
+        fill('applicant.childrenDetails.childrenInformation.0.childrenInformation2.dateOfBirth',
+             fmtDate(c.dob || c.dateOfBirth || ''));
+        await auto('applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfBirth',
+             c.countryOfBirth || 'China');
+        const loc = [c.locationCity, c.locationCountry].filter(Boolean).join(', ');
+        if (loc) fill('applicant.childrenDetails.childrenInformation.0.childrenInformation2.presentLocation', loc);
+      }
+      break;
+    }
+
     case 'mother':
       fill('applicant.mother.name.firstName', d.motherFirstName||'');
       fill('applicant.mother.name.lastName',  d.motherLastName||'');
