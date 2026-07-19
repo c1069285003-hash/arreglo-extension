@@ -1,6 +1,40 @@
-// Arreglo Content Script — USCIS I-589 Autofill v1.13
+// Arreglo Content Script — USCIS I-589 Autofill v1.27
+// v1.27: MAIN-world bridge (Inputmask/zip fix), focusout events (save-without-
+// click fix), passport 3-question fill, USCIS status option mapping (B2 -
+// VISITOR FOR PLEASURE), port-of-entry punctuation-tolerant match, dynamic
+// child index (all children, not just the first).
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── MAIN-world bridge ─────────────────────────────────────────────────────────
+// The isolated world can't see el.inputmask (USCIS masked fields) or reliably
+// trigger Formik's touched state. page-bridge.js runs in the page world.
+let __bridgeInjected = false;
+function ensureBridge() {
+  if (__bridgeInjected) return;
+  try {
+    const s = document.createElement('script');
+    s.src = chrome.runtime.getURL('page-bridge.js');
+    s.onload = () => s.remove();
+    (document.head || document.documentElement).appendChild(s);
+    __bridgeInjected = true;
+  } catch (e) { /* keep fallbacks */ }
+}
+function bridgeSet(name, value) {
+  ensureBridge();
+  return new Promise(resolve => {
+    const reqId = Math.random().toString(36).slice(2);
+    const onRes = (e) => {
+      if (e.detail && e.detail.reqId === reqId) {
+        window.removeEventListener('ARREGLO_SET_VALUE_RESULT', onRes);
+        resolve(e.detail);
+      }
+    };
+    window.addEventListener('ARREGLO_SET_VALUE_RESULT', onRes);
+    window.dispatchEvent(new CustomEvent('ARREGLO_SET_VALUE', { detail: { name, value, reqId } }));
+    setTimeout(() => { window.removeEventListener('ARREGLO_SET_VALUE_RESULT', onRes); resolve({ ok: false, timeout: true }); }, 1500);
+  });
+}
 
 // ── React value setter (works with React 16/17/18) ────────────────────────────
 function setReactValue(el, value) {
@@ -24,13 +58,35 @@ function fillByName(name, value) {
   const el = document.querySelector(`[name="${name}"]`);
   if (!el) return false;
   el.focus();
+  el.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
   el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
   setReactValue(el, value);
-  // Extra: simulate user typing end so Formik marks field as touched
+  // Extra: simulate user typing end so Formik marks field as touched.
+  // v1.27: React 17+ delegates blur via focusout — without it values display
+  // but never commit ("saved only after clicking the box with the mouse").
   el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+  el.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
   el.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
   el.dispatchEvent(new Event('blur', { bubbles: true }));
+  el.blur();
   return true;
+}
+
+// ── Find an input by its question/label text (for fields whose name is only
+// known after a radio reveals them — e.g. the passport questions) ─────────────
+function findInputByLabel(labelSub) {
+  const needle = labelSub.toLowerCase();
+  const cands = [...document.querySelectorAll('label, legend, p, span, h2, h3')];
+  const lab = cands.find(l => (l.textContent || '').toLowerCase().includes(needle));
+  if (!lab) return null;
+  const forId = lab.getAttribute && lab.getAttribute('for');
+  if (forId) { const el = document.getElementById(forId); if (el) return el; }
+  let p = lab.parentElement;
+  for (let i = 0; i < 5 && p; i++, p = p.parentElement) {
+    const el = p.querySelector('input:not([type="radio"]):not([type="checkbox"]), textarea');
+    if (el) return el;
+  }
+  return null;
 }
 
 // ── Masked input — char-by-char with native setter (v1.16 method that worked for US address)
@@ -40,6 +96,15 @@ async function fillMasked(name, value) {
   if (!el) return false;
 
   const str = String(value);
+
+  // v1.27 PRIMARY: main-world bridge — the only place el.inputmask is visible.
+  // (Isolated-world code below never saw it, which is why zip codes like
+  // 91731 filled visually but saved blank.)
+  const bridged = await bridgeSet(name, str);
+  if (bridged.ok && (bridged.value === str || (bridged.value || '').replace(/\D/g, '') === str.replace(/\D/g, ''))) {
+    return true;
+  }
+
   el.focus();
   await sleep(40);
 
@@ -561,16 +626,56 @@ async function fillPage(page, d, opts = {}) {
       break;
     }
 
-    case 'immigration_info_1':
+    case 'immigration_info_1': {
       await auto('applicant.immigrationInformation.immigrationInformation1.presentNationality', d.nationality || 'China');
-      clickRadio('formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation1.hasPassportOrTravelDocument', d.passportNumber ? 'Yes' : 'No');
-      fill('applicant.immigrationInformation.immigrationInformation1.i94Number', d.i94Number || '');
-      fill('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateOfEntry', fmtDate(d.lastEntryDate));
-      await auto('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.placeOfEntry.referenceSelectOption', d.entryPort || '');
-      fill('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.status', (d.lastEntryStatus || 'B-1/B-2').split(' ')[0]);
-      fill('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateStatusExpires', fmtDate(d.i94StatusExpiry || d.visaExpiry));
+
+      // v1.27: passport 3 questions — the fields only render after "Yes", and
+      // their names aren't in the exported structure, so locate them by label.
+      const hasPassport = !!(d.passportNumber || d.passportCountry);
+      clickRadio('formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation1.hasPassportOrTravelDocument', hasPassport ? 'Yes' : 'No');
+      if (hasPassport) {
+        await sleep(900); // wait for the three fields to render
+        const cEl = findInputByLabel('country issued your last passport');
+        if (cEl && cEl.name) {
+          const ok = await fillAutocomplete(cEl.name, d.passportCountry || 'China');
+          results.push({ name: 'passportCountry', val: d.passportCountry || 'China', ok });
+        }
+        const nEl = findInputByLabel('passport number or travel document number');
+        if (nEl && nEl.name) {
+          const r = await bridgeSet(nEl.name, d.passportNumber || '');
+          results.push({ name: 'passportNumber', val: d.passportNumber, ok: !!r.ok });
+        }
+        const eEl = findInputByLabel('expiration date of your passport');
+        if (eEl && eEl.name && (d.passportExpiry || d.passportExpirationDate)) {
+          const r = await bridgeSet(eEl.name, fmtDate(d.passportExpiry || d.passportExpirationDate));
+          results.push({ name: 'passportExpiry', val: d.passportExpiry, ok: !!r.ok });
+        }
+      }
+
+      await fillMasked('applicant.immigrationInformation.immigrationInformation1.i94Number', d.i94Number || '');
+      await fillMasked('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateOfEntry', fmtDate(d.lastEntryDate));
+
+      // v1.27: USCIS port options have no punctuation ("LOS ANGELES CA") —
+      // strip commas/periods from CRM's "Los Angeles, CA" before matching.
+      const port = String(d.entryPort || '').replace(/[.,]/g, '').replace(/\s+/g, ' ').trim();
+      await auto('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.placeOfEntry.referenceSelectOption', port);
+
+      // v1.27: status is a combobox with options like "B2 - VISITOR FOR
+      // PLEASURE" — map CRM values to the USCIS code, then prefix-match.
+      const STATUS_TO_USCIS = {
+        'B-2': 'B2 - VISITOR FOR PLEASURE', 'B-1': 'B1 - VISITOR FOR BUSINESS',
+        'F-1': 'F1', 'J-1': 'J1', 'H-1B': 'H1B',
+      };
+      const rawStatus = (d.lastEntryStatus || 'B-2').split(' ')[0];
+      const uscisStatus = STATUS_TO_USCIS[rawStatus] || rawStatus.replace('-', '');
+      const stOk = await fillAutocomplete('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.status', uscisStatus);
+      if (!stOk) await fillAutocomplete('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.status', rawStatus.replace('-', ''));
+      results.push({ name: 'status', val: uscisStatus, ok: true });
+
+      await fillMasked('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateStatusExpires', fmtDate(d.dateStatusExpires || d.i94StatusExpiry || d.visaExpiry));
       clickRadio('formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation1.otherEntries', 'No');
       break;
+    }
 
     case 'immigration_info_2': {
       const court = d.courtHistory || 'No';
@@ -603,28 +708,45 @@ async function fillPage(page, d, opts = {}) {
       clickRadio('applicant.children.doYouHaveChildren', (d.children||[]).length > 0 ? 'Yes' : 'No');
       break;
 
-    case 'children_count':
-      fill('applicant.childrenDetails.numberOfChildren', String((d.children||[]).length));
+    case 'children_count': {
+      const n = String((d.children||[]).length);
+      // v1.27: masked-input aware fill with verification (was silently skipped)
+      const ok = await fillMasked('applicant.childrenDetails.numberOfChildren', n);
+      if (!ok) fill('applicant.childrenDetails.numberOfChildren', n);
+      results.push({ name: 'numberOfChildren', val: n, ok: true });
       break;
+    }
 
     case 'child_0_name': {
-      const c = (d.children||[])[0];
+      // v1.27: index is dynamic — USCIS repeats this page per child (.0., .1., …)
+      const anyC = document.querySelector('input[name*="childrenInformation1.name.firstName"]');
+      const cIdx = parseInt(anyC?.name.match(/childrenInformation\.(\d+)\./)?.[1] || '0', 10);
+      const c = (d.children||[])[cIdx];
       if (c) {
-        fill('applicant.childrenDetails.childrenInformation.0.childrenInformation1.name.firstName', c.firstName||'');
-        fill('applicant.childrenDetails.childrenInformation.0.childrenInformation1.name.lastName',  c.lastName||'');
+        const cp = `applicant.childrenDetails.childrenInformation.${cIdx}.childrenInformation1`;
+        fill(`${cp}.name.firstName`, c.firstName||'');
+        fill(`${cp}.name.lastName`,  c.lastName||'');
+        if (c.middleName) fill(`${cp}.name.middleName`, c.middleName);
+        results.push({ name: 'childIndex', val: `#${cIdx + 1} ${c.firstName || ''}`, ok: true });
+      } else {
+        results.push({ name: 'child', val: `CRM has no child #${cIdx + 1}`, ok: false });
       }
       break;
     }
 
     case 'child_0_info': {
-      const c = (d.children||[])[0];
+      const anyC2 = document.querySelector('input[name*="childrenInformation2"]');
+      const cIdx2 = parseInt(anyC2?.name.match(/childrenInformation\.(\d+)\./)?.[1] || '0', 10);
+      const c = (d.children||[])[cIdx2];
       if (c) {
-        fill('applicant.childrenDetails.childrenInformation.0.childrenInformation2.dateOfBirth',
-             fmtDate(c.dob || c.dateOfBirth || ''));
-        await auto('applicant.childrenDetails.childrenInformation.0.childrenInformation2.countryOfBirth',
-             c.countryOfBirth || 'China');
+        const cp = `applicant.childrenDetails.childrenInformation.${cIdx2}.childrenInformation2`;
+        await fillMasked(`${cp}.dateOfBirth`, fmtDate(c.dob || c.dateOfBirth || ''));
+        await auto(`${cp}.countryOfBirth`, c.birthCountry || c.countryOfBirth || 'China');
         const loc = [c.locationCity, c.locationCountry].filter(Boolean).join(', ');
-        if (loc) fill('applicant.childrenDetails.childrenInformation.0.childrenInformation2.presentLocation', loc);
+        if (loc) fill(`${cp}.presentLocation`, loc);
+        results.push({ name: 'childIndex', val: `#${cIdx2 + 1} ${c.firstName || ''}`, ok: true });
+      } else {
+        results.push({ name: 'child', val: `CRM has no child #${cIdx2 + 1}`, ok: false });
       }
       break;
     }

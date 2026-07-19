@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Arreglo \u2014 \u79fb\u8fbe\u901a\u81ea\u52a8\u586b\u8868",
-  "version": "1.26.0",
+  "version": "1.27.0",
   "description": "Auto-fill USCIS forms from Yidatong Immigration CRM",
   "permissions": [
     "activeTab",
@@ -34,6 +34,12 @@
   "background": {
     "service_worker": "background.js"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["page-bridge.js"],
+      "matches": ["https://my.uscis.gov/*"]
+    }
+  ],
   "icons": {
     "32": "icon32.png"
   }
