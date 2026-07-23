@@ -124,6 +124,47 @@ function setStatus(el, msg, type) {
   el.style.marginTop = '10px';
 }
 
+function renderLoadedClient(caseNum, saved) {
+  document.getElementById('step-login').style.display = 'none';
+  document.getElementById('step-fill').style.display = 'block';
+  document.getElementById('case-number').value = caseNum;
+  document.getElementById('client-card').innerHTML = `
+    <div class="client-card">
+      <div class="client-name">${saved.familyName || ''}, ${saved.givenName || ''}</div>
+      <div class="client-meta">Case: ${caseNum} · DOB: ${saved.dob || '—'}</div>
+      <div class="client-meta">Nationality: ${saved.nationality || saved.countryOfBirth || '—'}</div>
+      <div class="client-meta">Synced: ${new Date().toLocaleTimeString()}</div>
+    </div>
+  `;
+}
+
+async function loadClientFromCloudflare(caseNum, { silent = false } = {}) {
+  if (!caseNum) return null;
+  const res = await fetch(`${WORKER}/case/${encodeURIComponent(caseNum)}`);
+  const json = await res.json();
+
+  if (!json.success || !json.client) {
+    if (!silent) setStatus(document.getElementById('load-status'), `❌ Case ${caseNum} not found`, 'err');
+    return null;
+  }
+
+  const client = json.client;
+  const saved = client.infoFormData;
+
+  if (!saved || (!saved.familyName && !saved.givenName)) {
+    if (!silent) setStatus(document.getElementById('load-status'), '⚠️ English info sheet not saved yet. Open CRM → Info Form → Save.', 'warn');
+    return null;
+  }
+
+  clientData = saved;
+  selectedAddressIndex = 0;
+  await chrome.storage.local.set({ arreglo_data: saved, arreglo_case: caseNum, arreglo_synced_at: new Date().toISOString() });
+  renderLoadedClient(caseNum, saved);
+  renderAddressSelector(currentPage);
+  renderFieldPreview(currentPage);
+  return saved;
+}
+
 async function getUscisTab() {
   const tabs = await chrome.tabs.query({ url: 'https://my.uscis.gov/*' });
   return tabs[0] || null;
@@ -402,40 +443,12 @@ document.getElementById('btn-load').addEventListener('click', async () => {
   setStatus(statusEl, 'Fetching from Cloudflare...', 'info');
 
   try {
-    const res = await fetch(`${WORKER}/case/${caseNum}`);
-    const json = await res.json();
-
-    if (!json.success || !json.client) {
-      setStatus(statusEl, `❌ Case ${caseNum} not found`, 'err');
+    const saved = await loadClientFromCloudflare(caseNum);
+    if (!saved) {
       btn.disabled = false;
       btn.textContent = 'Load Client 加载客户';
       return;
     }
-
-    const client = json.client;
-    const saved = client.infoFormData;
-
-    if (!saved || (!saved.familyName && !saved.givenName)) {
-      setStatus(statusEl, '⚠️ English info sheet not saved yet. Open CRM → Info Form → Save.', 'warn');
-      btn.disabled = false;
-      btn.textContent = 'Load Client 加载客户';
-      return;
-    }
-
-    clientData = saved;
-    selectedAddressIndex = 0;
-    await chrome.storage.local.set({ arreglo_data: saved, arreglo_case: caseNum });
-
-    document.getElementById('step-login').style.display = 'none';
-    document.getElementById('step-fill').style.display = 'block';
-
-    document.getElementById('client-card').innerHTML = `
-      <div class="client-card">
-        <div class="client-name">${saved.familyName || ''}, ${saved.givenName || ''}</div>
-        <div class="client-meta">Case: ${caseNum} · DOB: ${saved.dob || '—'}</div>
-        <div class="client-meta">Nationality: ${saved.nationality || saved.countryOfBirth || '—'}</div>
-      </div>
-    `;
 
     // Render preview immediately with whatever currentPage is — don't block on USCIS ping
     renderAddressSelector(currentPage);
@@ -459,6 +472,21 @@ document.getElementById('btn-fill').addEventListener('click', async () => {
   const btn = document.getElementById('btn-fill');
   const statusEl = document.getElementById('fill-status');
   btn.disabled = true;
+  btn.textContent = 'Syncing...';
+
+  try {
+    const caseNum = document.getElementById('case-number').value.trim();
+    setStatus(statusEl, 'Refreshing latest CRM data from Cloudflare...', 'info');
+    const refreshed = await loadClientFromCloudflare(caseNum, { silent: true });
+    if (refreshed) clientData = refreshed;
+    else if (!clientData) throw new Error('No synced client data. Click Load Client first.');
+  } catch(e) {
+    setStatus(statusEl, `❌ Cloudflare refresh failed: ${e.message}`, 'err');
+    btn.disabled = false;
+    btn.textContent = 'Fill This Page 填写此页';
+    return;
+  }
+
   btn.textContent = 'Filling...';
 
   // Always detect page fresh at fill time — don't rely on poll currentPage
@@ -526,19 +554,13 @@ chrome.storage.local.get(['arreglo_data', 'arreglo_case'], async (result) => {
     clientData = result.arreglo_data;
     selectedAddressIndex = 0;
     const saved = clientData;
-    document.getElementById('step-login').style.display = 'none';
-    document.getElementById('step-fill').style.display = 'block';
-    document.getElementById('case-number').value = result.arreglo_case;
-    document.getElementById('client-card').innerHTML = `
-      <div class="client-card">
-        <div class="client-name">${saved.familyName || ''}, ${saved.givenName || ''}</div>
-        <div class="client-meta">Case: ${result.arreglo_case} · DOB: ${saved.dob || '—'}</div>
-        <div class="client-meta">Nationality: ${saved.nationality || saved.countryOfBirth || '—'}</div>
-      </div>
-    `;
+    renderLoadedClient(result.arreglo_case, saved);
     // Render preview immediately from cached data — no USCIS ping needed
     renderAddressSelector('unknown');
     renderFieldPreview('unknown');
     startPolling(); // poll will detect page and update preview within 600ms
+    loadClientFromCloudflare(result.arreglo_case, { silent: true })
+      .then(fresh => { if (fresh) { renderAddressSelector(currentPage); renderFieldPreview(currentPage); } })
+      .catch(() => {});
   }
 });
