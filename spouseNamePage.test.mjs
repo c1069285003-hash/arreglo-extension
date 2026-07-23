@@ -35,6 +35,12 @@ assert.match(
 
 assert.match(
   content,
+  /case 'spouse_2':[\s\S]*spouseRace = d\.spouseEthnicity \|\| d\.spouseRaceEthnicity \|\| d\.spouseRace \|\| 'Han Chinese'[\s\S]*applicant\.spouse\.spouse2\.race/,
+  "Arreglo must fill spouse page 2 race/ethnic/tribal group from CRM spouseEthnicity with Han Chinese default"
+);
+
+assert.match(
+  content,
   /spouseANumberNone[\s\S]*formikFactoryUIMeta\.applicant\.spouse\.spouse2\.alienNumber\.none[\s\S]*spousePassportNumberNone[\s\S]*formikFactoryUIMeta\.applicant\.spouse\.spouse2\.passportNumber\.none[\s\S]*spouseSsnNone[\s\S]*formikFactoryUIMeta\.applicant\.spouse\.spouse2\.socialSecurityNumber\.none/,
   "Arreglo must handle spouse A-number/passport/SSN None checkboxes on spouse page 2"
 );
