@@ -1,5 +1,6 @@
 const WORKER = 'https://xinyuan.angie-li-business.workers.dev';
 const PAGE_LABELS = {
+  cbp_i94: 'CBP I-94 记录页',
   legal_assistance: 'Legal Assistance',
   preparer_family: 'Preparer — Family Member?',
   preparer_info: 'Preparer Information',
@@ -21,6 +22,7 @@ const PAGE_LABELS = {
   mother: 'Your Mother',
   father: 'Your Father',
   siblings: 'Your Siblings',
+  eligibility_reason: 'Reason for Asylum or Withholding',
 };
 
 // Fields to preview per page — shown in sidebar as contextual info
@@ -101,6 +103,14 @@ const PAGE_PREVIEW_FIELDS = {
     { label: 'Birth City',  key: '_sib0_birthCity' },
     { label: 'Country',     key: '_sib0_birthCountry' },
   ],
+  eligibility_reason: [
+    { label: 'Convention Against Torture', key: '_cat' },
+    { label: 'Selected basis', key: '_basis' },
+    { label: 'Past mistreatment', key: '_past' },
+    { label: 'Fear upon return', key: '_fear' },
+    { label: 'Fear of torture', key: '_torture' },
+    { label: 'Explanation', key: '_explanation' },
+  ],
 };
 
 const PREPARER = {
@@ -115,7 +125,34 @@ const PREPARER = {
 
 let clientData = null;
 let selectedAddressIndex = 0;
+let selectedSchoolIndex = 0;   // index into the SORTED (highest-first) school list
+let selectedChildIndex = 0;    // which child's data to fill into the open "Add child" editor
 let currentPage = 'unknown';
+
+// ── School helpers (must match content.js sorting exactly) ────────────────────
+const EDU_LEVEL_RANK = [
+  { rank: 7, match: /博士|doctor|phd|ph\.d/i },
+  { rank: 6, match: /硕士|master|研究生|graduate school/i },
+  { rank: 5, match: /本科|大学|bachelor|university|undergrad/i },
+  { rank: 4, match: /大专|专科|associate|college/i },
+  { rank: 3, match: /高中|职高|中专|技校|high school|vocational|technical/i },
+  { rank: 2, match: /初中|middle school|junior/i },
+  { rank: 1, match: /小学|elementary|primary/i },
+];
+function eduRank(edu) {
+  const s = `${edu.level || ''} ${edu.school || ''}`;
+  for (const { rank, match } of EDU_LEVEL_RANK) if (match.test(s)) return rank;
+  return 0;
+}
+function getSortedSchools() {
+  return [...(clientData?.eduList || [])]
+    .filter(e => e && (e.school || e.level))
+    .sort((a, b) => {
+      const r = eduRank(b) - eduRank(a);
+      if (r !== 0) return r;
+      return (parseInt(b.endYear || b.endDate || 0) || 0) - (parseInt(a.endYear || a.endDate || 0) || 0);
+    });
+}
 
 function setStatus(el, msg, type) {
   el.className = `status-box status-${type}`;
@@ -138,29 +175,59 @@ function renderLoadedClient(caseNum, saved) {
   `;
 }
 
-async function loadClientFromCloudflare(caseNum, { silent = false } = {}) {
+async function loadClientFromCloudflare(caseNum, { silent = false, requireInfoSheet = false, resetAddressIndex = false } = {}) {
   if (!caseNum) return null;
+  const statusEl = document.getElementById(silent ? 'fill-status' : 'load-status');
   const res = await fetch(`${WORKER}/case/${encodeURIComponent(caseNum)}`);
-  const json = await res.json();
-
-  if (!json.success || !json.client) {
-    if (!silent) setStatus(document.getElementById('load-status'), `❌ Case ${caseNum} not found`, 'err');
+  if (!res.ok) {
+    if (!silent) setStatus(statusEl, `❌ Cloudflare HTTP ${res.status} — /case/${caseNum} 不可达（Worker/网络问题，非插件问题）`, 'err');
     return null;
   }
 
-  const client = json.client;
-  const saved = client.infoFormData;
-
-  if (!saved || (!saved.familyName && !saved.givenName)) {
-    if (!silent) setStatus(document.getElementById('load-status'), '⚠️ English info sheet not saved yet. Open CRM → Info Form → Save.', 'warn');
+  let json;
+  try { json = await res.json(); }
+  catch (e) {
+    if (!silent) setStatus(statusEl, '❌ Worker 返回的不是 JSON — 检查 Worker 部署', 'err');
     return null;
+  }
+  console.log('[arreglo] /case response:', json);
+
+  // v1.32+: accept multiple worker response shapes
+  const client = json.client || json.case || json.data || (json.caseNumber ? json : null);
+  if ((json.success === false) || !client) {
+    if (!silent) setStatus(statusEl, `❌ Case ${caseNum} not found — Worker 返回: ${JSON.stringify(json).slice(0,120)}`, 'err');
+    return null;
+  }
+
+  const saved = { ...(client.infoFormData || {}) };
+  if (!saved.familyName && !saved.givenName) {
+    if (requireInfoSheet) {
+      setStatus(statusEl, '❌ Cloudflare 英文信息表还没有 staff 保存版；先在 CRM → Info Form → Save 成功后再 Fill USCIS。', 'err');
+      return null;
+    }
+    // Soft warning for CBP capture only. USCIS fill calls this function with
+    // requireInfoSheet=true so draft mini-program data cannot become filing data.
+    if (!silent) setStatus(statusEl, '⚠️ 英文信息表未保存（CRM → Info Form → Save）— 已用小程序数据加载，可先做 CBP 捕获', 'warn');
+    const f = client.formData || {};
+    saved.familyName = saved.familyName || f.lastNamePinyin || '';
+    saved.givenName  = saved.givenName  || f.firstNamePinyin || '';
+    saved.dob        = saved.dob        || f.dob || '';
+    saved.passportNumber = saved.passportNumber || f.passportNumber || '';
   }
 
   clientData = saved;
-  selectedAddressIndex = 0;
-  await chrome.storage.local.set({ arreglo_data: saved, arreglo_case: caseNum, arreglo_synced_at: new Date().toISOString() });
+  if (resetAddressIndex) selectedAddressIndex = 0;
+  await chrome.storage.local.set({
+    arreglo_data: saved,
+    arreglo_case: caseNum,
+    arreglo_address_index: selectedAddressIndex,
+    arreglo_synced_at: new Date().toISOString(),
+  });
+
   renderLoadedClient(caseNum, saved);
   renderAddressSelector(currentPage);
+  renderSchoolSelector(currentPage);
+  renderChildSelector(currentPage);
   renderFieldPreview(currentPage);
   return saved;
 }
@@ -177,8 +244,14 @@ async function getActiveTab() {
   return tab;
 }
 
+const SUPPORTED_HOSTS = /(^|\.)my\.uscis\.gov$|(^|\.)i94\.cbp\.dhs\.gov$/;
 async function sendToContent(msg, retries = 3) {
-  const tab = await getUscisTab() || await getActiveTab();
+  // v1.32: prefer the ACTIVE tab when it's a supported site — previously a
+  // background USCIS tab hijacked messages while staff worked on CBP.
+  const active = await getActiveTab();
+  let tab = null;
+  try { if (active && SUPPORTED_HOSTS.test(new URL(active.url || '').hostname)) tab = active; } catch (e) {}
+  if (!tab) tab = await getUscisTab() || active;
   if (!tab) throw new Error('No USCIS tab found. Please open my.uscis.gov first.');
   for (let i = 0; i < retries; i++) {
     try {
@@ -200,6 +273,83 @@ async function sendToContent(msg, retries = 3) {
     }
   }
 }
+
+
+// ── Smart address classification (mirror of content.js v1.28) ─────────────────
+function _parseYM(ym) {
+  if (!ym) return { month: '', year: '' };
+  let m = String(ym).match(/^(\d{4})[\/\-](\d{1,2})$/);
+  if (m) return { year: m[1], month: m[2].padStart(2, '0') };
+  m = String(ym).match(/^(\d{1,2})\/(\d{4})$/);
+  if (m) return { year: m[2], month: m[1].padStart(2, '0') };
+  m = String(ym).match(/^(\d{4})$/);
+  if (m) return { year: m[1], month: '' };
+  return { month: '', year: '' };
+}
+function _ymToNum(ym) {
+  const { year, month } = _parseYM(ym);
+  if (!year) return null;
+  return parseInt(year) * 12 + (parseInt(month || '1') - 1);
+}
+function _aFrom(a) { return a.fromDate || (a.fromYear ? `${a.fromYear}/${String(a.fromMonth||'01').padStart(2,'0')}` : ''); }
+function _aTo(a)   { return a.toDate   || (a.toYear   ? `${a.toYear}/${String(a.toMonth||'01').padStart(2,'0')}`   : ''); }
+function _normCountry(c) { return (c || '').trim().toLowerCase().replace(/^people'?s republic of\s+/, '').replace(/^pr\s+/, ''); }
+
+function classifyAddresses(d) {
+  const warnings = [];
+  const persecutionCountry = _normCountry(d.nationality || d.countryOfBirth || 'China');
+  const now = new Date();
+  const nowNum = now.getFullYear() * 12 + now.getMonth();
+  const fiveYearsAgo = nowNum - 60;
+
+  let usCurrent = null;
+  if (d.usAddressLine1 || d.usCity) {
+    let fromDate = '';
+    const m = (d.lastEntryDate || '').match(/^(\d{2})\/\d{2}\/(\d{4})$/);
+    if (m) fromDate = `${m[2]}/${m[1]}`;
+    usCurrent = {
+      addressLine1: d.usAddressLine1 || '', addressLine2: d.usAddressLine2 || '',
+      city: d.usCity || '', province: d.usState || '', country: 'United States',
+      postalCode: d.usZip || '', fromDate, toDate: '', _isUS: true, _role: 'US_CURRENT',
+    };
+  } else warnings.push('缺少美国现住址');
+
+  const hist = (d.addressHistory || []).map(a => ({ ...a }));
+  const nonUS = hist.filter(a => _normCountry(a.country || 'china') !== 'united states');
+  // Recency: real toDate wins; blank toDate but a fromDate = ongoing→present (latest);
+  // no dates at all = unknown → oldest. (Keeps display order in sync with content.js
+  // so an undated address no longer jumps to "last outside US".)
+  const _recencyKey = a => { const t = _ymToNum(_aTo(a)); if (t != null) return t; return (_ymToNum(_aFrom(a)) != null) ? Infinity : -Infinity; };
+  nonUS.sort((a, b) => _recencyKey(b) - _recencyKey(a));
+  const lastOutsideUs = nonUS[0] || null;
+  if (lastOutsideUs) {
+    lastOutsideUs._role = 'LAST_OUTSIDE_US';
+    const c = _normCountry(lastOutsideUs.country || 'china');
+    lastOutsideUs._fromPersecutionCountry = (c === persecutionCountry || c === '');
+    if (!lastOutsideUs._fromPersecutionCountry) {
+      warnings.push(`来美前最后地址在 ${lastOutsideUs.country}，非受迫害国`);
+    }
+  } else warnings.push('没有非美国地址');
+
+  const last5 = [];
+  for (const a of hist) {
+    const from = _ymToNum(_aFrom(a));
+    const to = _ymToNum(_aTo(a));
+    const intersects = (to === null || to >= fiveYearsAgo) && (from === null || from <= nowNum);
+    if (from === null && to === null) { warnings.push(`地址缺日期: ${a.addressLine1 || a.city || ''}`); last5.push(a); }
+    else if (intersects) last5.push(a);
+  }
+  last5.sort((a, b) => ((_ymToNum(_aTo(b)) ?? -Infinity) - (_ymToNum(_aTo(a)) ?? -Infinity)));
+  const fiveYearList = usCurrent ? [usCurrent, ...last5] : last5;
+  fiveYearList.forEach(a => { if (!a._role) a._role = 'LAST_5_YEARS'; });
+  return { usCurrent, lastOutsideUs, fiveYearList, warnings, persecutionCountry };
+}
+
+const ROLE_BADGE = {
+  US_CURRENT:      { txt: '🇺🇸 现住址 Current',           color: '#0369a1' },
+  LAST_OUTSIDE_US: { txt: '🎯 来美前最后地址 Last outside US', color: '#b45309' },
+  LAST_5_YEARS:    { txt: '📅 近5年 Within 5 yrs',        color: '#166534' },
+};
 
 // ── Address helpers ───────────────────────────────────────────────────────────
 function getAddressLabel(addr) {
@@ -239,6 +389,15 @@ function getAllAddresses() {
   return addresses;
 }
 
+function getAddressesForPage(page) {
+  const addresses = getAllAddresses();
+  // "Last address outside the US" must never default to the current US address.
+  if (page === 'residence_history_1') {
+    return addresses.filter(addr => !addr._isUS);
+  }
+  return addresses;
+}
+
 // ── Render contextual field preview ──────────────────────────────────────────
 function renderFieldPreview(page) {
   const el = document.getElementById('fill-results');
@@ -246,9 +405,11 @@ function renderFieldPreview(page) {
 
   const isAddrPage = page === 'residence_history_1' || page === 'residence_history_3';
   if (isAddrPage) {
-    // For address pages, show the selected address fields as preview
-    const addrs = getAllAddresses();
-    const addr = addrs[selectedAddressIndex];
+    // For address pages, show the smart-assigned address as preview
+    const cls = classifyAddresses(clientData);
+    const addr = page === 'residence_history_1'
+      ? cls.lastOutsideUs
+      : cls.fiveYearList[selectedAddressIndex];
     if (addr) {
       const fields = [
         { label: 'Country',   val: addr.country || (addr._isUS ? 'United States' : '') },
@@ -288,6 +449,15 @@ function renderFieldPreview(page) {
         _preparer_state:     PREPARER.state,
         _preparer_zip:       PREPARER.zip,
       }
+    : page === 'eligibility_reason'
+    ? {
+        _cat: 'Yes',
+        _basis: 'Torture Convention only',
+        _past: 'Yes',
+        _fear: 'Yes',
+        _torture: 'Yes',
+        _explanation: 'Please refer to my statement.',
+      }
     : page === 'siblings'
     ? {
         siblingsCount:    clientData?.siblingsCount || '0',
@@ -316,70 +486,442 @@ function renderFieldPreview(page) {
   el.innerHTML = rows || '<div style="color:#94a3b8;font-size:11px;padding:4px 0">No preview for this page</div>';
 }
 
-// ── Render address selector ───────────────────────────────────────────────────
+// ── Render smart address card (v1.28 — replaces manual prev/next selection) ──
+// residence_history_1: shows the auto-picked "last address outside US" +
+//   persecution-country determination. One button, zero selection.
+// residence_history_3: shows the computed 5-year list in fill order +
+//   "Fill ALL" button. Manual prev/next kept only as a small fallback link.
 function renderAddressSelector(page) {
   const el = document.getElementById('addr-selector');
   if (!el) return;
-
+  if (!clientData) { el.innerHTML = ''; return; }
   const isAddrPage = page === 'residence_history_1' || page === 'residence_history_3';
-  if (!isAddrPage || !clientData) {
-    el.innerHTML = '';
+  if (!isAddrPage) { el.innerHTML = ''; return; }
+
+  const cls = classifyAddresses(clientData);
+  const warnHtml = cls.warnings.length
+    ? `<div style="margin-top:6px;padding:6px 8px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;color:#92400e;font-size:10px">
+         ${cls.warnings.map(w => `⚠️ ${w}`).join('<br>')}</div>`
+    : '';
+
+  if (page === 'residence_history_1') {
+    const a = cls.lastOutsideUs;
+    if (!a) {
+      el.innerHTML = `<div style="color:#991b1b;font-size:11px;margin-bottom:8px">❌ 没有非美国地址记录，无法填写此页</div>${warnHtml}`;
+      return;
+    }
+    const persec = a._fromPersecutionCountry;
+    el.innerHTML = `
+      <div style="background:#f1f5f9;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;">
+        <div style="font-weight:700;color:#1e3a5f;margin-bottom:4px">🎯 自动识别：来美前最后地址</div>
+        <div style="color:#1e293b;font-weight:700;font-size:12px">${getAddressLabel(a)}</div>
+        <div style="color:#64748b">${getAddressDateRange(a)}</div>
+        <div style="margin-top:4px;font-size:10px;font-weight:600;color:${persec ? '#166534' : '#b45309'}">
+          ${persec
+            ? `✓ 位于受迫害国 (${cls.persecutionCountry}) — 自动勾选 Yes`
+            : `✗ 不在受迫害国 — 自动勾选 No，需在下一页补受迫害国地址`}
+        </div>
+        ${warnHtml}
+        <div style="color:#94a3b8;margin-top:5px;font-size:10px">直接点 Fill This Page，无需选择</div>
+      </div>`;
     return;
   }
 
-  const addrs = getAllAddresses();
-  if (addrs.length === 0) {
-    el.innerHTML = '<div style="color:#94a3b8;font-size:11px">No address history found</div>';
+  // residence_history_3
+  const list = cls.fiveYearList;
+  if (!list.length) {
+    el.innerHTML = `<div style="color:#991b1b;font-size:11px;margin-bottom:8px">❌ 近5年地址列表为空</div>${warnHtml}`;
     return;
   }
-
-  // Clamp index
-  if (selectedAddressIndex >= addrs.length) selectedAddressIndex = 0;
-
-  const cur = addrs[selectedAddressIndex];
-  const label = getAddressLabel(cur);
-  const dateRange = getAddressDateRange(cur);
-  const isUS = (cur.country || '').toLowerCase().includes('united states') ||
-               (cur.country || '').toLowerCase() === 'us' ||
-               (cur.country || '').toLowerCase() === 'usa';
+  if (selectedAddressIndex >= list.length) selectedAddressIndex = 0;
+  const rows = list.map((a, i) => {
+    const badge = ROLE_BADGE[a._role] || ROLE_BADGE.LAST_5_YEARS;
+    return `
+      <div style="padding:3px 0;border-bottom:1px solid #e2e8f0;
+                  ${i === selectedAddressIndex ? 'font-weight:700' : ''}">
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="width:14px;text-align:right;color:#64748b">${i + 1}.</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b">${getAddressLabel(a)}</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-left:20px;font-size:10px">
+          <span style="color:${badge.color};font-weight:600">${badge.txt}</span>
+          <span style="color:#94a3b8">${getAddressDateRange(a)}</span>
+        </div>
+      </div>`;
+  }).join('');
 
   el.innerHTML = `
     <div style="background:#f1f5f9;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <span style="font-weight:700;color:#1e3a5f">Address for this page</span>
-        <span style="color:#64748b">${selectedAddressIndex + 1} / ${addrs.length}</span>
+        <span style="font-weight:700;color:#1e3a5f">近5年地址（自动计算 · 按时间倒序）</span>
+        <span style="color:#64748b">${list.length} 条</span>
       </div>
-      <div style="color:#1e293b;font-weight:600;margin-bottom:2px;font-size:12px">${label}</div>
-      <div style="color:#64748b">${dateRange}</div>
-      ${isUS ? '<div style="margin-top:3px;font-size:10px;color:#0369a1;font-weight:600">🇺🇸 US Address</div>' : ''}
+      ${rows}
+      <button id="btn-fill-all-addresses" style="width:100%;margin-top:8px;padding:7px;border:none;border-radius:7px;
+              background:#1e3a5f;color:#fff;font-weight:600;font-size:12px;cursor:pointer">
+        ⚡ Fill ALL Addresses 一键填写全部地址
+      </button>
       <div style="display:flex;gap:6px;margin-top:6px;">
         <button id="addr-prev" style="flex:1;padding:4px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:12px">◀ Prev</button>
         <button id="addr-next" style="flex:1;padding:4px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:12px">Next ▶</button>
       </div>
-    </div>
-  `;
+      ${warnHtml}
+      <div style="color:#94a3b8;margin-top:4px;font-size:10px">
+        一键 = 自动逐条填写并保存 · Prev/Next + Fill This Page 只填选中一条（兜底）
+      </div>
+    </div>`;
 
   document.getElementById('addr-prev').onclick = () => {
-    selectedAddressIndex = (selectedAddressIndex - 1 + addrs.length) % addrs.length;
+    selectedAddressIndex = (selectedAddressIndex - 1 + list.length) % list.length;
+    chrome.storage.local.set({ arreglo_address_index: selectedAddressIndex });
     renderAddressSelector(page);
     renderFieldPreview(page);
   };
   document.getElementById('addr-next').onclick = () => {
-    selectedAddressIndex = (selectedAddressIndex + 1) % addrs.length;
+    selectedAddressIndex = (selectedAddressIndex + 1) % list.length;
+    chrome.storage.local.set({ arreglo_address_index: selectedAddressIndex });
     renderAddressSelector(page);
     renderFieldPreview(page);
   };
+  document.getElementById('btn-fill-all-addresses').onclick = () => fillAllAddresses();
+}
+
+// ── Render child picker (shown on child_0_name / child_0_info pages) ──────────
+// USCIS "Add child" edits one child at a time. When the client has more than one
+// child, staff pick which child's data goes into the open editor here. Writes
+// into the same #addr-selector container (address & child pages never coincide).
+function renderChildSelector(page) {
+  const el = document.getElementById('addr-selector');
+  if (!el) return;
+  const isChildPage = page === 'child_0_name' || page === 'child_0_info';
+  if (!isChildPage || !clientData) return;   // leave addr-selector as-is for other pages
+
+  const kids = clientData.children || [];
+  if (kids.length === 0) {
+    el.innerHTML = `<div style="color:#991b1b;font-size:11px;margin-bottom:8px">❌ 该客户没有子女数据</div>`;
+    return;
+  }
+  if (selectedChildIndex >= kids.length) selectedChildIndex = 0;
+  const c = kids[selectedChildIndex];
+  const nameStr = [c.firstName, c.lastName].filter(Boolean).join(' ') || '(未命名)';
+  const detail = [c.dob, c.birthCountry].filter(Boolean).join(' · ');
+  const needSex = !c.sex;
+
+  const picker = kids.length > 1 ? `
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button id="child-prev" style="flex:1;padding:4px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:12px">◀ Prev</button>
+        <button id="child-next" style="flex:1;padding:4px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:12px">Next ▶</button>
+      </div>` : '';
+
+  el.innerHTML = `
+    <div style="background:#f1f5f9;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <span style="font-weight:700;color:#1e3a5f">选择要填的孩子 Child</span>
+        <span style="color:#64748b">${selectedChildIndex + 1} / ${kids.length}</span>
+      </div>
+      <div style="color:#1e293b;font-weight:700;font-size:12px">👶 ${nameStr}</div>
+      ${detail ? `<div style="color:#64748b">${detail}</div>` : ''}
+      ${needSex ? `<div style="margin-top:6px;padding:6px 8px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;color:#92400e;font-size:10px">⚠️ CRM 未录入该孩子性别，Details 页请手动选择 Male/Female</div>` : ''}
+      ${picker}
+      <div style="color:#94a3b8;margin-top:5px;font-size:10px">选好孩子后点 Fill This Page 填入当前编辑器</div>
+    </div>`;
+
+  if (kids.length > 1) {
+    document.getElementById('child-prev').onclick = () => {
+      selectedChildIndex = (selectedChildIndex - 1 + kids.length) % kids.length;
+      renderChildSelector(page);
+    };
+    document.getElementById('child-next').onclick = () => {
+      selectedChildIndex = (selectedChildIndex + 1) % kids.length;
+      renderChildSelector(page);
+    };
+  }
+}
+
+async function fillAllAddresses() {
+  const statusEl = document.getElementById('fill-status');
+  setStatus(statusEl, '正在自动填写全部近5年地址…', 'info');
+  try {
+    const resp = await sendToContent({
+      type: 'FILL_PAGE',
+      data: clientData,
+      opts: { fillAllAddresses: true },
+    });
+    const results = resp?.results || [];
+    const ok = results.filter(r => r.ok).length;
+    const fail = results.filter(r => !r.ok).length;
+    setStatus(statusEl, `${fail === 0 ? '✅' : '⚠️'} Addresses: ${ok} ok, ${fail} flagged`, fail === 0 ? 'ok' : 'warn');
+    document.getElementById('fill-results').innerHTML = results.map(r => `
+      <div class="result-row">
+        <div class="dot ${r.ok ? 'dot-ok' : 'dot-fail'}"></div>
+        <div class="result-name">${String(r.name).split('.').pop()}</div>
+        <div class="result-val">${r.val || '—'}</div>
+      </div>`).join('');
+  } catch (e) {
+    setStatus(statusEl, `❌ ${e.message}`, 'err');
+  }
+}
+
+// ── Render school selector (shown only on Your School History page) ──────────
+// Default flow is fully automatic: "Fill ALL" sorts highest-degree-first and
+// fills every school (add → fill → save loop). The prev/next picker is only a
+// manual fallback for fixing a single entry.
+function renderSchoolSelector(page) {
+  const el = document.getElementById('school-selector');
+  if (!el) return;
+  if (!clientData || page !== 'school') { el.innerHTML = ''; return; }
+
+  const schools = getSortedSchools();
+  if (!schools.length) {
+    el.innerHTML = '<div style="color:#94a3b8;font-size:11px;margin-bottom:8px">No education history found 无学历记录</div>';
+    return;
+  }
+  if (selectedSchoolIndex >= schools.length) selectedSchoolIndex = 0;
+
+  const listHtml = schools.map((s, i) => `
+    <div style="display:flex;gap:6px;align-items:center;padding:2px 0;
+                ${i === selectedSchoolIndex ? 'font-weight:700;color:#1e3a5f' : 'color:#64748b'}">
+      <span style="width:14px;text-align:right">${i + 1}.</span>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+        ${s.level || '—'} · ${s.school || '—'}
+      </span>
+      <span>${s.startYear || ''}–${s.endYear || ''}</span>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div style="background:#f1f5f9;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <span style="font-weight:700;color:#1e3a5f">Schools 学历（已按最高学历排序）</span>
+        <span style="color:#64748b">${schools.length} total</span>
+      </div>
+      ${listHtml}
+      <button id="btn-fill-all-schools" style="width:100%;margin-top:8px;padding:7px;border:none;border-radius:7px;
+              background:#1e3a5f;color:#fff;font-weight:600;font-size:12px;cursor:pointer">
+        ⚡ Fill ALL Schools 一键填写全部学校
+      </button>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <button id="school-prev" style="flex:1;padding:4px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:12px">◀ Prev</button>
+        <button id="school-next" style="flex:1;padding:4px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:12px">Next ▶</button>
+      </div>
+      <div style="color:#94a3b8;margin-top:4px;font-size:10px">
+        Fill This Page 只填当前选中的一所（手动兜底）· Fill ALL 自动全部填写
+      </div>
+    </div>
+  `;
+
+  document.getElementById('school-prev').onclick = () => {
+    selectedSchoolIndex = (selectedSchoolIndex - 1 + schools.length) % schools.length;
+    renderSchoolSelector(page);
+  };
+  document.getElementById('school-next').onclick = () => {
+    selectedSchoolIndex = (selectedSchoolIndex + 1) % schools.length;
+    renderSchoolSelector(page);
+  };
+  document.getElementById('btn-fill-all-schools').onclick = () => fillSchools(true);
+}
+
+// Send a school fill request (all = auto loop, single = current selection)
+async function fillSchools(all) {
+  const statusEl = document.getElementById('fill-status');
+  setStatus(statusEl, all ? 'Filling all schools… 正在自动填写全部学校' : 'Filling selected school…', 'info');
+  try {
+    const resp = await sendToContent({
+      type: 'FILL_PAGE',
+      data: clientData,
+      opts: {
+        fillAllSchools: !!all,
+        selectedSchoolIndex,
+        sortedSchools: getSortedSchools(),
+      },
+    });
+    const results = resp?.results || [];
+    const ok = results.filter(r => r.ok).length;
+    const fail = results.filter(r => !r.ok).length;
+    setStatus(statusEl, `${fail === 0 ? '✅' : '⚠️'} Schools: ${ok} ok, ${fail} failed`, fail === 0 ? 'ok' : 'warn');
+    document.getElementById('fill-results').innerHTML = results.map(r => `
+      <div class="result-row">
+        <div class="dot ${r.ok ? 'dot-ok' : 'dot-fail'}"></div>
+        <div class="result-name">${String(r.name).split('.').pop()}</div>
+        <div class="result-val">${r.val || '—'}</div>
+      </div>`).join('');
+  } catch (e) {
+    setStatus(statusEl, `❌ ${e.message}`, 'err');
+  }
+}
+
+// ── CBP I-94 capture card (v1.31) ─────────────────────────────────────────────
+// Workflow: staff loads the client (case #) → opens i94.cbp.dhs.gov and runs
+// the passport search → this card captures the results, verifies they belong
+// to the loaded client (name / DOB / passport), and saves to Cloudflare.
+// Saving IS the staff confirmation step required by the field-level data rules.
+let lastCbp = null;
+
+function fmtName(d) { return `${(d.familyName||'').toUpperCase()}, ${(d.givenName||'').toUpperCase()}`; }
+
+function cbpMatchClient(cbp, d) {
+  if (!d) return { ok: false, checks: [], reason: 'no client loaded' };
+  const checks = [];
+  const norm = s => String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if (cbp.docNumber && d.passportNumber) checks.push({ label: 'Passport', ok: norm(cbp.docNumber) === norm(d.passportNumber), a: cbp.docNumber, b: d.passportNumber });
+  if (cbp.lastName && d.familyName)      checks.push({ label: 'Name', ok: norm(cbp.lastName) === norm(d.familyName) && (!cbp.firstName || norm(cbp.firstName) === norm(d.givenName)), a: `${cbp.lastName}, ${cbp.firstName}`, b: fmtName(d) });
+  if (cbp.dob && d.dob)                  checks.push({ label: 'DOB', ok: norm(cbp.dob) === norm(d.dob), a: cbp.dob, b: d.dob });
+  const ok = checks.length > 0 && checks.every(c => c.ok);
+  return { ok, checks, reason: checks.length ? '' : 'no comparable fields' };
+}
+
+function renderCbpCard(page) {
+  const el = document.getElementById('cbp-card');
+  if (!el) return;
+  if (page !== 'cbp_i94') { el.innerHTML = ''; return; }
+
+  const caseNum = document.getElementById('case-number')?.value?.trim() || '';
+  const rows = (o) => Object.entries(o).map(([k,v]) =>
+    `<div style="display:flex;gap:6px;padding:1px 0"><span style="width:110px;color:#64748b">${k}</span><span style="font-weight:600;color:#1e293b">${v || '—'}</span></div>`).join('');
+
+  let body = '';
+  if (!lastCbp) {
+    body = `<div style="color:#64748b;font-size:11px;margin:4px 0 8px">
+      ${clientData ? '在 CBP 查询出结果后点击抓取。' : '⚠ 先在上方输入案件号加载客户，再抓取（用于身份核对）。'}
+    </div>
+    <button id="btn-cbp-capture" style="width:100%;padding:8px;border:none;border-radius:7px;background:#1e3a5f;color:#fff;font-weight:700;font-size:12px;cursor:pointer">📥 抓取本页 I-94 · Capture I-94</button>
+    <button id="btn-cbp-passport" style="width:100%;margin-top:6px;padding:8px;border:none;border-radius:7px;background:#475569;color:#fff;font-weight:700;font-size:12px;cursor:pointer">📎 注入护照信息页 → CBP Document Capture</button>
+    <div style="color:#94a3b8;font-size:10px;margin-top:3px">先点页面上 CAPTURE DOCUMENT 打开弹窗，再点此按钮（不用点 Files）</div>`;
+  } else {
+    const c = lastCbp;
+    const match = cbpMatchClient(c, clientData);
+    const matchHtml = clientData ? (match.ok
+      ? `<div style="margin:6px 0;padding:6px 8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;color:#166534;font-size:11px;font-weight:700">✓ 与 case ${caseNum} 身份匹配</div>`
+      : `<div style="margin:6px 0;padding:6px 8px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;color:#991b1b;font-size:11px">
+           ✗ 与已加载客户不匹配 — ${match.checks.filter(x=>!x.ok).map(x=>`${x.label}: CBP「${x.a}」≠ CRM「${x.b}」`).join('；') || match.reason}
+           <label style="display:block;margin-top:4px;font-weight:600"><input type="checkbox" id="cbp-override"> 我已人工核对，强制保存</label>
+         </div>`)
+      : `<div style="margin:6px 0;padding:6px 8px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;color:#92400e;font-size:11px">⚠ 未加载客户，无法核对身份 — 请先加载案件</div>`;
+
+    body = `
+      <div style="font-size:11px">${rows({
+        'I-94 号': c.i94Number,
+        '入境日期': c.entryDate,
+        '身份类别': c.classOfAdmission,
+        '准许停留至': c.admitUntil,
+        '入境口岸': c.portMapped ? `${c.port} (${c.portRaw})` : `${c.portRaw || '—'} ⚠未识别`,
+        '姓名': c.lastName ? `${c.lastName}, ${c.firstName}` : '',
+        '出生日期': c.dob,
+        '护照号': c.docNumber,
+        '入境次数': `${c.arrivalsCount}${c.arrivalsCount > 1 ? '（有既往入境 → otherEntries=Yes）' : ''}`,
+      })}</div>
+      ${matchHtml}
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <button id="btn-cbp-save" ${clientData ? '' : 'disabled'} style="flex:2;padding:8px;border:none;border-radius:7px;background:${clientData?'#166534':'#94a3b8'};color:#fff;font-weight:700;font-size:12px;cursor:pointer">💾 保存到 CRM (case ${caseNum || '?'})</button>
+        <button id="btn-cbp-recapture" style="flex:1;padding:8px;border-radius:7px;border:1px solid #cbd5e1;background:#fff;font-size:12px;cursor:pointer">重新抓取</button>
+      </div>`;
+  }
+
+  el.innerHTML = `<div style="background:#f1f5f9;border-radius:8px;padding:8px 10px;margin-bottom:8px;">
+    <div style="font-weight:700;color:#1e3a5f;font-size:12px;margin-bottom:4px">🛂 CBP I-94 捕获</div>${body}</div>`;
+
+  const cap = document.getElementById('btn-cbp-capture') || document.getElementById('btn-cbp-recapture');
+  if (cap) cap.onclick = async () => {
+    const resp = await sendToContent({ type: 'EXTRACT_CBP' });
+    if (resp?.success) { lastCbp = resp.data; renderCbpCard(page); }
+    else setStatus(document.getElementById('fill-status'), `❌ 抓取失败: ${resp?.error || 'no response'}`, 'err');
+  };
+  const save = document.getElementById('btn-cbp-save');
+  if (save) save.onclick = () => saveCbpToCloudflare(page);
+  const pp = document.getElementById('btn-cbp-passport');
+  if (pp) pp.onclick = () => uploadPassportBio();
+}
+
+async function uploadPassportBio() {
+  const statusEl = document.getElementById('fill-status');
+  const caseNum = document.getElementById('case-number')?.value?.trim();
+  if (!caseNum) { setStatus(statusEl, '❌ 先输入案件号', 'err'); return; }
+  setStatus(statusEl, '获取护照信息页…', 'info');
+  try {
+    const res = await fetch(`${WORKER}/passport-bio/${caseNum}`);
+    if (!res.ok) {
+      setStatus(statusEl, `❌ Worker /passport-bio 未部署或无文件 (HTTP ${res.status}) — 见 Codex 指令文档`, 'err');
+      return;
+    }
+    const blob = await res.blob();
+    const base64 = await new Promise((ok, bad) => {
+      const r = new FileReader();
+      r.onload = () => ok(r.result);
+      r.onerror = () => bad(new Error('read failed'));
+      r.readAsDataURL(blob);
+    });
+    setStatus(statusEl, '注入 CBP Document Capture…', 'info');
+    const resp = await sendToContent({ type: 'UPLOAD_PASSPORT_BIO', dataUrl: base64, fileName: `passport_bio_${caseNum}.jpg` });
+    if (resp?.success) setStatus(statusEl, '✅ 护照信息页已注入 — 在 CBP 弹窗里核对识别结果后提交', 'ok');
+    else setStatus(statusEl, `❌ 注入失败: ${resp?.error || 'no response'} — 确认已点开 CAPTURE DOCUMENT 弹窗`, 'err');
+  } catch (e) {
+    setStatus(statusEl, `❌ ${e.message}`, 'err');
+  }
+}
+
+async function saveCbpToCloudflare(page) {
+  const statusEl = document.getElementById('fill-status');
+  const caseNum = document.getElementById('case-number')?.value?.trim();
+  if (!lastCbp || !clientData || !caseNum) return;
+  const match = cbpMatchClient(lastCbp, clientData);
+  const override = document.getElementById('cbp-override')?.checked;
+  if (!match.ok && !override) {
+    setStatus(statusEl, '❌ 身份不匹配 — 核对后勾选强制保存', 'err');
+    return;
+  }
+  setStatus(statusEl, '保存到 Cloudflare…', 'info');
+  const c = lastCbp;
+  const merged = {
+    ...clientData,
+    i94Number: c.i94Number || clientData.i94Number,
+    lastEntryDate: c.entryDate || clientData.lastEntryDate,
+    lastEntryStatus: c.classOfAdmission || clientData.lastEntryStatus,
+    dateStatusExpires: c.admitUntil || clientData.dateStatusExpires,
+    i94StatusExpiry: c.admitUntil || clientData.i94StatusExpiry,   // legacy mirror
+    entryPort: (c.portMapped && c.port) || clientData.entryPort,
+    passportNumber: clientData.passportNumber || c.docNumber,
+    otherEntries: c.arrivalsCount > 1 ? 'Yes' : (clientData.otherEntries || 'No'),
+    _cbp: { capturedAt: c.capturedAt, sourceUrl: c.sourceUrl, travelHistory: c.travelHistory,
+            classOfAdmission: c.classOfAdmission, portRaw: c.portRaw,
+            confirmedBy: 'staff-extension', matchOverride: !match.ok },
+  };
+  try {
+    const res = await fetch(`${WORKER}/update-info-sheet`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ caseNumber: caseNum, infoFormData: merged }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (res.ok && json.success !== false) {
+      clientData = merged;
+      chrome.storage.local.set({ arreglo_client_data: merged, arreglo_case_number: caseNum });
+      setStatus(statusEl, `✅ I-94 已保存到 case ${caseNum} — CRM 同步后即生效，USCIS 填表将使用这些数据`, 'ok');
+    } else {
+      setStatus(statusEl, `❌ 保存失败: ${json.error || res.status}`, 'err');
+    }
+  } catch (e) {
+    setStatus(statusEl, `❌ 保存失败: ${e.message}`, 'err');
+  }
 }
 
 // ── Refresh page detection & update UI ───────────────────────────────────────
 let _pingFailCount = 0;
 
+// v1.33: a supported tab is USCIS *or* CBP — previously this only looked for
+// a USCIS tab, so on i94.cbp.dhs.gov it early-returned with a warning and the
+// CBP capture card never rendered (her 8:52PM screenshot).
+async function getSupportedTab() {
+  const active = await getActiveTab();
+  try {
+    if (active && SUPPORTED_HOSTS.test(new URL(active.url || '').hostname)) return active;
+  } catch (e) {}
+  return await getUscisTab();
+}
+
 async function refreshPageTag() {
   try {
-    const uscisTab = await getUscisTab();
+    const uscisTab = await getSupportedTab();
     if (!uscisTab) {
       document.getElementById('page-tag').innerHTML =
-        `<span class="page-tag" style="background:#fffbeb;color:#92400e">⚠️ Open my.uscis.gov in a tab</span>`;
+        `<span class="page-tag" style="background:#fffbeb;color:#92400e">⚠️ Open my.uscis.gov or i94.cbp.dhs.gov</span>`;
       return;
     }
     let resp;
@@ -389,9 +931,8 @@ async function refreshPageTag() {
     } catch(pingErr) {
       _pingFailCount++;
       if (_pingFailCount >= 3) {
-        // Clear the loading message after 3 fails — don't leave it stuck
         document.getElementById('page-tag').innerHTML =
-          `<span class="page-tag" style="background:#f1f5f9;color:#64748b">📄 Ready</span>`;
+          `<span class="page-tag" style="background:#fffbeb;color:#92400e">⚠️ Reconnecting to USCIS page</span>`;
       }
       return;
     }
@@ -405,14 +946,14 @@ async function refreshPageTag() {
       // Clear old fill results — show fresh preview for new page
       document.getElementById('fill-status').innerHTML = '';
       document.getElementById('fill-results').innerHTML = '';
+      renderCbpCard(currentPage);
+      // CBP page: capture is the workflow — USCIS fill button makes no sense there
+      const fillBtn = document.getElementById('btn-fill');
+      if (fillBtn) fillBtn.style.display = currentPage === 'cbp_i94' ? 'none' : '';
       if (clientData) {
-        // On address pages, default to China address (index 1) since US (0) is filled first
-        const isAddrPage = currentPage === 'residence_history_1' || currentPage === 'residence_history_3';
-        if (isAddrPage) {
-          const addrs = getAllAddresses();
-          if (addrs.length > 1 && selectedAddressIndex === 0) selectedAddressIndex = 1;
-        }
         renderAddressSelector(currentPage);
+        renderSchoolSelector(currentPage);
+        renderChildSelector(currentPage);
         renderFieldPreview(currentPage);
       }
     }
@@ -425,7 +966,7 @@ async function refreshPageTag() {
 let _pollInterval = null;
 function startPolling() {
   if (_pollInterval) return;
-  _pollInterval = setInterval(() => { if (clientData) refreshPageTag(); }, 600);
+  _pollInterval = setInterval(() => { refreshPageTag(); }, 600);  // v1.31: always poll so the CBP card appears before a client is loaded
 }
 function stopPolling() {
   if (_pollInterval) { clearInterval(_pollInterval); _pollInterval = null; }
@@ -443,15 +984,15 @@ document.getElementById('btn-load').addEventListener('click', async () => {
   setStatus(statusEl, 'Fetching from Cloudflare...', 'info');
 
   try {
-    const saved = await loadClientFromCloudflare(caseNum);
+    const saved = await loadClientFromCloudflare(caseNum, { resetAddressIndex: true });
     if (!saved) {
-      btn.disabled = false;
-      btn.textContent = 'Load Client 加载客户';
-      return;
+      btn.disabled = false; btn.textContent = 'Load Client 加载客户'; return;
     }
 
     // Render preview immediately with whatever currentPage is — don't block on USCIS ping
     renderAddressSelector(currentPage);
+    renderSchoolSelector(currentPage);
+    renderChildSelector(currentPage);
     renderFieldPreview(currentPage);
     // Detect USCIS page in background (non-blocking)
     refreshPageTag().catch(() => {});
@@ -477,9 +1018,13 @@ document.getElementById('btn-fill').addEventListener('click', async () => {
   try {
     const caseNum = document.getElementById('case-number').value.trim();
     setStatus(statusEl, 'Refreshing latest CRM data from Cloudflare...', 'info');
-    const refreshed = await loadClientFromCloudflare(caseNum, { silent: true });
+    const refreshed = await loadClientFromCloudflare(caseNum, { silent: true, requireInfoSheet: true });
     if (refreshed) clientData = refreshed;
-    else if (!clientData) throw new Error('No synced client data. Click Load Client first.');
+    else {
+      btn.disabled = false;
+      btn.textContent = 'Fill This Page 填写此页';
+      return;
+    }
   } catch(e) {
     setStatus(statusEl, `❌ Cloudflare refresh failed: ${e.message}`, 'err');
     btn.disabled = false;
@@ -498,9 +1043,23 @@ document.getElementById('btn-fill').addEventListener('click', async () => {
   const isAddrPage = currentPage === 'residence_history_1' || currentPage === 'residence_history_3';
   let opts = {};
   if (isAddrPage) {
-    const addrs = getAllAddresses();
-    const selectedAddr = addrs[selectedAddressIndex] || null;
-    opts = { addressIndex: selectedAddressIndex, selectedAddr };
+    const cls = classifyAddresses(clientData);
+    if (currentPage === 'residence_history_1') {
+      // Smart: auto-picked last address outside US — no selection needed
+      opts = { selectedAddr: cls.lastOutsideUs };
+    } else {
+      // Manual single-entry fallback picks from the computed 5-year list
+      opts = { addressIndex: selectedAddressIndex, selectedAddr: cls.fiveYearList[selectedAddressIndex] || null };
+    }
+  }
+  if (currentPage === 'school') {
+    // Single-entry mode: fill the selected school into the open editor.
+    // (Fill ALL has its own button in the school selector.)
+    opts = { selectedSchoolIndex, sortedSchools: getSortedSchools() };
+  }
+  if (currentPage === 'child_0_name' || currentPage === 'child_0_info') {
+    // Which child's data goes into the open "Add child" editor.
+    opts = { childIndex: selectedChildIndex };
   }
 
   try {
@@ -539,28 +1098,48 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   selectedAddressIndex = 0;
   currentPage = 'unknown';
   stopPolling();
-  chrome.storage.local.remove(['arreglo_data', 'arreglo_case']);
+  chrome.storage.local.remove(['arreglo_data', 'arreglo_case', 'arreglo_address_index']);
   document.getElementById('step-fill').style.display = 'none';
   document.getElementById('step-login').style.display = 'block';
   document.getElementById('case-number').value = '';
   document.getElementById('load-status').textContent = '';
   document.getElementById('fill-results').innerHTML = '';
   document.getElementById('addr-selector').innerHTML = '';
+  const schoolSel = document.getElementById('school-selector');
+  if (schoolSel) schoolSel.innerHTML = '';
+  selectedSchoolIndex = 0;
+  selectedChildIndex = 0;
 });
 
 // ── On popup open: restore session ───────────────────────────────────────────
-chrome.storage.local.get(['arreglo_data', 'arreglo_case'], async (result) => {
+chrome.storage.local.get(['arreglo_data', 'arreglo_case', 'arreglo_address_index'], async (result) => {
   if (result.arreglo_data && result.arreglo_case) {
     clientData = result.arreglo_data;
-    selectedAddressIndex = 0;
+    selectedAddressIndex = Number.isInteger(result.arreglo_address_index)
+      ? result.arreglo_address_index
+      : 0;
     const saved = clientData;
     renderLoadedClient(result.arreglo_case, saved);
     // Render preview immediately from cached data — no USCIS ping needed
     renderAddressSelector('unknown');
+    renderSchoolSelector('unknown');
+    renderChildSelector('unknown');
     renderFieldPreview('unknown');
     startPolling(); // poll will detect page and update preview within 600ms
     loadClientFromCloudflare(result.arreglo_case, { silent: true })
-      .then(fresh => { if (fresh) { renderAddressSelector(currentPage); renderFieldPreview(currentPage); } })
+      .then(fresh => {
+        if (fresh) {
+          renderAddressSelector(currentPage);
+          renderSchoolSelector(currentPage);
+          renderChildSelector(currentPage);
+          renderFieldPreview(currentPage);
+        }
+      })
       .catch(() => {});
   }
 });
+
+// v1.32.1: start polling only after the whole script has initialized —
+// calling it earlier hit the `let _pollInterval` temporal dead zone, threw,
+// and killed every event listener below it (the 'Load Client does nothing' bug).
+startPolling();
