@@ -22,6 +22,18 @@ assert.match(
   "Employment text fields must use USCIS-accepted real typing, but only one direct typed message"
 );
 
+assert.match(
+  content,
+  /function fitUscisTextToMax\(value, maxLength\) \{[\s\S]*Management[\s\S]*Mgmt[\s\S]*Building[\s\S]*Bldg[\s\S]*Street[\s\S]*St[\s\S]*slice\(0, limit\)/,
+  "Arreglo must abbreviate common terms and respect USCIS maxlength before typing long employment/address text"
+);
+
+assert.match(
+  content,
+  /const maxLength = Number\(el\.maxLength\);[\s\S]*const fitted = fitUscisTextToMax\(str, maxLength\);[\s\S]*SET_USCIS_TYPED_VALUE[\s\S]*value: fitted/,
+  "Employment text commit must read the field maxlength and type the fitted value, not the over-limit CRM value"
+);
+
 assert.doesNotMatch(
   content.match(/async function commitEmploymentText\(name, value\) \{[\s\S]*?\n\}/)?.[0] || "",
   /typeIntoField\(/,
