@@ -18,14 +18,14 @@ assert.match(
 
 assert.match(
   content,
-  /async function commitEmploymentText\(name, value\) \{[\s\S]*SET_USCIS_TEXT_VALUE[\s\S]*chrome\.runtime\.sendMessage/,
-  "Employment plain text fields must use one-shot replace text commit, not repeated per-character typing"
+  /async function commitEmploymentText\(name, value\) \{[\s\S]*SET_USCIS_TYPED_VALUE[\s\S]*chrome\.runtime\.sendMessage/,
+  "Employment text fields must use USCIS-accepted real typing, but only one direct typed message"
 );
 
 assert.doesNotMatch(
   content.match(/async function commitEmploymentText\(name, value\) \{[\s\S]*?\n\}/)?.[0] || "",
   /typeIntoField\(/,
-  "Employment company/occupation must not use the grouped-name per-character typer, which can visibly repeat long company names"
+  "Employment company/occupation must not use the retrying typeIntoField wrapper, which can visibly repeat long company names"
 );
 
 assert.match(
