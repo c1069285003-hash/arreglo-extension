@@ -23,8 +23,14 @@ assert.match(
 
 assert.match(
   content,
-  /async function fillOneEmployment\(idx, work, results\) \{[\s\S]*const field = \(\.\.\.suffixes\) => employmentFieldName\(idx, \.\.\.suffixes\);[\s\S]*commitEmploymentText\(field\('name'\)[\s\S]*commitEmploymentText\(field\('occupation'\)[\s\S]*fillAutocomplete\(field\('address\.country'\)/,
-  "Employment name, occupation, and country must be filled through resolved field names"
+  /function employmentFieldName\(idx,[\s\S]*toLowerCase\(\)[\s\S]*endsWith\(`\.\$\{sfx\}`\)[\s\S]*norm\(n\)\.endsWith\(norm\(suffix\)\)/,
+  "Employment field resolver must match USCIS name variants case-insensitively instead of only strict .name"
+);
+
+assert.match(
+  content,
+  /async function fillOneEmployment\(idx, work, results\) \{[\s\S]*const field = \(\.\.\.suffixes\) => employmentFieldName\(idx, \.\.\.suffixes\);[\s\S]*commitEmploymentText\(field\('name', 'employerName', 'nameOfEmployer'\)[\s\S]*commitEmploymentText\(field\('occupation', 'occupationTitle', 'position', 'jobTitle'\)[\s\S]*fillAutocomplete\(field\('address\.country'\)/,
+  "Employment name and occupation must try USCIS employer/job-title field variants before falling back"
 );
 
 assert.doesNotMatch(
