@@ -951,6 +951,7 @@ async function saveCbpToCloudflare(page) {
     passportNumber: clientData.passportNumber || c.docNumber,
     otherEntries: c.arrivalsCount > 1 ? 'Yes' : (clientData.otherEntries || 'No'),
     _cbp: { capturedAt: c.capturedAt, sourceUrl: c.sourceUrl, travelHistory: c.travelHistory,
+            docNumber: c.docNumber, arrivalsCount: c.arrivalsCount,
             classOfAdmission: c.classOfAdmission, portRaw: c.portRaw,
             confirmedBy: 'staff-extension', matchOverride: !match.ok },
   };

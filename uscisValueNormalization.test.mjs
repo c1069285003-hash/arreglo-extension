@@ -18,8 +18,8 @@ assert.ok(
 
 assert.match(
   content,
-  /statusQuery\(d\.lastEntryStatus \|\| 'B-2 Tourist'\)/,
-  "Arreglo should keep CRM-facing fallback text human-readable while translating it at USCIS fill time"
+  /statusQuery\(mostRecentEntry\.status \|\| d\.lastEntryStatus \|\| 'B-2 Tourist'\)/,
+  "Arreglo should use entry-row status first while keeping CRM-facing fallback text human-readable"
 );
 
 console.log("arreglo USCIS value normalization guards passed");
