@@ -30,8 +30,14 @@ assert.match(
 
 assert.match(
   content,
-  /const maxLength = Number\(el\.maxLength\);[\s\S]*const fitted = fitUscisTextToMax\(str, maxLength\);[\s\S]*SET_USCIS_TYPED_VALUE[\s\S]*value: fitted/,
-  "Employment text commit must read the field maxlength and type the fitted value, not the over-limit CRM value"
+  /function inferredUscisTextMax\(name, el\) \{[\s\S]*applicant\\\.employmentHistory\\\.\\d\+\\\.name\$[\s\S]*return 40[\s\S]*addressLineOne/,
+  "Arreglo must provide a verified fallback max for USCIS employment fields that hide maxlength in the DOM"
+);
+
+assert.match(
+  content,
+  /const maxLength = inferredUscisTextMax\(name, el\);[\s\S]*const fitted = fitUscisTextToMax\(str, maxLength\);[\s\S]*SET_USCIS_TYPED_VALUE[\s\S]*value: fitted/,
+  "Employment text commit must use the inferred field limit and type the fitted value, not the over-limit CRM value"
 );
 
 assert.doesNotMatch(
