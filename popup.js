@@ -663,9 +663,9 @@ async function fillAllAddresses() {
 }
 
 // ── Render school selector (shown only on Your School History page) ──────────
-// Default flow is fully automatic: "Fill ALL" sorts highest-degree-first and
-// fills every school (add → fill → save loop). The prev/next picker is only a
-// manual fallback for fixing a single entry.
+// Fill This Page is single-entry mode: staff chooses the exact school row, then
+// fills that one into the currently open USCIS editor. The all-school automation
+// is intentionally isolated behind the explicit Fill ALL button.
 function renderSchoolSelector(page) {
   const el = document.getElementById('school-selector');
   if (!el) return;
@@ -679,8 +679,10 @@ function renderSchoolSelector(page) {
   if (selectedSchoolIndex >= schools.length) selectedSchoolIndex = 0;
 
   const listHtml = schools.map((s, i) => `
-    <div style="display:flex;gap:6px;align-items:center;padding:2px 0;
-                ${i === selectedSchoolIndex ? 'font-weight:700;color:#1e3a5f' : 'color:#64748b'}">
+    <div class="school-row" data-school-index="${i}"
+         title="Click to select this school before Fill This Page"
+         style="display:flex;gap:6px;align-items:center;padding:4px 6px;border-radius:6px;cursor:pointer;
+                ${i === selectedSchoolIndex ? 'font-weight:700;color:#1e3a5f;background:#dbeafe' : 'color:#64748b'}">
       <span style="width:14px;text-align:right">${i + 1}.</span>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
         ${s.level || '—'} · ${s.school || '—'}
@@ -717,6 +719,12 @@ function renderSchoolSelector(page) {
     selectedSchoolIndex = (selectedSchoolIndex + 1) % schools.length;
     renderSchoolSelector(page);
   };
+  document.querySelectorAll('[data-school-index]').forEach(btn => {
+    btn.onclick = () => {
+      selectedSchoolIndex = Number(btn.dataset.schoolIndex);
+      renderSchoolSelector(page);
+    };
+  });
   document.getElementById('btn-fill-all-schools').onclick = () => fillSchools(true);
 }
 
@@ -1055,7 +1063,7 @@ document.getElementById('btn-fill').addEventListener('click', async () => {
   if (currentPage === 'school') {
     // Single-entry mode: fill the selected school into the open editor.
     // (Fill ALL has its own button in the school selector.)
-    opts = { selectedSchoolIndex, sortedSchools: getSortedSchools() };
+    opts = { fillAllSchools: false, selectedSchoolIndex, sortedSchools: getSortedSchools() };
   }
   if (currentPage === 'child_0_name' || currentPage === 'child_0_info') {
     // Which child's data goes into the open "Add child" editor.
