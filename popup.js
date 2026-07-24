@@ -126,6 +126,7 @@ const PREPARER = {
 let clientData = null;
 let selectedAddressIndex = 0;
 let selectedSchoolIndex = 0;   // index into the SORTED (highest-first) school list
+let selectedWorkIndex = 0;     // which CRM work history entry to fill into the open employment editor
 let selectedChildIndex = 0;    // which child's data to fill into the open "Add child" editor
 let currentPage = 'unknown';
 
@@ -227,6 +228,7 @@ async function loadClientFromCloudflare(caseNum, { silent = false, requireInfoSh
   renderLoadedClient(caseNum, saved);
   renderAddressSelector(currentPage);
   renderSchoolSelector(currentPage);
+  renderWorkSelector(currentPage);
   renderChildSelector(currentPage);
   renderFieldPreview(currentPage);
   return saved;
@@ -638,6 +640,66 @@ function renderChildSelector(page) {
   }
 }
 
+// ── Render work picker (shown on Your Employment History page) ───────────────
+// USCIS employment edits one employer at a time. Staff must be able to select
+// the exact CRM work row (e.g. Yinqingdaobo instead of Deran) before Fill This Page.
+function renderWorkSelector(page) {
+  const el = document.getElementById('addr-selector');
+  if (!el) return;
+  if (page !== 'employment' || !clientData) return;
+
+  const works = clientData.workList || [];
+  if (!works.length) {
+    el.innerHTML = `<div style="color:#991b1b;font-size:11px;margin-bottom:8px">❌ 该客户没有工作记录</div>`;
+    return;
+  }
+  if (selectedWorkIndex >= works.length) selectedWorkIndex = 0;
+
+  const rows = works.map((w, i) => `
+    <div class="work-row" data-work-index="${i}"
+         title="Click to select this employer before Fill This Page"
+         style="padding:5px 6px;border-radius:6px;cursor:pointer;border-bottom:1px solid #e2e8f0;
+                ${i === selectedWorkIndex ? 'font-weight:700;color:#1e3a5f;background:#dbeafe' : 'color:#64748b'}">
+      <div style="display:flex;gap:6px;align-items:center">
+        <span style="width:14px;text-align:right">${i + 1}.</span>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${w.company || '—'}</span>
+      </div>
+      <div style="display:flex;gap:6px;margin-left:20px;font-size:10px">
+        <span style="color:#64748b">${w.position || '—'}</span>
+        <span style="color:#94a3b8">${w.startDate || ''}${w.endDate ? `–${w.endDate}` : ''}</span>
+      </div>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div style="background:#f1f5f9;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <span style="font-weight:700;color:#1e3a5f">选择要填的工作 Employer</span>
+        <span style="color:#64748b">${selectedWorkIndex + 1} / ${works.length}</span>
+      </div>
+      ${rows}
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <button id="work-prev" style="flex:1;padding:4px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:12px">◀ Prev</button>
+        <button id="work-next" style="flex:1;padding:4px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:12px">Next ▶</button>
+      </div>
+      <div style="color:#94a3b8;margin-top:5px;font-size:10px">选好公司后点 Fill This Page 填入当前 employment editor</div>
+    </div>`;
+
+  document.getElementById('work-prev').onclick = () => {
+    selectedWorkIndex = (selectedWorkIndex - 1 + works.length) % works.length;
+    renderWorkSelector(page);
+  };
+  document.getElementById('work-next').onclick = () => {
+    selectedWorkIndex = (selectedWorkIndex + 1) % works.length;
+    renderWorkSelector(page);
+  };
+  document.querySelectorAll('[data-work-index]').forEach(btn => {
+    btn.onclick = () => {
+      selectedWorkIndex = Number(btn.dataset.workIndex);
+      renderWorkSelector(page);
+    };
+  });
+}
+
 async function fillAllAddresses() {
   const statusEl = document.getElementById('fill-status');
   setStatus(statusEl, '正在自动填写全部近5年地址…', 'info');
@@ -961,6 +1023,7 @@ async function refreshPageTag() {
       if (clientData) {
         renderAddressSelector(currentPage);
         renderSchoolSelector(currentPage);
+        renderWorkSelector(currentPage);
         renderChildSelector(currentPage);
         renderFieldPreview(currentPage);
       }
@@ -1000,6 +1063,7 @@ document.getElementById('btn-load').addEventListener('click', async () => {
     // Render preview immediately with whatever currentPage is — don't block on USCIS ping
     renderAddressSelector(currentPage);
     renderSchoolSelector(currentPage);
+    renderWorkSelector(currentPage);
     renderChildSelector(currentPage);
     renderFieldPreview(currentPage);
     // Detect USCIS page in background (non-blocking)
@@ -1065,6 +1129,10 @@ document.getElementById('btn-fill').addEventListener('click', async () => {
     // (Fill ALL has its own button in the school selector.)
     opts = { fillAllSchools: false, selectedSchoolIndex, sortedSchools: getSortedSchools() };
   }
+  if (currentPage === 'employment') {
+    // Single-entry mode: fill the selected CRM work row into the open editor.
+    opts = { selectedWorkIndex };
+  }
   if (currentPage === 'child_0_name' || currentPage === 'child_0_info') {
     // Which child's data goes into the open "Add child" editor.
     opts = { childIndex: selectedChildIndex };
@@ -1116,6 +1184,7 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   const schoolSel = document.getElementById('school-selector');
   if (schoolSel) schoolSel.innerHTML = '';
   selectedSchoolIndex = 0;
+  selectedWorkIndex = 0;
   selectedChildIndex = 0;
 });
 
@@ -1131,6 +1200,7 @@ chrome.storage.local.get(['arreglo_data', 'arreglo_case', 'arreglo_address_index
     // Render preview immediately from cached data — no USCIS ping needed
     renderAddressSelector('unknown');
     renderSchoolSelector('unknown');
+    renderWorkSelector('unknown');
     renderChildSelector('unknown');
     renderFieldPreview('unknown');
     startPolling(); // poll will detect page and update preview within 600ms
@@ -1139,6 +1209,7 @@ chrome.storage.local.get(['arreglo_data', 'arreglo_case', 'arreglo_address_index
         if (fresh) {
           renderAddressSelector(currentPage);
           renderSchoolSelector(currentPage);
+          renderWorkSelector(currentPage);
           renderChildSelector(currentPage);
           renderFieldPreview(currentPage);
         }

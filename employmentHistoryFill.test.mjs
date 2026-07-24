@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const content = readFileSync(new URL("./content.js", import.meta.url), "utf8");
+const popup = readFileSync(new URL("./popup.js", import.meta.url), "utf8");
 
 assert.match(
   content,
@@ -37,6 +38,24 @@ assert.doesNotMatch(
   content,
   /applicant\.employmentHistory\.0\.name/,
   "Employment fill must not hardcode applicant.employmentHistory.0.name"
+);
+
+assert.match(
+  popup,
+  /let selectedWorkIndex = 0;/,
+  "Popup must track which CRM work history entry staff selected"
+);
+
+assert.match(
+  popup,
+  /function renderWorkSelector\(page\) \{[\s\S]*page !== 'employment'[\s\S]*data-work-index="\$\{i\}"[\s\S]*selectedWorkIndex = Number\(btn\.dataset\.workIndex\);/,
+  "Employment page must show clickable CRM work history rows so staff can choose Yinqingdaobo instead of defaulting to Deran"
+);
+
+assert.match(
+  popup,
+  /if \(currentPage === 'employment'\) \{[\s\S]*opts = \{ selectedWorkIndex \};/,
+  "Generic Fill This Page on employment pages must send selectedWorkIndex to content.js"
 );
 
 console.log("arreglo employment history guards passed");
