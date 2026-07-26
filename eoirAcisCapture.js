@@ -126,10 +126,14 @@ export function parseEoirAcisText(text, sourceUrl = "") {
 
 export function parseEoirAcisResult(root) {
   if (!root) return error("EOIR ACIS result root is unavailable.");
-  if (typeof root.innerText !== "string") {
+  const renderedRoot = typeof root.innerText === "string" ? root : root.body;
+  if (!renderedRoot || typeof renderedRoot.innerText !== "string") {
     return error("EOIR ACIS result root does not expose rendered visible text.");
   }
-  const text = root.innerText;
-  const sourceUrl = root.baseURI || (root.ownerDocument && root.ownerDocument.location && root.ownerDocument.location.href) || "";
+  const text = renderedRoot.innerText;
+  const sourceUrl = root.baseURI
+    || renderedRoot.baseURI
+    || (renderedRoot.ownerDocument && renderedRoot.ownerDocument.location && renderedRoot.ownerDocument.location.href)
+    || "";
   return parseEoirAcisText(text, sourceUrl);
 }

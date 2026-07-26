@@ -1,4 +1,19 @@
 const WORKER = 'https://xinyuan.angie-li-business.workers.dev';
+const EOIR_PENDING_KEY = 'arreglo_eoir_pending_capture';
+const EOIR_PREVIEW_ENDPOINT = '/eoir-captures/preview-match';
+const EOIR_SAVE_ENDPOINT = '/eoir-captures';
+const EOIR_STATES = Object.freeze({
+  IDLE: 'idle',
+  READING: 'reading',
+  PREVIEW: 'preview',
+  MATCHING: 'matching',
+  READY: 'ready-to-confirm',
+  SAVING: 'saving',
+  LINKED: 'linked',
+  UNLINKED: 'unlinked',
+  CONFLICT: 'conflict',
+  PENDING_OFFLINE: 'pending-offline',
+});
 const PAGE_LABELS = {
   cbp_i94: 'CBP I-94 记录页',
   legal_assistance: 'Legal Assistance',
@@ -129,6 +144,9 @@ let selectedSchoolIndex = 0;   // index into the SORTED (highest-first) school l
 let selectedWorkIndex = 0;     // which CRM work history entry to fill into the open employment editor
 let selectedChildIndex = 0;    // which child's data to fill into the open "Add child" editor
 let currentPage = 'unknown';
+let eoirDraft = null;
+let eoirPending = null;
+let eoirMatchState = '';
 
 // ── School helpers (must match content.js sorting exactly) ────────────────────
 const EDU_LEVEL_RANK = [
@@ -247,14 +265,8 @@ async function getActiveTab() {
 }
 
 const SUPPORTED_HOSTS = /(^|\.)my\.uscis\.gov$|(^|\.)i94\.cbp\.dhs\.gov$/;
-async function sendToContent(msg, retries = 3) {
-  // v1.32: prefer the ACTIVE tab when it's a supported site — previously a
-  // background USCIS tab hijacked messages while staff worked on CBP.
-  const active = await getActiveTab();
-  let tab = null;
-  try { if (active && SUPPORTED_HOSTS.test(new URL(active.url || '').hostname)) tab = active; } catch (e) {}
-  if (!tab) tab = await getUscisTab() || active;
-  if (!tab) throw new Error('No USCIS tab found. Please open my.uscis.gov first.');
+async function sendToTabContent(tab, msg, retries = 3) {
+  if (!tab?.id) throw new Error('No supported government tab is open.');
   for (let i = 0; i < retries; i++) {
     try {
       return await chrome.tabs.sendMessage(tab.id, msg);
@@ -274,6 +286,17 @@ async function sendToContent(msg, retries = 3) {
       await new Promise(r => setTimeout(r, 600));
     }
   }
+}
+
+async function sendToContent(msg, retries = 3) {
+  // v1.32: prefer the ACTIVE tab when it's a supported site — previously a
+  // background USCIS tab hijacked messages while staff worked on CBP.
+  const active = await getActiveTab();
+  let tab = null;
+  try { if (active && SUPPORTED_HOSTS.test(new URL(active.url || '').hostname)) tab = active; } catch (e) {}
+  if (!tab) tab = await getUscisTab() || active;
+  if (!tab) throw new Error('No USCIS tab found. Please open my.uscis.gov first.');
+  return sendToTabContent(tab, msg, retries);
 }
 
 
@@ -819,6 +842,319 @@ async function fillSchools(all) {
   }
 }
 
+// ── EOIR ACIS capture (explicit staff action only) ────────────────────────────
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function isEoirAcisUrl(value) {
+  try {
+    return new URL(value || '').hostname === 'acis.eoir.justice.gov';
+  } catch (e) {
+    return false;
+  }
+}
+
+function isCbpI94Url(value) {
+  try {
+    return new URL(value || '').hostname === 'i94.cbp.dhs.gov';
+  } catch (e) {
+    return false;
+  }
+}
+
+async function getActiveBrowserTab() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  return tab || null;
+}
+
+function eoirStateMessage(state, detail = '') {
+  const messages = {
+    [EOIR_STATES.IDLE]: 'Open an EOIR ACIS result, then click Capture EOIR.',
+    [EOIR_STATES.READING]: 'Reading the visible EOIR result…',
+    [EOIR_STATES.PREVIEW]: 'Review the machine-produced draft below.',
+    [EOIR_STATES.MATCHING]: 'Checking Cloudflare for a strong client match…',
+    [EOIR_STATES.READY]: eoirMatchState === EOIR_STATES.LINKED
+      ? 'Strong client match found. Review every field before confirming.'
+      : 'No strong client match. Confirmation will save Case Status only as unlinked.',
+    [EOIR_STATES.SAVING]: 'Saving the staff-confirmed capture to Cloudflare…',
+    [EOIR_STATES.LINKED]: 'Saved and linked to the matching CRM client.',
+    [EOIR_STATES.UNLINKED]: 'Saved as Case Status only / unlinked.',
+    [EOIR_STATES.CONFLICT]: 'Identity conflict. Nothing was attached; review the preview.',
+    [EOIR_STATES.PENDING_OFFLINE]: eoirPending
+      ? 'Save is pending. Retry will use the same capture ID.'
+      : 'Cloudflare preview is unavailable. Retry matching when online.',
+  };
+  return detail ? `${messages[state] || state} ${detail}` : (messages[state] || state);
+}
+
+function renderEoirPreview(fields) {
+  const preview = document.getElementById('eoir-preview');
+  if (!preview) return;
+  if (!fields) {
+    preview.innerHTML = '';
+    preview.style.display = 'none';
+    return;
+  }
+
+  const hearing = [
+    fields.hearingDate,
+    fields.hearingTime,
+    fields.hearingType,
+  ].filter(Boolean).join(' · ');
+  const rows = [
+    ['Name', fields.subjectName],
+    ['A-Number', fields.alienNumber],
+    ['Docket date', fields.docketDate],
+    ['Hearing', hearing],
+    ['Appearance', fields.appearanceMode],
+    ['Judge', fields.judge],
+    ['Court', fields.courtAddress],
+    ['Court phone', fields.courtPhone],
+    ['Case status', fields.caseStatus],
+    ['BIA status', fields.biaStatus],
+    ['Source', fields.sourceUrl],
+    ['Capture time', fields.capturedAt],
+  ];
+  preview.innerHTML = rows.map(([label, value]) =>
+    `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value || '—')}</dd>`
+  ).join('');
+  preview.style.display = 'grid';
+}
+
+function setEoirState(state, detail = '') {
+  const card = document.getElementById('eoir-card');
+  const status = document.getElementById('eoir-state');
+  const captureButton = document.getElementById('btn-eoir-capture');
+  const confirmButton = document.getElementById('btn-eoir-confirm');
+  if (!card || !status || !captureButton || !confirmButton) return;
+
+  card.dataset.state = state;
+  card.classList.add('is-visible');
+  status.textContent = eoirStateMessage(state, detail);
+  renderEoirPreview(eoirDraft?.fields || eoirPending?.fields || null);
+
+  const busy = state === EOIR_STATES.READING
+    || state === EOIR_STATES.MATCHING
+    || state === EOIR_STATES.SAVING;
+  captureButton.disabled = busy || Boolean(eoirPending);
+  captureButton.textContent = eoirPending
+    ? 'Confirmed Save Pending'
+    : (eoirDraft ? 'Capture Again' : 'Capture EOIR');
+
+  const canConfirm = state === EOIR_STATES.READY;
+  const canRetry = state === EOIR_STATES.PENDING_OFFLINE
+    || (state === EOIR_STATES.CONFLICT && Boolean(eoirPending));
+  confirmButton.style.display = canConfirm || canRetry ? '' : 'none';
+  confirmButton.disabled = busy;
+  confirmButton.textContent = canConfirm
+    ? 'Confirm Save to Case Status'
+    : (eoirPending ? 'Retry Confirmed Save' : 'Retry Match');
+}
+
+function getEoirResultState(payload) {
+  const state = payload?.state
+    || payload?.matchState
+    || payload?.linkState
+    || payload?.match?.state
+    || payload?.capture?.linkState
+    || '';
+  if (state === EOIR_STATES.LINKED || state === 'strong-match') return EOIR_STATES.LINKED;
+  if (state === EOIR_STATES.UNLINKED || state === 'no-match') return EOIR_STATES.UNLINKED;
+  if (state === EOIR_STATES.CONFLICT) return EOIR_STATES.CONFLICT;
+  return '';
+}
+
+async function parseJsonResponse(response) {
+  try {
+    return await response.json();
+  } catch (e) {
+    return {};
+  }
+}
+
+async function previewEoirMatch() {
+  if (!eoirDraft) return;
+  setEoirState(EOIR_STATES.MATCHING);
+  try {
+    const response = await fetch(`${WORKER}${EOIR_PREVIEW_ENDPOINT}`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        captureId: eoirDraft.captureId,
+        fields: eoirDraft.fields,
+      }),
+    });
+    const result = await parseJsonResponse(response);
+    const matchState = getEoirResultState(result);
+    if (!response.ok || result.success === false || result.ok === false) {
+      if (response.status === 409 || matchState === EOIR_STATES.CONFLICT) {
+        setEoirState(EOIR_STATES.CONFLICT, result.error || result.reason || '');
+        return;
+      }
+      throw new Error(result.error || `HTTP ${response.status}`);
+    }
+    if (!matchState) throw new Error('Worker returned no match state.');
+    if (matchState === EOIR_STATES.CONFLICT) {
+      setEoirState(EOIR_STATES.CONFLICT, result.error || result.reason || '');
+      return;
+    }
+    eoirMatchState = matchState;
+    setEoirState(EOIR_STATES.READY);
+  } catch (error) {
+    setEoirState(EOIR_STATES.PENDING_OFFLINE, error.message);
+  }
+}
+
+async function captureEoirResult(activeTab) {
+  eoirPending = null;
+  eoirDraft = null;
+  eoirMatchState = '';
+  setEoirState(EOIR_STATES.READING);
+
+  try {
+    const tab = activeTab || await getActiveBrowserTab();
+    if (!tab || !isEoirAcisUrl(tab.url)) {
+      throw new Error('The active tab is not acis.eoir.justice.gov.');
+    }
+    const response = await sendToTabContent(tab, {
+      type: 'ARREGLO_CAPTURE_EOIR_RESULT',
+    });
+    if (!response?.ok || !response.fields) {
+      throw new Error(response?.error || 'Unable to read this page.');
+    }
+
+    eoirDraft = {
+      captureId: crypto.randomUUID(),
+      fields: {
+        ...response.fields,
+        capturedAt: new Date().toISOString(),
+      },
+    };
+    setEoirState(EOIR_STATES.PREVIEW);
+    await previewEoirMatch();
+  } catch (error) {
+    setEoirState(EOIR_STATES.IDLE, error.message);
+  }
+}
+
+async function captureCbpResult(activeTab) {
+  const statusEl = document.getElementById('fill-status');
+  try {
+    const tab = activeTab || await getActiveBrowserTab();
+    if (!tab || !isCbpI94Url(tab.url)) {
+      throw new Error('The active tab is not i94.cbp.dhs.gov.');
+    }
+    const response = await sendToTabContent(tab, { type: 'EXTRACT_CBP' });
+    if (!response?.success) {
+      throw new Error(response?.error || 'Unable to capture this CBP result.');
+    }
+    lastCbp = response.data;
+    renderCbpCard('cbp_i94');
+  } catch (error) {
+    if (statusEl) setStatus(statusEl, `❌ 抓取失败: ${error.message}`, 'err');
+  }
+}
+
+async function captureGovernmentResult() {
+  const tab = await getActiveBrowserTab();
+  if (tab && isEoirAcisUrl(tab.url)) {
+    await captureEoirResult(tab);
+    return;
+  }
+  if (tab && isCbpI94Url(tab.url)) {
+    await captureCbpResult(tab);
+    return;
+  }
+  setEoirState(EOIR_STATES.IDLE, 'Open an EOIR ACIS or CBP I-94 result first.');
+}
+
+async function saveEoirPending() {
+  if (!eoirPending) return;
+  setEoirState(EOIR_STATES.SAVING);
+  try {
+    const response = await fetch(`${WORKER}${EOIR_SAVE_ENDPOINT}`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(eoirPending),
+    });
+    const result = await parseJsonResponse(response);
+    const savedState = getEoirResultState(result);
+    if (response.status === 409 || savedState === EOIR_STATES.CONFLICT) {
+      setEoirState(EOIR_STATES.CONFLICT, result.error || result.reason || '');
+      return;
+    }
+    const cloudflareConfirmed = response.ok
+      && (result.success === true || result.ok === true)
+      && (savedState === EOIR_STATES.LINKED || savedState === EOIR_STATES.UNLINKED);
+    if (!cloudflareConfirmed) {
+      throw new Error(result.error || `Cloudflare did not confirm save (HTTP ${response.status}).`);
+    }
+
+    await chrome.storage.local.remove([EOIR_PENDING_KEY]);
+    eoirPending = null;
+    setEoirState(savedState);
+  } catch (error) {
+    setEoirState(EOIR_STATES.PENDING_OFFLINE, error.message);
+  }
+}
+
+async function confirmEoirSave() {
+  if (!eoirDraft) return;
+  const pendingPayload = {
+    captureId: eoirDraft.captureId,
+    fields: eoirDraft.fields,
+    staffConfirmed: true,
+  };
+  eoirPending = pendingPayload;
+  await chrome.storage.local.set({ [EOIR_PENDING_KEY]: pendingPayload });
+  await saveEoirPending();
+}
+
+async function handleEoirConfirm() {
+  if (eoirPending) {
+    await saveEoirPending();
+  } else if (eoirDraft && document.getElementById('eoir-card')?.dataset.state === EOIR_STATES.READY) {
+    await confirmEoirSave();
+  } else if (eoirDraft) {
+    await previewEoirMatch();
+  }
+}
+
+async function refreshEoirVisibility() {
+  const card = document.getElementById('eoir-card');
+  if (!card || eoirPending) return;
+  const tab = await getActiveBrowserTab();
+  const visible = Boolean(tab && isEoirAcisUrl(tab.url));
+  card.classList.toggle('is-visible', visible);
+  if (visible && !eoirDraft) setEoirState(EOIR_STATES.IDLE);
+}
+
+async function initializeEoirCapture() {
+  document.getElementById('btn-eoir-capture')?.addEventListener('click', captureGovernmentResult);
+  document.getElementById('btn-eoir-confirm')?.addEventListener('click', handleEoirConfirm);
+
+  const stored = await chrome.storage.local.get([EOIR_PENDING_KEY]);
+  const pending = stored?.[EOIR_PENDING_KEY];
+  if (pending
+      && typeof pending.captureId === 'string'
+      && pending.fields
+      && pending.staffConfirmed === true) {
+    eoirPending = pending;
+    eoirDraft = { captureId: pending.captureId, fields: pending.fields };
+    setEoirState(EOIR_STATES.PENDING_OFFLINE);
+    return;
+  }
+  await refreshEoirVisibility();
+}
+
 // ── CBP I-94 capture card (v1.31) ─────────────────────────────────────────────
 // Workflow: staff loads the client (case #) → opens i94.cbp.dhs.gov and runs
 // the passport search → this card captures the results, verifies they belong
@@ -890,11 +1226,7 @@ function renderCbpCard(page) {
     <div style="font-weight:700;color:#1e3a5f;font-size:12px;margin-bottom:4px">🛂 CBP I-94 捕获</div>${body}</div>`;
 
   const cap = document.getElementById('btn-cbp-capture') || document.getElementById('btn-cbp-recapture');
-  if (cap) cap.onclick = async () => {
-    const resp = await sendToContent({ type: 'EXTRACT_CBP' });
-    if (resp?.success) { lastCbp = resp.data; renderCbpCard(page); }
-    else setStatus(document.getElementById('fill-status'), `❌ 抓取失败: ${resp?.error || 'no response'}`, 'err');
-  };
+  if (cap) cap.onclick = captureGovernmentResult;
   const save = document.getElementById('btn-cbp-save');
   if (save) save.onclick = () => saveCbpToCloudflare(page);
   const pp = document.getElementById('btn-cbp-passport');
@@ -989,6 +1321,7 @@ async function getSupportedTab() {
 
 async function refreshPageTag() {
   try {
+    await refreshEoirVisibility();
     const uscisTab = await getSupportedTab();
     if (!uscisTab) {
       document.getElementById('page-tag').innerHTML =
@@ -1222,4 +1555,5 @@ chrome.storage.local.get(['arreglo_data', 'arreglo_case', 'arreglo_address_index
 // v1.32.1: start polling only after the whole script has initialized —
 // calling it earlier hit the `let _pollInterval` temporal dead zone, threw,
 // and killed every event listener below it (the 'Load Client does nothing' bug).
+initializeEoirCapture().catch(() => {});
 startPolling();

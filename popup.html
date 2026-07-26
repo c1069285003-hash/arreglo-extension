@@ -77,6 +77,30 @@
   .dot-skip { background: #d1d5db; }
   .result-name { color: #64748b; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .result-val { color: #1e293b; font-weight: 500; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .eoir-card {
+    display: none;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 14px;
+  }
+  .eoir-card.is-visible { display: block; }
+  .eoir-title { color: #1e3a5f; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .eoir-state { color: #64748b; font-size: 11px; line-height: 1.45; margin-bottom: 8px; }
+  .eoir-preview {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 4px 8px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 8px;
+    margin: 8px 0;
+    font-size: 11px;
+  }
+  .eoir-preview dt { color: #64748b; }
+  .eoir-preview dd { color: #1e293b; font-weight: 600; overflow-wrap: anywhere; }
+  .eoir-actions { display: flex; gap: 6px; }
+  .eoir-actions .btn { margin-bottom: 0; }
 </style>
 </head>
 <body>
@@ -87,6 +111,19 @@
   </div>
 </div>
 <div class="body">
+
+  <!-- Explicit, staff-reviewed EOIR ACIS capture -->
+  <div class="eoir-card" id="eoir-card" data-state="idle">
+    <div class="eoir-title">⚖️ EOIR Case Status 捕获</div>
+    <div class="eoir-state" id="eoir-state" aria-live="polite"></div>
+    <dl class="eoir-preview" id="eoir-preview" style="display:none"></dl>
+    <div class="eoir-actions">
+      <button class="btn btn-secondary" id="btn-eoir-capture">Capture EOIR</button>
+      <button class="btn btn-primary" id="btn-eoir-confirm" style="display:none">
+        Confirm Save to Case Status
+      </button>
+    </div>
+  </div>
 
   <!-- Step 1: Case number input -->
   <div class="section" id="step-login">

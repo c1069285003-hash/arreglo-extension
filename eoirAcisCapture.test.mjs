@@ -84,6 +84,19 @@ test("reads rendered visible text from a page root", () => {
   assert.equal(result.fields.sourceUrl, "https://acis.eoir.justice.gov/en/caseInformation");
 });
 
+test("reads rendered visible text from a browser-shaped document", () => {
+  const document = {
+    body: { innerText: approvedResult },
+    baseURI: "https://acis.eoir.justice.gov/en/caseInformation",
+  };
+
+  const result = parseEoirAcisResult(document);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.fields.subjectName, "QIN, HAIXIA");
+  assert.equal(result.fields.alienNumber, "236333728");
+});
+
 test("fails closed rather than reading a result from non-rendered textContent", () => {
   const root = {
     // A non-rendered node exposes textContent but no browser-computed innerText.
