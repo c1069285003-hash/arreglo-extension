@@ -18,16 +18,31 @@ function labeledValue(text, label) {
   return match ? match[1].trim() : "";
 }
 
+function isCalendarDate(year, month, day) {
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year
+    && date.getUTCMonth() === month - 1
+    && date.getUTCDate() === day;
+}
+
 function formatEnglishDate(value) {
   const match = String(value || "").trim().match(/^([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})$/);
   if (!match || !MONTHS[match[1].toLowerCase()]) return "";
-  return `${MONTHS[match[1].toLowerCase()]}/${match[2].padStart(2, "0")}/${match[3]}`;
+  const month = Number(MONTHS[match[1].toLowerCase()]);
+  const day = Number(match[2]);
+  const year = Number(match[3]);
+  if (!isCalendarDate(year, month, day)) return "";
+  return `${String(month).padStart(2, "0")}/${String(day).padStart(2, "0")}/${year}`;
 }
 
 function formatNumericDate(value) {
   const match = String(value || "").trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (!match) return "";
-  return `${match[1].padStart(2, "0")}/${match[2].padStart(2, "0")}/${match[3]}`;
+  const month = Number(match[1]);
+  const day = Number(match[2]);
+  const year = Number(match[3]);
+  if (!isCalendarDate(year, month, day)) return "";
+  return `${String(month).padStart(2, "0")}/${String(day).padStart(2, "0")}/${year}`;
 }
 
 function error(message) {
@@ -69,8 +84,9 @@ export function parseEoirAcisText(text, sourceUrl = "") {
   const phoneMatch = visible.match(/Phone Number\s*([^\n]+)/i);
   const docketRaw = labeledValue(visible, "Docket Date");
   const addressMatch = visible.match(/(?:^|\n)Court Address\n([\s\S]*?)(?=\n(?:This case is|No appeal was|Phone Number|Judge\b)|$)/i);
-  const address = addressMatch
-    ? addressMatch[1].split("\n").map((line) => line.trim()).filter(Boolean).join(", ")
+  const rawAddress = addressMatch ? addressMatch[1].trim() : "";
+  const address = rawAddress
+    ? rawAddress.split("\n").map((line) => line.trim()).filter(Boolean).join(", ")
     : "";
 
   const rawVisibleFields = {
@@ -79,7 +95,7 @@ export function parseEoirAcisText(text, sourceUrl = "") {
     docketDate: docketRaw,
     hearing: hearingMatch ? hearingMatch[0] : "",
     judge: judgeMatch ? judgeMatch[1].trim() : "",
-    courtAddress: address,
+    courtAddress: rawAddress,
     courtPhone: phoneMatch ? phoneMatch[1].trim() : "",
     caseStatus: caseStatusMatch ? caseStatusMatch[1].trim() : "",
     biaStatus: biaStatusMatch ? biaStatusMatch[1].trim() : "",
@@ -110,7 +126,10 @@ export function parseEoirAcisText(text, sourceUrl = "") {
 
 export function parseEoirAcisResult(root) {
   if (!root) return error("EOIR ACIS result root is unavailable.");
-  const text = root.innerText || root.textContent || "";
+  if (typeof root.innerText !== "string") {
+    return error("EOIR ACIS result root does not expose rendered visible text.");
+  }
+  const text = root.innerText;
   const sourceUrl = root.baseURI || (root.ownerDocument && root.ownerDocument.location && root.ownerDocument.location.href) || "";
   return parseEoirAcisText(text, sourceUrl);
 }
