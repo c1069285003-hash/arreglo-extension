@@ -14,6 +14,10 @@ const EOIR_STATES = Object.freeze({
   CONFLICT: 'conflict',
   PENDING_OFFLINE: 'pending-offline',
 });
+const eoirPendingState = createEoirPendingState({
+  storage: chrome.storage.local,
+  pendingKey: EOIR_PENDING_KEY,
+});
 const PAGE_LABELS = {
   cbp_i94: 'CBP I-94 记录页',
   legal_assistance: 'Legal Assistance',
@@ -145,7 +149,6 @@ let selectedWorkIndex = 0;     // which CRM work history entry to fill into the 
 let selectedChildIndex = 0;    // which child's data to fill into the open "Add child" editor
 let currentPage = 'unknown';
 let eoirDraft = null;
-let eoirPending = null;
 let eoirMatchState = '';
 
 // ── School helpers (must match content.js sorting exactly) ────────────────────
@@ -874,6 +877,7 @@ async function getActiveBrowserTab() {
 }
 
 function eoirStateMessage(state, detail = '') {
+  const eoirPending = eoirPendingState.getPending();
   const messages = {
     [EOIR_STATES.IDLE]: 'Open an EOIR ACIS result, then click Capture EOIR.',
     [EOIR_STATES.READING]: 'Reading the visible EOIR result…',
@@ -933,6 +937,7 @@ function setEoirState(state, detail = '') {
   const captureButton = document.getElementById('btn-eoir-capture');
   const confirmButton = document.getElementById('btn-eoir-confirm');
   if (!card || !status || !captureButton || !confirmButton) return;
+  const eoirPending = eoirPendingState.getPending();
 
   card.dataset.state = state;
   card.classList.add('is-visible');
@@ -1013,7 +1018,10 @@ async function previewEoirMatch() {
 }
 
 async function captureEoirResult(activeTab) {
-  eoirPending = null;
+  if (!eoirPendingState.tryBeginCapture()) {
+    setEoirState(EOIR_STATES.PENDING_OFFLINE, 'A confirmed save is already pending.');
+    return;
+  }
   eoirDraft = null;
   eoirMatchState = '';
   setEoirState(EOIR_STATES.READING);
@@ -1076,9 +1084,12 @@ async function captureGovernmentResult() {
 }
 
 async function saveEoirPending() {
+  let eoirPending = eoirPendingState.getPending();
   if (!eoirPending) return;
   setEoirState(EOIR_STATES.SAVING);
   try {
+    await eoirPendingState.ensurePersisted();
+    eoirPending = eoirPendingState.getPending();
     const response = await fetch(`${WORKER}${EOIR_SAVE_ENDPOINT}`, {
       method: 'POST',
       credentials: 'include',
@@ -1091,15 +1102,15 @@ async function saveEoirPending() {
       setEoirState(EOIR_STATES.CONFLICT, result.error || result.reason || '');
       return;
     }
-    const cloudflareConfirmed = response.ok
-      && (result.success === true || result.ok === true)
-      && (savedState === EOIR_STATES.LINKED || savedState === EOIR_STATES.UNLINKED);
-    if (!cloudflareConfirmed) {
+    const cleared = await eoirPendingState.finishSave({
+      httpOk: response.ok,
+      resultOk: result.success === true || result.ok === true,
+      linkState: savedState,
+    });
+    if (!cleared) {
       throw new Error(result.error || `Cloudflare did not confirm save (HTTP ${response.status}).`);
     }
 
-    await chrome.storage.local.remove([EOIR_PENDING_KEY]);
-    eoirPending = null;
     setEoirState(savedState);
   } catch (error) {
     setEoirState(EOIR_STATES.PENDING_OFFLINE, error.message);
@@ -1108,18 +1119,19 @@ async function saveEoirPending() {
 
 async function confirmEoirSave() {
   if (!eoirDraft) return;
-  const pendingPayload = {
-    captureId: eoirDraft.captureId,
-    fields: eoirDraft.fields,
-    staffConfirmed: true,
-  };
-  eoirPending = pendingPayload;
-  await chrome.storage.local.set({ [EOIR_PENDING_KEY]: pendingPayload });
+  const persistence = eoirPendingState.beginConfirmation(eoirDraft);
+  setEoirState(EOIR_STATES.SAVING);
+  try {
+    await persistence;
+  } catch (error) {
+    setEoirState(EOIR_STATES.PENDING_OFFLINE, error.message);
+    return;
+  }
   await saveEoirPending();
 }
 
 async function handleEoirConfirm() {
-  if (eoirPending) {
+  if (eoirPendingState.getPending()) {
     await saveEoirPending();
   } else if (eoirDraft && document.getElementById('eoir-card')?.dataset.state === EOIR_STATES.READY) {
     await confirmEoirSave();
@@ -1130,7 +1142,7 @@ async function handleEoirConfirm() {
 
 async function refreshEoirVisibility() {
   const card = document.getElementById('eoir-card');
-  if (!card || eoirPending) return;
+  if (!card || eoirPendingState.getPending()) return;
   const tab = await getActiveBrowserTab();
   const visible = Boolean(tab && isEoirAcisUrl(tab.url));
   card.classList.toggle('is-visible', visible);
@@ -1147,7 +1159,7 @@ async function initializeEoirCapture() {
       && typeof pending.captureId === 'string'
       && pending.fields
       && pending.staffConfirmed === true) {
-    eoirPending = pending;
+    eoirPendingState.restore(pending);
     eoirDraft = { captureId: pending.captureId, fields: pending.fields };
     setEoirState(EOIR_STATES.PENDING_OFFLINE);
     return;

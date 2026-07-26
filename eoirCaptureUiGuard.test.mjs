@@ -6,6 +6,7 @@ const manifestPath = new URL("./manifest.json", import.meta.url);
 const contentPath = new URL("./content.js", import.meta.url);
 const popupHtmlPath = new URL("./popup.html", import.meta.url);
 const popupJsPath = new URL("./popup.js", import.meta.url);
+const pendingStatePath = new URL("./eoirPendingState.js", import.meta.url);
 
 test("ACIS permission is narrow and capture is explicit", () => {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
@@ -71,13 +72,14 @@ test("popup exposes every EOIR review state and field", () => {
 
 test("preview and confirmed save use one persisted capture ID", () => {
   const popup = readFileSync(popupJsPath, "utf8");
+  const pendingState = readFileSync(pendingStatePath, "utf8");
 
   assert.match(popup, /crypto\.randomUUID\(\)/);
   assert.match(popup, /\/eoir-captures\/preview-match/);
   assert.match(popup, /\/eoir-captures['"`]/);
-  assert.match(popup, /staffConfirmed:\s*true/);
-  assert.match(popup, /chrome\.storage\.local\.set\([^)]*EOIR_PENDING_KEY/s);
-  assert.match(popup, /chrome\.storage\.local\.remove\(\[EOIR_PENDING_KEY\]\)/);
+  assert.match(pendingState, /staffConfirmed:\s*true/);
+  assert.match(pendingState, /storage\.set\(\{ \[pendingKey\]: target \}\)/);
+  assert.match(pendingState, /storage\.remove\(\[pendingKey\]\)/);
   assert.match(popup, /captureButton\.disabled = busy \|\| Boolean\(eoirPending\)/);
 });
 
@@ -100,7 +102,23 @@ test("save conflict keeps the pending ID retryable", () => {
     popup,
     /const canRetry = state === EOIR_STATES\.PENDING_OFFLINE\s*\|\| \(state === EOIR_STATES\.CONFLICT && Boolean\(eoirPending\)\)/,
   );
-  assert.match(popup, /if \(eoirPending\) \{\s*await saveEoirPending\(\);/);
+  assert.match(popup, /if \(eoirPendingState\.getPending\(\)\) \{\s*await saveEoirPending\(\);/);
+});
+
+test("popup delegates the confirmed pending lifecycle to the runtime state guard", () => {
+  const popupHtml = readFileSync(popupHtmlPath, "utf8");
+  const popup = readFileSync(popupJsPath, "utf8");
+
+  assert.ok(
+    popupHtml.indexOf('src="eoirPendingState.js"') < popupHtml.indexOf('src="popup.js"'),
+    "pending state runtime must load before popup orchestration",
+  );
+  assert.match(popup, /createEoirPendingState\(\{\s*storage:\s*chrome\.storage\.local,\s*pendingKey:\s*EOIR_PENDING_KEY/s);
+  assert.match(popup, /if \(!eoirPendingState\.tryBeginCapture\(\)\)/);
+  assert.match(popup, /eoirPendingState\.beginConfirmation\(eoirDraft\)/);
+  assert.match(popup, /await eoirPendingState\.ensurePersisted\(\)/);
+  assert.match(popup, /await eoirPendingState\.finishSave\(/);
+  assert.doesNotMatch(popup, /chrome\.storage\.local\.(?:set|remove)\([^)]*EOIR_PENDING_KEY/s);
 });
 
 test("EOIR UI source contains no ACIS automation", () => {
