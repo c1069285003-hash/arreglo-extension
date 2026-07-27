@@ -1071,16 +1071,23 @@ async function captureCbpResult(activeTab) {
 }
 
 async function captureGovernmentResult() {
-  const tab = await getActiveBrowserTab();
-  if (tab && isEoirAcisUrl(tab.url)) {
-    await captureEoirResult(tab);
-    return;
+  try {
+    const tab = await getActiveBrowserTab();
+    if (tab && isEoirAcisUrl(tab.url)) {
+      await captureEoirResult(tab);
+      return;
+    }
+    if (tab && isCbpI94Url(tab.url)) {
+      await captureCbpResult(tab);
+      return;
+    }
+    setEoirState(EOIR_STATES.IDLE, 'Open an EOIR ACIS or CBP I-94 result first.');
+  } catch (error) {
+    setEoirState(
+      EOIR_STATES.IDLE,
+      `Unable to read the active browser tab. ${error?.message || String(error)}`,
+    );
   }
-  if (tab && isCbpI94Url(tab.url)) {
-    await captureCbpResult(tab);
-    return;
-  }
-  setEoirState(EOIR_STATES.IDLE, 'Open an EOIR ACIS or CBP I-94 result first.');
 }
 
 async function saveEoirPending() {
@@ -1567,5 +1574,10 @@ chrome.storage.local.get(['arreglo_data', 'arreglo_case', 'arreglo_address_index
 // v1.32.1: start polling only after the whole script has initialized —
 // calling it earlier hit the `let _pollInterval` temporal dead zone, threw,
 // and killed every event listener below it (the 'Load Client does nothing' bug).
-initializeEoirCapture().catch(() => {});
+initializeEoirCapture().catch((error) => {
+  setEoirState(
+    EOIR_STATES.IDLE,
+    `Unable to initialize EOIR capture. ${error?.message || String(error)}`,
+  );
+});
 startPolling();

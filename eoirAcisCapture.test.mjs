@@ -49,6 +49,19 @@ test("parses the approved QIN HAIXIA ACIS result", () => {
   assert.equal(rawVisibleFields.docketDate, "4/24/2026");
 });
 
+test("parses a complete result when the shared footer mentions hCaptcha", () => {
+  const result = parseEoirAcisText(
+    `${approvedResult}
+      This site is protected by hCaptcha and its Privacy Policy and Terms of Service apply.
+    `,
+    "https://acis.eoir.justice.gov/en/caseInformation",
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.fields.subjectName, "QIN, HAIXIA");
+  assert.equal(result.fields.alienNumber, "236333728");
+});
+
 test("normalizes only a complete nine-digit A-Number", () => {
   assert.equal(normalizeAlienNumber("A-236-333-728"), "236333728");
   assert.equal(normalizeAlienNumber("236-333-72"), "");

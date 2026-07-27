@@ -57,22 +57,32 @@ export function normalizeAlienNumber(value) {
 export function parseEoirAcisText(text, sourceUrl = "") {
   const visible = visibleText(text);
   if (!visible) return error("EOIR ACIS did not show any visible result text.");
-  if (/captcha|verify you are human|i acknowledge and agree|case information search/i.test(visible)) {
-    return error("EOIR ACIS is not displaying a case result.");
-  }
 
   const headerMatch = visible.match(/^([^\n()]+?)\s*\(\s*(?:A-?)?\d[\d -]*\)/m);
   const namedValue = labeledValue(visible, "Name");
   const subjectName = (namedValue || (headerMatch && headerMatch[1]) || "").trim();
   const nameParts = subjectName.match(/^([^,]+),\s*(.+)$/);
-  if (!nameParts || !nameParts[1].trim() || !nameParts[2].trim()) {
-    return error("EOIR ACIS result is missing a full name.");
-  }
-
   const labeledAlienNumber = labeledValue(visible, "A-?Number");
   const headerAlienNumber = headerMatch && headerMatch[0].match(/\(([^)]+)\)/);
   const rawAlienNumber = labeledAlienNumber || (headerAlienNumber && headerAlienNumber[1]) || "";
   const alienNumber = normalizeAlienNumber(rawAlienNumber);
+  const hasCompleteResultIdentity = Boolean(
+    nameParts
+    && nameParts[1].trim()
+    && nameParts[2].trim()
+    && alienNumber,
+  );
+
+  // ACIS includes hCaptcha branding in the shared footer even after a valid
+  // result renders. Treat challenge/search text as blocking only when the
+  // page does not also expose a complete visible result identity.
+  if (!hasCompleteResultIdentity
+      && /captcha|verify you are human|i acknowledge and agree|case information search/i.test(visible)) {
+    return error("EOIR ACIS is not displaying a case result.");
+  }
+  if (!nameParts || !nameParts[1].trim() || !nameParts[2].trim()) {
+    return error("EOIR ACIS result is missing a full name.");
+  }
   if (!alienNumber) return error("EOIR ACIS result is missing a valid A-Number.");
 
   const hearingMatch = visible.match(

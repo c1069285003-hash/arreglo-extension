@@ -1,12 +1,105 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { runInNewContext } from "node:vm";
 
 const manifestPath = new URL("./manifest.json", import.meta.url);
 const contentPath = new URL("./content.js", import.meta.url);
 const popupHtmlPath = new URL("./popup.html", import.meta.url);
 const popupJsPath = new URL("./popup.js", import.meta.url);
 const pendingStatePath = new URL("./eoirPendingState.js", import.meta.url);
+
+function makePopupElement(id) {
+  const listeners = {};
+  return {
+    id,
+    listeners,
+    style: {},
+    dataset: {},
+    classList: {
+      add() {},
+      toggle() {},
+    },
+    addEventListener(type, listener) {
+      listeners[type] = listener;
+    },
+    innerHTML: "",
+    textContent: "",
+    value: "",
+    disabled: false,
+  };
+}
+
+function loadPopupWithTabsQuery(tabsQuery) {
+  const popupHtml = readFileSync(popupHtmlPath, "utf8");
+  const ids = [...popupHtml.matchAll(/id="([^"]+)"/g)].map((match) => match[1]);
+  const elements = Object.fromEntries(ids.map((id) => [id, makePopupElement(id)]));
+  const local = {
+    get(keys, callback) {
+      if (typeof callback === "function") {
+        callback({});
+        return undefined;
+      }
+      return Promise.resolve({});
+    },
+    set() {
+      return Promise.resolve();
+    },
+    remove() {
+      return Promise.resolve();
+    },
+  };
+  const context = {
+    URL,
+    chrome: {
+      runtime: {},
+      scripting: {
+        executeScript() {
+          return Promise.resolve();
+        },
+      },
+      storage: { local },
+      tabs: {
+        query: tabsQuery,
+        sendMessage() {
+          return Promise.resolve({});
+        },
+      },
+    },
+    clearInterval() {},
+    clearTimeout() {},
+    console,
+    crypto: {
+      randomUUID() {
+        return "capture-test-id";
+      },
+    },
+    document: {
+      getElementById(id) {
+        return elements[id] || null;
+      },
+      querySelector() {
+        return null;
+      },
+      querySelectorAll() {
+        return [];
+      },
+    },
+    fetch() {
+      return Promise.reject(new Error("fetch should not run"));
+    },
+    setInterval() {
+      return 1;
+    },
+    setTimeout() {
+      return 1;
+    },
+  };
+
+  runInNewContext(readFileSync(pendingStatePath, "utf8"), context);
+  runInNewContext(readFileSync(popupJsPath, "utf8"), context);
+  return { elements };
+}
 
 test("ACIS permission is narrow and capture is explicit", () => {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
@@ -93,6 +186,18 @@ test("one explicit capture action routes only the active EOIR or CBP result", ()
   assert.match(popup, /sendToTabContent\(tab,\s*\{\s*type:\s*['"]EXTRACT_CBP['"]/);
   assert.match(popup, /ARREGLO_CAPTURE_EOIR_RESULT/);
   assert.match(popup, /EXTRACT_CBP/);
+});
+
+test("a tabs.query failure is shown after Capture EOIR instead of becoming an unhandled rejection", async () => {
+  const { elements } = loadPopupWithTabsQuery(async () => {
+    throw new Error("tab access failed after extension reload");
+  });
+  const captureButton = elements["btn-eoir-capture"];
+
+  await captureButton.listeners.click();
+
+  assert.equal(elements["eoir-card"].dataset.state, "idle");
+  assert.match(elements["eoir-state"].textContent, /tab access failed after extension reload/);
 });
 
 test("save conflict keeps the pending ID retryable", () => {
