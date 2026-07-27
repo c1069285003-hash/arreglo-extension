@@ -2,6 +2,7 @@ const WORKER = 'https://xinyuan.angie-li-business.workers.dev';
 const EOIR_PENDING_KEY = 'arreglo_eoir_pending_capture';
 const EOIR_PREVIEW_ENDPOINT = '/eoir-captures/preview-match';
 const EOIR_SAVE_ENDPOINT = '/eoir-captures';
+const EOIR_CRM_CREATE_URL = 'https://xinyuan-crm.pages.dev/';
 const EOIR_STATES = Object.freeze({
   IDLE: 'idle',
   READING: 'reading',
@@ -11,6 +12,7 @@ const EOIR_STATES = Object.freeze({
   SAVING: 'saving',
   LINKED: 'linked',
   UNLINKED: 'unlinked',
+  UNLINKED_CREATE_CHOICE: 'unlinked-create-choice',
   CONFLICT: 'conflict',
   PENDING_OFFLINE: 'pending-offline',
 });
@@ -150,6 +152,8 @@ let selectedChildIndex = 0;    // which child's data to fill into the open "Add 
 let currentPage = 'unknown';
 let eoirDraft = null;
 let eoirMatchState = '';
+let eoirUnlinkedCaptureId = '';
+let eoirCreateOpening = false;
 
 // ── School helpers (must match content.js sorting exactly) ────────────────────
 const EDU_LEVEL_RANK = [
@@ -889,6 +893,7 @@ function eoirStateMessage(state, detail = '') {
     [EOIR_STATES.SAVING]: 'Saving the staff-confirmed capture to Cloudflare…',
     [EOIR_STATES.LINKED]: 'Saved and linked to the matching CRM client.',
     [EOIR_STATES.UNLINKED]: 'Saved as Case Status only / unlinked.',
+    [EOIR_STATES.UNLINKED_CREATE_CHOICE]: 'Saved as Case Status only / unlinked.',
     [EOIR_STATES.CONFLICT]: 'Identity conflict. Nothing was attached; review the preview.',
     [EOIR_STATES.PENDING_OFFLINE]: eoirPending
       ? 'Save is pending. Retry will use the same capture ID.'
@@ -939,6 +944,9 @@ function setEoirState(state, detail = '') {
   const status = document.getElementById('eoir-state');
   const captureButton = document.getElementById('btn-eoir-capture');
   const confirmButton = document.getElementById('btn-eoir-confirm');
+  const unlinkedChoice = document.getElementById('eoir-unlinked-choice');
+  const keepUnlinkedButton = document.getElementById('btn-eoir-keep-unlinked');
+  const createClientButton = document.getElementById('btn-eoir-create-client');
   if (!card || !status || !captureButton || !confirmButton) return;
   const eoirPending = eoirPendingState.getPending();
 
@@ -963,6 +971,12 @@ function setEoirState(state, detail = '') {
   confirmButton.textContent = canConfirm
     ? 'Confirm Save to Case Status'
     : (eoirPending ? 'Retry Confirmed Save' : 'Retry Match');
+
+  if (unlinkedChoice) {
+    unlinkedChoice.style.display = state === EOIR_STATES.UNLINKED_CREATE_CHOICE ? '' : 'none';
+  }
+  if (keepUnlinkedButton) keepUnlinkedButton.disabled = eoirCreateOpening;
+  if (createClientButton) createClientButton.disabled = eoirCreateOpening;
 }
 
 function getEoirResultState(payload) {
@@ -983,6 +997,59 @@ async function parseJsonResponse(response) {
     return await response.json();
   } catch (e) {
     return {};
+  }
+}
+
+function isServerFinalUnlinkedCapture(response, result) {
+  const resultOk = result?.success === true || result?.ok === true;
+  return response?.ok === true
+    && resultOk
+    && result?.capture?.linkState === EOIR_STATES.UNLINKED;
+}
+
+function showEoirUnlinkedDecision(captureId) {
+  eoirUnlinkedCaptureId = String(captureId || '').trim();
+  eoirCreateOpening = false;
+  if (!eoirUnlinkedCaptureId) {
+    setEoirState(EOIR_STATES.UNLINKED, 'The saved capture ID is unavailable.');
+    return;
+  }
+  const question = document.getElementById('eoir-unlinked-question');
+  const keepButton = document.getElementById('btn-eoir-keep-unlinked');
+  const createButton = document.getElementById('btn-eoir-create-client');
+  if (question) question.textContent = 'No existing client profile was found. Create one?';
+  if (keepButton) keepButton.textContent = 'No — Keep Case Status Only';
+  if (createButton) createButton.textContent = 'Yes — Create XY Client';
+  setEoirState(EOIR_STATES.UNLINKED_CREATE_CHOICE);
+}
+
+function keepEoirCaseStatusOnly() {
+  if (!eoirUnlinkedCaptureId) return;
+  eoirUnlinkedCaptureId = '';
+  eoirCreateOpening = false;
+  setEoirState(EOIR_STATES.UNLINKED);
+}
+
+async function openEoirClientCreation() {
+  if (!eoirUnlinkedCaptureId || eoirCreateOpening) return;
+  const captureId = eoirUnlinkedCaptureId;
+  const createUrl = `${EOIR_CRM_CREATE_URL}?view=caseStatus`
+    + `&eoirCaptureId=${encodeURIComponent(captureId)}&action=create`;
+
+  eoirCreateOpening = true;
+  setEoirState(EOIR_STATES.UNLINKED_CREATE_CHOICE, 'Opening XY CRM…');
+  try {
+    const openedTab = await chrome.tabs.create({ url: createUrl });
+    if (!openedTab) throw new Error('Chrome did not open the CRM tab.');
+    eoirUnlinkedCaptureId = '';
+    eoirCreateOpening = false;
+    setEoirState(EOIR_STATES.UNLINKED, 'XY CRM opened to create the client.');
+  } catch (error) {
+    eoirCreateOpening = false;
+    setEoirState(
+      EOIR_STATES.UNLINKED_CREATE_CHOICE,
+      `Could not open XY CRM: ${error?.message || String(error)} Please try again.`,
+    );
   }
 }
 
@@ -1112,6 +1179,8 @@ async function saveEoirPending() {
       setEoirState(EOIR_STATES.CONFLICT, result.error || result.reason || '');
       return;
     }
+    const serverFinalUnlinked = isServerFinalUnlinkedCapture(response, result);
+    const savedCaptureId = eoirPending.captureId;
     const cleared = await eoirPendingState.finishSave({
       httpOk: response.ok,
       resultOk: result.success === true || result.ok === true,
@@ -1121,7 +1190,11 @@ async function saveEoirPending() {
       throw new Error(result.error || `Cloudflare did not confirm save (HTTP ${response.status}).`);
     }
 
-    setEoirState(savedState);
+    if (serverFinalUnlinked) {
+      showEoirUnlinkedDecision(savedCaptureId);
+    } else {
+      setEoirState(savedState);
+    }
   } catch (error) {
     setEoirState(EOIR_STATES.PENDING_OFFLINE, error.message);
   }
@@ -1162,6 +1235,14 @@ async function refreshEoirVisibility() {
 async function initializeEoirCapture() {
   document.getElementById('btn-eoir-capture')?.addEventListener('click', captureGovernmentResult);
   document.getElementById('btn-eoir-confirm')?.addEventListener('click', handleEoirConfirm);
+  document.getElementById('btn-eoir-keep-unlinked')?.addEventListener(
+    'click',
+    keepEoirCaseStatusOnly,
+  );
+  document.getElementById('btn-eoir-create-client')?.addEventListener(
+    'click',
+    openEoirClientCreation,
+  );
 
   const stored = await chrome.storage.local.get([EOIR_PENDING_KEY]);
   const pending = stored?.[EOIR_PENDING_KEY];

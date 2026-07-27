@@ -101,6 +101,19 @@
   .eoir-preview dd { color: #1e293b; font-weight: 600; overflow-wrap: anywhere; }
   .eoir-actions { display: flex; gap: 6px; }
   .eoir-actions .btn { margin-bottom: 0; }
+  .eoir-unlinked-choice {
+    display: none;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e2e8f0;
+  }
+  .eoir-unlinked-question {
+    color: #1e293b;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.45;
+    margin-bottom: 8px;
+  }
 </style>
 </head>
 <body>
@@ -121,6 +134,17 @@
       <button class="btn btn-secondary" id="btn-eoir-capture">Capture EOIR</button>
       <button class="btn btn-primary" id="btn-eoir-confirm" style="display:none">
         Confirm Save to Case Status
+      </button>
+    </div>
+    <div class="eoir-unlinked-choice" id="eoir-unlinked-choice" style="display:none">
+      <div class="eoir-unlinked-question" id="eoir-unlinked-question">
+        No existing client profile was found. Create one?
+      </div>
+      <button class="btn btn-secondary" id="btn-eoir-keep-unlinked">
+        No — Keep Case Status Only
+      </button>
+      <button class="btn btn-primary" id="btn-eoir-create-client">
+        Yes — Create XY Client
       </button>
     </div>
   </div>

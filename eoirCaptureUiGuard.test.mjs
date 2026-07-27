@@ -30,7 +30,7 @@ function makePopupElement(id) {
   };
 }
 
-function loadPopupWithTabsQuery(tabsQuery) {
+function loadPopupWithTabsQuery(tabsQuery, { tabsCreate } = {}) {
   const popupHtml = readFileSync(popupHtmlPath, "utf8");
   const ids = [...popupHtml.matchAll(/id="([^"]+)"/g)].map((match) => match[1]);
   const elements = Object.fromEntries(ids.map((id) => [id, makePopupElement(id)]));
@@ -61,6 +61,7 @@ function loadPopupWithTabsQuery(tabsQuery) {
       storage: { local },
       tabs: {
         query: tabsQuery,
+        create: tabsCreate || (() => Promise.resolve({ id: 1 })),
         sendMessage() {
           return Promise.resolve({});
         },
@@ -229,6 +230,104 @@ test("save conflict keeps the pending ID retryable", () => {
     /const canRetry = state === EOIR_STATES\.PENDING_OFFLINE\s*\|\| \(state === EOIR_STATES\.CONFLICT && Boolean\(eoirPending\)\)/,
   );
   assert.match(popup, /if \(eoirPendingState\.getPending\(\)\) \{\s*await saveEoirPending\(\);/);
+});
+
+test("only a successful server-final unlinked capture offers client creation", () => {
+  const { context } = loadPopupWithTabsQuery(async () => []);
+
+  assert.equal(context.isServerFinalUnlinkedCapture(
+    { ok: true },
+    { success: true, capture: { linkState: "unlinked" } },
+  ), true);
+  assert.equal(context.isServerFinalUnlinkedCapture(
+    { ok: true },
+    { success: true, linkState: "unlinked" },
+  ), false, "a preview or top-level no-match state is not server-final");
+  assert.equal(context.isServerFinalUnlinkedCapture(
+    { ok: true },
+    { success: true, capture: { linkState: "linked" } },
+  ), false);
+  assert.equal(context.isServerFinalUnlinkedCapture(
+    { ok: false },
+    { success: true, capture: { linkState: "unlinked" } },
+  ), false);
+  assert.equal(context.isServerFinalUnlinkedCapture(
+    { ok: true },
+    { success: false, capture: { linkState: "unlinked" } },
+  ), false);
+});
+
+test("unlinked decision keeps Case Status only or opens CRM creation without requesting a case number", async () => {
+  const opened = [];
+  const { elements, context } = loadPopupWithTabsQuery(
+    async () => [],
+    {
+      tabsCreate: async (options) => {
+        opened.push(options);
+        return { id: 42 };
+      },
+    },
+  );
+
+  context.showEoirUnlinkedDecision("capture/id with spaces");
+
+  assert.equal(elements["eoir-card"].dataset.state, "unlinked-create-choice");
+  assert.equal(elements["eoir-unlinked-choice"].style.display, "");
+  assert.match(
+    elements["eoir-unlinked-question"].textContent,
+    /No existing client profile was found\. Create one\?/,
+  );
+  assert.equal(
+    elements["btn-eoir-keep-unlinked"].textContent.trim(),
+    "No — Keep Case Status Only",
+  );
+  assert.equal(
+    elements["btn-eoir-create-client"].textContent.trim(),
+    "Yes — Create XY Client",
+  );
+
+  await elements["btn-eoir-create-client"].listeners.click();
+
+  assert.equal(opened.length, 1);
+  assert.equal(
+    opened[0].url,
+    "https://xinyuan-crm.pages.dev/?view=caseStatus&eoirCaptureId=capture%2Fid%20with%20spaces&action=create",
+  );
+  assert.equal(elements["eoir-card"].dataset.state, "unlinked");
+  assert.equal(elements["eoir-unlinked-choice"].style.display, "none");
+
+  context.showEoirUnlinkedDecision("capture-keep");
+  await elements["btn-eoir-keep-unlinked"].listeners.click();
+  assert.equal(elements["eoir-card"].dataset.state, "unlinked");
+
+  const popup = readFileSync(popupJsPath, "utf8");
+  assert.doesNotMatch(popup, /fetch\([^)]*\/next-case-number/s);
+});
+
+test("a failed CRM tab open leaves the unlinked question visible and retryable", async () => {
+  let attempts = 0;
+  const { elements, context } = loadPopupWithTabsQuery(
+    async () => [],
+    {
+      tabsCreate: async () => {
+        attempts += 1;
+        if (attempts === 1) throw new Error("tabs unavailable");
+        return { id: 43 };
+      },
+    },
+  );
+
+  context.showEoirUnlinkedDecision("capture-retry");
+  await elements["btn-eoir-create-client"].listeners.click();
+
+  assert.equal(elements["eoir-card"].dataset.state, "unlinked-create-choice");
+  assert.equal(elements["eoir-unlinked-choice"].style.display, "");
+  assert.equal(elements["btn-eoir-create-client"].disabled, false);
+  assert.match(elements["eoir-state"].textContent, /tabs unavailable/);
+
+  await elements["btn-eoir-create-client"].listeners.click();
+  assert.equal(attempts, 2);
+  assert.equal(elements["eoir-card"].dataset.state, "unlinked");
 });
 
 test("popup delegates the confirmed pending lifecycle to the runtime state guard", () => {
