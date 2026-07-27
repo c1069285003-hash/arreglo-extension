@@ -98,7 +98,7 @@ function loadPopupWithTabsQuery(tabsQuery) {
 
   runInNewContext(readFileSync(pendingStatePath, "utf8"), context);
   runInNewContext(readFileSync(popupJsPath, "utf8"), context);
-  return { elements };
+  return { elements, context };
 }
 
 test("ACIS permission is narrow and capture is explicit", () => {
@@ -120,7 +120,7 @@ test("ACIS permission is narrow and capture is explicit", () => {
   assert.doesNotMatch(content, /setInterval\([^)]*captureEoir/i);
 });
 
-test("popup exposes every EOIR review state and field", () => {
+test("popup exposes every EOIR review state and keeps the full capture payload", () => {
   const popupHtml = readFileSync(popupHtmlPath, "utf8");
   const popupJs = readFileSync(popupJsPath, "utf8");
 
@@ -143,24 +143,45 @@ test("popup exposes every EOIR review state and field", () => {
   assert.match(popupHtml, /id="btn-eoir-capture"/);
   assert.match(popupHtml, /id="btn-eoir-confirm"/);
 
-  for (const field of [
-    "subjectName",
-    "alienNumber",
-    "docketDate",
-    "hearingDate",
-    "hearingTime",
-    "hearingType",
-    "appearanceMode",
-    "judge",
-    "courtAddress",
-    "courtPhone",
-    "caseStatus",
-    "biaStatus",
-    "sourceUrl",
-    "capturedAt",
-  ]) {
-    assert.match(popupJs, new RegExp(`\\b${field}\\b`));
-  }
+  assert.match(popupJs, /fields:\s*\{\s*\.\.\.response\.fields,\s*capturedAt:/s);
+  assert.match(popupJs, /fields:\s*eoirDraft\.fields/);
+  assert.match(popupJs, /JSON\.stringify\(eoirPending\)/);
+});
+
+test("EOIR preview separates and normalizes hearing type while hiding audit metadata", () => {
+  const { elements, context } = loadPopupWithTabsQuery(async () => []);
+  const fields = {
+    subjectName: "DOE, JANE",
+    alienNumber: "123456789",
+    docketDate: "July 1, 2026",
+    hearingDate: "August 2, 2026",
+    hearingTime: "1:00 PM",
+    hearingType: "Individual Hearing",
+    appearanceMode: "Internet-based",
+    judge: "Jane Judge",
+    courtAddress: "123 Court St",
+    courtPhone: "555-0100",
+    caseStatus: "This case is pending.",
+    biaStatus: "No appeal was received for this case.",
+    sourceUrl: "https://acis.eoir.justice.gov/en/caseInformation",
+    capturedAt: "2026-07-27T00:52:35.839Z",
+  };
+
+  context.renderEoirPreview(fields);
+
+  const html = elements["eoir-preview"].innerHTML;
+  assert.match(html, /<dt>Hearing<\/dt><dd>August 2, 2026 · 1:00 PM<\/dd>/);
+  assert.match(html, /<dt>Hearing type<\/dt><dd>Individual<\/dd>/);
+  assert.match(html, /<dt>Appearance<\/dt><dd>Internet-based<\/dd>/);
+  assert.doesNotMatch(html, /Individual Hearing/);
+  assert.doesNotMatch(html, /Case status|This case is pending\./);
+  assert.doesNotMatch(html, /BIA status|No appeal was received/);
+  assert.doesNotMatch(html, /Source|acis\.eoir\.justice\.gov/);
+  assert.doesNotMatch(html, /Capture time|2026-07-27/);
+
+  fields.hearingType = "Master Calendar Hearing";
+  context.renderEoirPreview(fields);
+  assert.match(elements["eoir-preview"].innerHTML, /<dt>Hearing type<\/dt><dd>Master<\/dd>/);
 });
 
 test("preview and confirmed save use one persisted capture ID", () => {

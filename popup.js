@@ -897,6 +897,13 @@ function eoirStateMessage(state, detail = '') {
   return detail ? `${messages[state] || state} ${detail}` : (messages[state] || state);
 }
 
+function normalizeEoirHearingType(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized.includes('individual')) return 'Individual';
+  if (normalized.includes('master')) return 'Master';
+  return '';
+}
+
 function renderEoirPreview(fields) {
   const preview = document.getElementById('eoir-preview');
   if (!preview) return;
@@ -909,21 +916,17 @@ function renderEoirPreview(fields) {
   const hearing = [
     fields.hearingDate,
     fields.hearingTime,
-    fields.hearingType,
   ].filter(Boolean).join(' · ');
   const rows = [
     ['Name', fields.subjectName],
     ['A-Number', fields.alienNumber],
     ['Docket date', fields.docketDate],
     ['Hearing', hearing],
+    ['Hearing type', normalizeEoirHearingType(fields.hearingType)],
     ['Appearance', fields.appearanceMode],
     ['Judge', fields.judge],
     ['Court', fields.courtAddress],
     ['Court phone', fields.courtPhone],
-    ['Case status', fields.caseStatus],
-    ['BIA status', fields.biaStatus],
-    ['Source', fields.sourceUrl],
-    ['Capture time', fields.capturedAt],
   ];
   preview.innerHTML = rows.map(([label, value]) =>
     `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value || '—')}</dd>`
