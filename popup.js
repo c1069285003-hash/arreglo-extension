@@ -968,7 +968,15 @@ async function saveCbpToCloudflare(page) {
     const json = await res.json().catch(() => ({}));
     if (res.ok && json.success !== false) {
       clientData = merged;
-      chrome.storage.local.set({ arreglo_client_data: merged, arreglo_case_number: caseNum });
+      // Keep the same canonical session keys used by load/restore. The old
+      // client_data/case_number pair made the side panel forget the client
+      // after an extension reload and return to the first screen.
+      chrome.storage.local.set({
+        arreglo_data: merged,
+        arreglo_case: caseNum,
+        arreglo_address_index: selectedAddressIndex,
+        arreglo_synced_at: new Date().toISOString(),
+      });
       setStatus(statusEl, `✅ I-94 已保存到 case ${caseNum} — CRM 同步后即生效，USCIS 填表将使用这些数据`, 'ok');
     } else {
       setStatus(statusEl, `❌ 保存失败: ${json.error || res.status}`, 'err');
@@ -1180,7 +1188,10 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   selectedAddressIndex = 0;
   currentPage = 'unknown';
   stopPolling();
-  chrome.storage.local.remove(['arreglo_data', 'arreglo_case', 'arreglo_address_index']);
+  chrome.storage.local.remove([
+    'arreglo_data', 'arreglo_case', 'arreglo_address_index',
+    'arreglo_client_data', 'arreglo_case_number',
+  ]);
   document.getElementById('step-fill').style.display = 'none';
   document.getElementById('step-login').style.display = 'block';
   document.getElementById('case-number').value = '';
@@ -1195,14 +1206,22 @@ document.getElementById('btn-clear').addEventListener('click', () => {
 });
 
 // ── On popup open: restore session ───────────────────────────────────────────
-chrome.storage.local.get(['arreglo_data', 'arreglo_case', 'arreglo_address_index'], async (result) => {
-  if (result.arreglo_data && result.arreglo_case) {
-    clientData = result.arreglo_data;
+chrome.storage.local.get([
+  'arreglo_data', 'arreglo_case', 'arreglo_address_index',
+  'arreglo_client_data', 'arreglo_case_number',
+], async (result) => {
+  // Migrate sessions saved by the earlier CBP capture path so reloading the
+  // extension resumes the selected client instead of starting over.
+  const restoredData = result.arreglo_data || result.arreglo_client_data;
+  const restoredCase = result.arreglo_case || result.arreglo_case_number;
+  if (restoredData && restoredCase) {
+    clientData = restoredData;
     selectedAddressIndex = Number.isInteger(result.arreglo_address_index)
       ? result.arreglo_address_index
       : 0;
     const saved = clientData;
-    renderLoadedClient(result.arreglo_case, saved);
+    renderLoadedClient(restoredCase, saved);
+    await chrome.storage.local.set({ arreglo_data: saved, arreglo_case: restoredCase });
     // Render preview immediately from cached data — no USCIS ping needed
     renderAddressSelector('unknown');
     renderSchoolSelector('unknown');
@@ -1210,7 +1229,7 @@ chrome.storage.local.get(['arreglo_data', 'arreglo_case', 'arreglo_address_index
     renderChildSelector('unknown');
     renderFieldPreview('unknown');
     startPolling(); // poll will detect page and update preview within 600ms
-    loadClientFromCloudflare(result.arreglo_case, { silent: true })
+    loadClientFromCloudflare(restoredCase, { silent: true })
       .then(fresh => {
         if (fresh) {
           renderAddressSelector(currentPage);
