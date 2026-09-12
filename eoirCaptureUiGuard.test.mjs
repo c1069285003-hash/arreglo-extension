@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 
 const manifestPath = new URL("./manifest.json", import.meta.url);
-const contentPath = new URL("./content.js", import.meta.url);
+const contentPath = new URL("./eoirContent.js", import.meta.url);
 const popupHtmlPath = new URL("./popup.html", import.meta.url);
 const popupJsPath = new URL("./popup.js", import.meta.url);
 const pendingStatePath = new URL("./eoirPendingState.js", import.meta.url);
@@ -107,7 +107,8 @@ test("ACIS permission is narrow and capture is explicit", () => {
   assert.ok(manifest.host_permissions.includes("https://acis.eoir.justice.gov/*"));
   assert.ok(manifest.content_scripts.some(s =>
     s.matches.includes("https://acis.eoir.justice.gov/*") &&
-    s.js.includes("content.js") &&
+    s.js.includes("eoirContent.js") &&
+    !s.js.includes("content.js") &&
     !s.js.includes("eoirAcisCapture.js")
   ));
   assert.ok(manifest.web_accessible_resources.some(resource =>
@@ -357,11 +358,8 @@ test("EOIR UI source contains no ACIS automation", () => {
   assert.doesNotMatch(eoirSources, /captcha[\s\S]{0,120}(solve|bypass|click)/i);
 });
 
-test("loading content.js on ACIS cannot start the USCIS address watcher", () => {
+test("the isolated EOIR bridge contains no USCIS address watcher", () => {
   const content = readFileSync(contentPath, "utf8");
 
-  assert.match(
-    content,
-    /function startUspsAddressWatcher\(\) \{\s*if \(location\.hostname !== ['"]my\.uscis\.gov['"]\) return;/,
-  );
+  assert.doesNotMatch(content, /startUspsAddressWatcher|USPS_ADDRESS|FILL_PAGE/);
 });

@@ -38,7 +38,7 @@
         "https://acis.eoir.justice.gov/*"
       ],
       "js": [
-        "content.js"
+        "eoirContent.js"
       ],
       "run_at": "document_idle"
     }

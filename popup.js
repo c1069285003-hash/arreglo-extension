@@ -274,6 +274,12 @@ async function getActiveTab() {
 const SUPPORTED_HOSTS = /(^|\.)my\.uscis\.gov$|(^|\.)i94\.cbp\.dhs\.gov$/;
 async function sendToTabContent(tab, msg, retries = 3) {
   if (!tab?.id) throw new Error('No supported government tab is open.');
+  let fallbackScript = 'content.js';
+  try {
+    if (new URL(tab.url || '').hostname === 'acis.eoir.justice.gov') {
+      fallbackScript = 'eoirContent.js';
+    }
+  } catch (e) {}
   for (let i = 0; i < retries; i++) {
     try {
       return await chrome.tabs.sendMessage(tab.id, msg);
@@ -287,7 +293,7 @@ async function sendToTabContent(tab, msg, retries = 3) {
       try {
         await chrome.scripting.executeScript({
           target: { tabId: tab.id },
-          files: ['content.js']
+          files: [fallbackScript]
         });
       } catch(_) {}
       await new Promise(r => setTimeout(r, 600));
