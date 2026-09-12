@@ -240,10 +240,15 @@ async function getUscisTab() {
 }
 
 async function getActiveTab() {
-  const uscisTab = await getUscisTab();
-  if (uscisTab) return uscisTab;
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  return tab;
+  // The active supported page is authoritative. Any background USCIS tab must
+  // not steal capture messages from the CBP I-94 page staff is viewing.
+  if (tab?.url) {
+    try {
+      if (SUPPORTED_HOSTS.test(new URL(tab.url).hostname)) return tab;
+    } catch (e) { /* fall through to the USCIS fallback */ }
+  }
+  return await getUscisTab() || tab || null;
 }
 
 const SUPPORTED_HOSTS = /(^|\.)my\.uscis\.gov$|(^|\.)i94\.cbp\.dhs\.gov$/;
