@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Arreglo — 移达通自动填表",
+  "version": "1.33.0",
+  "description": "Auto-fill USCIS forms from Yidatong Immigration CRM",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "sidePanel",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://my.uscis.gov/*",
+    "https://xinyuan.angie-li-business.workers.dev/*",
+    "https://i94.cbp.dhs.gov/*"
+  ],
+  "action": {
+    "default_title": "Arreglo 移达通自动填表"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://my.uscis.gov/*",
+        "https://i94.cbp.dhs.gov/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "32": "icon32.png"
+  }
+}

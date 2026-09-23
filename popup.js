@@ -1,6 +1,29 @@
 const WORKER = 'https://xinyuan.angie-li-business.workers.dev';
+const EOIR_PENDING_KEY = 'arreglo_eoir_pending_capture';
+const EOIR_PREVIEW_ENDPOINT = '/eoir-captures/preview-match';
+const EOIR_SAVE_ENDPOINT = '/eoir-captures';
+const EOIR_CRM_CREATE_URL = 'https://xinyuan-crm.pages.dev/';
+const EOIR_STATES = Object.freeze({
+  IDLE: 'idle',
+  READING: 'reading',
+  PREVIEW: 'preview',
+  MATCHING: 'matching',
+  READY: 'ready-to-confirm',
+  SAVING: 'saving',
+  LINKED: 'linked',
+  UNLINKED: 'unlinked',
+  UNLINKED_CREATE_CHOICE: 'unlinked-create-choice',
+  CONFLICT: 'conflict',
+  PENDING_OFFLINE: 'pending-offline',
+});
+const eoirPendingState = createEoirPendingState({
+  storage: chrome.storage.local,
+  pendingKey: EOIR_PENDING_KEY,
+});
 const PAGE_LABELS = {
-  cbp_i94: 'CBP I-94 记录页',
+  cbp_i94_form: 'CBP Traveler Search',
+  cbp_i94_result: 'CBP I-94 Result',
+  cbp_i94_history: 'CBP Travel History',
   legal_assistance: 'Legal Assistance',
   preparer_family: 'Preparer — Family Member?',
   preparer_info: 'Preparer Information',
@@ -23,6 +46,11 @@ const PAGE_LABELS = {
   father: 'Your Father',
   siblings: 'Your Siblings',
   eligibility_reason: 'Reason for Asylum or Withholding',
+  evidence_personal: 'Personal Identification Evidence',
+  preparer_signature_upload: 'Preparer Signature Upload',
+  evidence_optional: 'Optional Evidence',
+  additional_information_optional: 'Additional Information',
+  review: 'Review',
 };
 
 // Fields to preview per page — shown in sidebar as contextual info
@@ -129,6 +157,12 @@ let selectedSchoolIndex = 0;   // index into the SORTED (highest-first) school l
 let selectedWorkIndex = 0;     // which CRM work history entry to fill into the open employment editor
 let selectedChildIndex = 0;    // which child's data to fill into the open "Add child" editor
 let currentPage = 'unknown';
+let eoirDraft = null;
+let eoirMatchState = '';
+let eoirUnlinkedCaptureId = '';
+let eoirCreateOpening = false;
+let eoirAutoBusy = false;
+let eoirLastAutoKey = '';
 
 // ── School helpers (must match content.js sorting exactly) ────────────────────
 const EDU_LEVEL_RANK = [
@@ -201,6 +235,26 @@ async function loadClientFromCloudflare(caseNum, { silent = false, requireInfoSh
   }
 
   const saved = { ...(client.infoFormData || {}) };
+  // Keep a download-only manifest for USCIS Evidence → Personal identification.
+  // The actual blobs remain in Cloudflare and are pulled only after staff clicks
+  // Start Filling; they are never copied into chrome.storage.
+  saved._arregloCaseNumber = String(caseNum);
+  saved._arregloFiles = Object.entries(client.uploads || {}).map(([id, upload]) => ({
+    id,
+    name: upload.fileName || upload.name || `document-${id}.pdf`,
+    type: upload.docType || upload.type || '',
+    url: upload.url || `${WORKER}/document/${encodeURIComponent(caseNum)}/${encodeURIComponent(id)}`,
+    mimeType: upload.contentType || upload.mimeType || 'application/pdf',
+  })).filter(file => /passport|i[-\s]?94|travel\s*history|preparer.*(?:signature|details)|signature.*preparer/i.test(`${file.name} ${file.type}`));
+  try {
+    const passportMetaResponse = await fetch(`${WORKER}/passport-meta/${encodeURIComponent(caseNum)}`);
+    if (passportMetaResponse.ok && !saved._arregloFiles.some(file => /passport/i.test(`${file.name} ${file.type}`))) {
+      saved._arregloFiles.unshift({
+        id: 'passport-pdf', name: `${caseNum}_passport.pdf`, type: 'Passport',
+        url: `${WORKER}/passport-pdf/${encodeURIComponent(caseNum)}`, mimeType: 'application/pdf',
+      });
+    }
+  } catch (_) { /* missing passport is reported at the evidence page */ }
   if (!saved.familyName && !saved.givenName) {
     if (requireInfoSheet) {
       setStatus(statusEl, '❌ Cloudflare 英文信息表还没有 staff 保存版；先在 CRM → Info Form → Save 成功后再 Fill USCIS。', 'err');
@@ -241,25 +295,12 @@ async function getUscisTab() {
 
 async function getActiveTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  // The active supported page is authoritative. Any background USCIS tab must
-  // not steal capture messages from the CBP I-94 page staff is viewing.
-  if (tab?.url) {
-    try {
-      if (SUPPORTED_HOSTS.test(new URL(tab.url).hostname)) return tab;
-    } catch (e) { /* fall through to the USCIS fallback */ }
-  }
-  return await getUscisTab() || tab || null;
+  return tab || null;
 }
 
 const SUPPORTED_HOSTS = /(^|\.)my\.uscis\.gov$|(^|\.)i94\.cbp\.dhs\.gov$/;
-async function sendToContent(msg, retries = 3) {
-  // v1.32: prefer the ACTIVE tab when it's a supported site — previously a
-  // background USCIS tab hijacked messages while staff worked on CBP.
-  const active = await getActiveTab();
-  let tab = null;
-  try { if (active && SUPPORTED_HOSTS.test(new URL(active.url || '').hostname)) tab = active; } catch (e) {}
-  if (!tab) tab = await getUscisTab() || active;
-  if (!tab) throw new Error('No USCIS tab found. Please open my.uscis.gov first.');
+async function sendToTabContent(tab, msg, retries = 3) {
+  if (!tab?.id) throw new Error('No supported government tab is open.');
   for (let i = 0; i < retries; i++) {
     try {
       return await chrome.tabs.sendMessage(tab.id, msg);
@@ -279,6 +320,17 @@ async function sendToContent(msg, retries = 3) {
       await new Promise(r => setTimeout(r, 600));
     }
   }
+}
+
+async function sendToContent(msg, retries = 3) {
+  // v1.32: prefer the ACTIVE tab when it's a supported site — previously a
+  // background USCIS tab hijacked messages while staff worked on CBP.
+  const active = await getActiveTab();
+  let tab = null;
+  try { if (active && SUPPORTED_HOSTS.test(new URL(active.url || '').hostname)) tab = active; } catch (e) {}
+  if (!tab) tab = await getUscisTab() || active;
+  if (!tab) throw new Error('No USCIS tab found. Please open my.uscis.gov first.');
+  return sendToTabContent(tab, msg, retries);
 }
 
 
@@ -544,8 +596,8 @@ function renderAddressSelector(page) {
   const rows = list.map((a, i) => {
     const badge = ROLE_BADGE[a._role] || ROLE_BADGE.LAST_5_YEARS;
     return `
-      <div style="padding:3px 0;border-bottom:1px solid #e2e8f0;
-                  ${i === selectedAddressIndex ? 'font-weight:700' : ''}">
+      <div data-address-index="${i}" style="padding:3px 0;border-bottom:1px solid #e2e8f0;cursor:pointer;
+                  ${i === selectedAddressIndex ? 'font-weight:700;background:#dbeafe;border-radius:5px' : ''}">
         <div style="display:flex;gap:6px;align-items:center">
           <span style="width:14px;text-align:right;color:#64748b">${i + 1}.</span>
           <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b">${getAddressLabel(a)}</span>
@@ -590,6 +642,14 @@ function renderAddressSelector(page) {
     renderAddressSelector(page);
     renderFieldPreview(page);
   };
+  document.querySelectorAll('[data-address-index]').forEach(row => {
+    row.onclick = () => {
+      selectedAddressIndex = Number(row.dataset.addressIndex);
+      chrome.storage.local.set({ arreglo_address_index: selectedAddressIndex });
+      renderAddressSelector(page);
+      renderFieldPreview(page);
+    };
+  });
   document.getElementById('btn-fill-all-addresses').onclick = () => fillAllAddresses();
 }
 
@@ -612,7 +672,7 @@ function renderChildSelector(page) {
   const c = kids[selectedChildIndex];
   const nameStr = [c.firstName, c.lastName].filter(Boolean).join(' ') || '(未命名)';
   const detail = [c.dob, c.birthCountry].filter(Boolean).join(' · ');
-  const needSex = !c.sex;
+  const needSex = !(c.sex || c.gender);
 
   const picker = kids.length > 1 ? `
       <div style="display:flex;gap:6px;margin-top:8px;">
@@ -824,12 +884,618 @@ async function fillSchools(all) {
   }
 }
 
+// ── EOIR ACIS capture (explicit staff action only) ────────────────────────────
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function isEoirAcisUrl(value) {
+  try {
+    return new URL(value || '').hostname === 'acis.eoir.justice.gov';
+  } catch (e) {
+    return false;
+  }
+}
+
+function isCbpI94Url(value) {
+  try {
+    return new URL(value || '').hostname === 'i94.cbp.dhs.gov';
+  } catch (e) {
+    return false;
+  }
+}
+
+async function getActiveBrowserTab() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  return tab || null;
+}
+
+function eoirStateMessage(state, detail = '') {
+  const eoirPending = eoirPendingState.getPending();
+  const messages = {
+    [EOIR_STATES.IDLE]: 'Open an EOIR ACIS result, then click Capture EOIR.',
+    [EOIR_STATES.READING]: 'Reading the visible EOIR result…',
+    [EOIR_STATES.PREVIEW]: 'Review the machine-produced draft below.',
+    [EOIR_STATES.MATCHING]: 'Checking Cloudflare for a strong client match…',
+    [EOIR_STATES.READY]: eoirMatchState === EOIR_STATES.LINKED
+      ? 'Strong client match found. Review every field before confirming.'
+      : 'No strong client match. Confirmation will save Case Status only as unlinked.',
+    [EOIR_STATES.SAVING]: 'Saving the staff-confirmed capture to Cloudflare…',
+    [EOIR_STATES.LINKED]: 'Saved and linked to the matching CRM client.',
+    [EOIR_STATES.UNLINKED]: 'Saved as Case Status only / unlinked.',
+    [EOIR_STATES.UNLINKED_CREATE_CHOICE]: 'Saved as Case Status only / unlinked.',
+    [EOIR_STATES.CONFLICT]: 'Identity conflict. Nothing was attached; review the preview.',
+    [EOIR_STATES.PENDING_OFFLINE]: eoirPending
+      ? 'Save is pending. Retry will use the same capture ID.'
+      : 'Cloudflare preview is unavailable. Retry matching when online.',
+  };
+  return detail ? `${messages[state] || state} ${detail}` : (messages[state] || state);
+}
+
+function normalizeEoirHearingType(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized.includes('individual')) return 'Individual';
+  if (normalized.includes('master')) return 'Master';
+  return '';
+}
+
+function renderEoirPreview(fields) {
+  const preview = document.getElementById('eoir-preview');
+  if (!preview) return;
+  if (!fields) {
+    preview.innerHTML = '';
+    preview.style.display = 'none';
+    return;
+  }
+
+  const hearing = [
+    fields.hearingDate,
+    fields.hearingTime,
+  ].filter(Boolean).join(' · ');
+  const rows = [
+    ['Name', fields.subjectName, ''],
+    ['A-Number', fields.alienNumber, ''],
+    ['Docket date', fields.docketDate, ''],
+    ['Hearing', hearing, 'eoir-hearing-row'],
+    ['Hearing type', normalizeEoirHearingType(fields.hearingType), ''],
+    ['Appearance', fields.appearanceMode, ''],
+    ['IJ', fields.judge, 'eoir-judge-row'],
+    ['Court address', fields.courtAddress, 'eoir-address-row'],
+    ['Court phone', fields.courtPhone, ''],
+  ];
+  preview.innerHTML = rows.map(([label, value, className]) => {
+    const classAttr = className ? ` class="${className}"` : '';
+    return `<dt${classAttr}>${escapeHtml(label)}</dt><dd${classAttr}>${escapeHtml(value || '—')}</dd>`;
+  }).join('');
+  preview.style.display = 'grid';
+}
+
+function setEoirState(state, detail = '') {
+  const card = document.getElementById('eoir-card');
+  const status = document.getElementById('eoir-state');
+  const captureButton = document.getElementById('btn-eoir-capture');
+  const confirmButton = document.getElementById('btn-eoir-confirm');
+  const unlinkedChoice = document.getElementById('eoir-unlinked-choice');
+  const keepUnlinkedButton = document.getElementById('btn-eoir-keep-unlinked');
+  const createClientButton = document.getElementById('btn-eoir-create-client');
+  if (!card || !status || !captureButton || !confirmButton) return;
+  const eoirPending = eoirPendingState.getPending();
+
+  card.dataset.state = state;
+  card.classList.add('is-visible');
+  status.textContent = eoirStateMessage(state, detail);
+  renderEoirPreview(eoirDraft?.fields || eoirPending?.fields || null);
+
+  const busy = state === EOIR_STATES.READING
+    || state === EOIR_STATES.MATCHING
+    || state === EOIR_STATES.SAVING;
+  captureButton.disabled = busy || Boolean(eoirPending);
+  captureButton.textContent = eoirPending
+    ? 'Confirmed Save Pending'
+    : (eoirDraft ? 'Capture Again' : 'Capture EOIR');
+
+  const canConfirm = state === EOIR_STATES.READY;
+  const canRetry = state === EOIR_STATES.PENDING_OFFLINE
+    || (state === EOIR_STATES.CONFLICT && Boolean(eoirPending));
+  confirmButton.style.display = canConfirm || canRetry ? '' : 'none';
+  confirmButton.disabled = busy;
+  confirmButton.textContent = canConfirm
+    ? 'Confirm Save to Case Status'
+    : (eoirPending ? 'Retry Confirmed Save' : 'Retry Match');
+
+  if (unlinkedChoice) {
+    unlinkedChoice.style.display = state === EOIR_STATES.UNLINKED_CREATE_CHOICE ? '' : 'none';
+  }
+  if (keepUnlinkedButton) keepUnlinkedButton.disabled = eoirCreateOpening;
+  if (createClientButton) createClientButton.disabled = eoirCreateOpening;
+}
+
+function getEoirResultState(payload) {
+  const state = payload?.state
+    || payload?.matchState
+    || payload?.linkState
+    || payload?.match?.state
+    || payload?.capture?.linkState
+    || '';
+  if (state === EOIR_STATES.LINKED || state === 'strong-match') return EOIR_STATES.LINKED;
+  if (state === EOIR_STATES.UNLINKED || state === 'no-match') return EOIR_STATES.UNLINKED;
+  if (state === EOIR_STATES.CONFLICT) return EOIR_STATES.CONFLICT;
+  return '';
+}
+
+async function parseJsonResponse(response) {
+  try {
+    return await response.json();
+  } catch (e) {
+    return {};
+  }
+}
+
+function isServerFinalUnlinkedCapture(response, result) {
+  const resultOk = result?.success === true || result?.ok === true;
+  return response?.ok === true
+    && resultOk
+    && result?.capture?.linkState === EOIR_STATES.UNLINKED;
+}
+
+function showEoirUnlinkedDecision(captureId) {
+  eoirUnlinkedCaptureId = String(captureId || '').trim();
+  eoirCreateOpening = false;
+  if (!eoirUnlinkedCaptureId) {
+    setEoirState(EOIR_STATES.UNLINKED, 'The saved capture ID is unavailable.');
+    return;
+  }
+  const question = document.getElementById('eoir-unlinked-question');
+  const keepButton = document.getElementById('btn-eoir-keep-unlinked');
+  const createButton = document.getElementById('btn-eoir-create-client');
+  if (question) question.textContent = 'No existing client profile was found. Create one?';
+  if (keepButton) keepButton.textContent = 'No — Keep Case Status Only';
+  if (createButton) createButton.textContent = 'Yes — Create XY Client';
+  setEoirState(EOIR_STATES.UNLINKED_CREATE_CHOICE);
+}
+
+function keepEoirCaseStatusOnly() {
+  if (!eoirUnlinkedCaptureId) return;
+  eoirUnlinkedCaptureId = '';
+  eoirCreateOpening = false;
+  setEoirState(EOIR_STATES.UNLINKED);
+}
+
+async function openEoirClientCreation() {
+  if (!eoirUnlinkedCaptureId || eoirCreateOpening) return;
+  const captureId = eoirUnlinkedCaptureId;
+  const createUrl = `${EOIR_CRM_CREATE_URL}?view=caseStatus`
+    + `&eoirCaptureId=${encodeURIComponent(captureId)}&action=create`;
+
+  eoirCreateOpening = true;
+  setEoirState(EOIR_STATES.UNLINKED_CREATE_CHOICE, 'Opening XY CRM…');
+  try {
+    const openedTab = await chrome.tabs.create({ url: createUrl });
+    if (!openedTab) throw new Error('Chrome did not open the CRM tab.');
+    eoirUnlinkedCaptureId = '';
+    eoirCreateOpening = false;
+    setEoirState(EOIR_STATES.UNLINKED, 'XY CRM opened to create the client.');
+  } catch (error) {
+    eoirCreateOpening = false;
+    setEoirState(
+      EOIR_STATES.UNLINKED_CREATE_CHOICE,
+      `Could not open XY CRM: ${error?.message || String(error)} Please try again.`,
+    );
+  }
+}
+
+async function previewEoirMatch() {
+  if (!eoirDraft) return;
+  setEoirState(EOIR_STATES.MATCHING);
+  try {
+    const response = await fetch(`${WORKER}${EOIR_PREVIEW_ENDPOINT}`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        captureId: eoirDraft.captureId,
+        fields: eoirDraft.fields,
+      }),
+    });
+    const result = await parseJsonResponse(response);
+    const matchState = getEoirResultState(result);
+    if (!response.ok || result.success === false || result.ok === false) {
+      if (response.status === 409 || matchState === EOIR_STATES.CONFLICT) {
+        setEoirState(EOIR_STATES.CONFLICT, result.error || result.reason || '');
+        return;
+      }
+      throw new Error(result.error || `HTTP ${response.status}`);
+    }
+    if (!matchState) throw new Error('Worker returned no match state.');
+    if (matchState === EOIR_STATES.CONFLICT) {
+      setEoirState(EOIR_STATES.CONFLICT, result.error || result.reason || '');
+      return;
+    }
+    eoirMatchState = matchState;
+    setEoirState(EOIR_STATES.READY);
+  } catch (error) {
+    setEoirState(EOIR_STATES.PENDING_OFFLINE, error.message);
+  }
+}
+
+async function captureEoirResult(activeTab) {
+  if (!eoirPendingState.tryBeginCapture()) {
+    setEoirState(EOIR_STATES.PENDING_OFFLINE, 'A confirmed save is already pending.');
+    return;
+  }
+  eoirDraft = null;
+  eoirMatchState = '';
+  setEoirState(EOIR_STATES.READING);
+
+  try {
+    const tab = activeTab || await getActiveBrowserTab();
+    if (!tab || !isEoirAcisUrl(tab.url)) {
+      throw new Error('The active tab is not acis.eoir.justice.gov.');
+    }
+    const response = await sendToTabContent(tab, {
+      type: 'ARREGLO_CAPTURE_EOIR_RESULT',
+    });
+    if (!response?.ok || !response.fields) {
+      throw new Error(response?.error || 'Unable to read this page.');
+    }
+
+    eoirDraft = {
+      captureId: crypto.randomUUID(),
+      fields: {
+        ...response.fields,
+        capturedAt: new Date().toISOString(),
+      },
+    };
+    setEoirState(EOIR_STATES.PREVIEW);
+    await previewEoirMatch();
+  } catch (error) {
+    setEoirState(EOIR_STATES.IDLE, error.message);
+  }
+}
+
+function normalizedEoirIdentity(value) {
+  return String(value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+async function syncEoirResultDirectly(fields) {
+  const listResponse = await fetch(`${WORKER}/list-clients?limit=1000`);
+  const listJson = await parseJsonResponse(listResponse);
+  if (!listResponse.ok || !Array.isArray(listJson.clients)) throw new Error('Unable to read CRM clients.');
+  const aNumber = normalizedEoirIdentity(fields.alienNumber);
+  const matches = listJson.clients.filter(client => {
+    const info = client.infoFormData || client.formData || {};
+    return normalizedEoirIdentity(info.alienNumber) === aNumber;
+  });
+  if (matches.length !== 1) throw new Error(matches.length ? 'Duplicate CRM A-Number; nothing was updated.' : 'No CRM client has this A-Number.');
+  const client = matches[0];
+  const info = client.infoFormData || {};
+  const crmName = `${info.familyName || ''}, ${info.givenName || ''}`;
+  if (normalizedEoirIdentity(crmName) !== normalizedEoirIdentity(fields.subjectName)) {
+    throw new Error('EOIR name does not match the CRM client; nothing was updated.');
+  }
+  const updatedAt = new Date().toISOString();
+  const previous = {
+    hearingDate:info._crmEoirNextHearing || '', hearingTime:info._crmEoirHearingTime || '',
+    hearingType:info._crmEoirHearingType || '', courtAddress:info._crmEoirCourt || '', judge:info._crmEoirJudge || '',
+  };
+  const current = {
+    hearingDate:fields.hearingDate || '', hearingTime:fields.hearingTime || '',
+    hearingType:normalizeEoirHearingType(fields.hearingType), courtAddress:fields.courtAddress || '', judge:fields.judge || '',
+  };
+  const changedFields = Object.keys(current).filter(key => previous[key] && current[key] && normalizedEoirIdentity(previous[key]) !== normalizedEoirIdentity(current[key]));
+  const alerts = Array.isArray(info._crmEoirAlerts) ? info._crmEoirAlerts : [];
+  const changeKey = changedFields.map(key => `${key}:${previous[key]}=>${current[key]}`).join('|');
+  const nextAlerts = changeKey && !alerts.some(alert => alert.changeKey === changeKey)
+    ? [{ id:`eoir_alert_${Date.now()}`, changeKey, detectedAt:updatedAt, status:'unreviewed', changedFields, previous, current }, ...alerts]
+    : alerts;
+  let history = Array.isArray(info._crmEoirHearingHistory) ? [...info._crmEoirHearingHistory] : [];
+  const priorDate = previous.hearingDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  const priorOccurred = priorDate && new Date(Number(priorDate[3]), Number(priorDate[1]) - 1, Number(priorDate[2])) <= new Date();
+  if (priorOccurred && previous.hearingDate && previous.hearingDate !== current.hearingDate) {
+    const priorHearing = { id:`hearing_${Date.now()}`, eoirNextHearing:previous.hearingDate, eoirHearingTime:previous.hearingTime,
+      eoirHearingType:previous.hearingType || 'Master', eoirCourt:previous.courtAddress, eoirJudge:previous.judge, archivedAt:updatedAt, source:'eoir_daily_check' };
+    const signature = [priorHearing.eoirNextHearing, priorHearing.eoirHearingTime, priorHearing.eoirHearingType, priorHearing.eoirCourt, priorHearing.eoirJudge].join('|');
+    if (!history.some(item => [item.eoirNextHearing, item.eoirHearingTime, item.eoirHearingType, item.eoirCourt, item.eoirJudge].join('|') === signature)) history.unshift(priorHearing);
+  }
+  const merged = {
+    ...info,
+    _crmNtaFiled: true,
+    _crmEoirNextHearing: fields.hearingDate || info._crmEoirNextHearing || '',
+    _crmEoirHearingTime: fields.hearingTime || info._crmEoirHearingTime || '',
+    _crmEoirCourt: fields.courtAddress || info._crmEoirCourt || '',
+    _crmEoirHearingType: normalizeEoirHearingType(fields.hearingType) || info._crmEoirHearingType || '',
+    _crmEoirJudge: fields.judge || info._crmEoirJudge || '',
+    _crmEoirDocketDate: fields.docketDate || info._crmEoirDocketDate || '',
+    _crmEoirAppearanceMode: fields.appearanceMode || info._crmEoirAppearanceMode || '',
+    _crmEoirCourtPhone: fields.courtPhone || info._crmEoirCourtPhone || '',
+    _crmEoirHearingHistory: history,
+    _crmEoirAlerts: nextAlerts,
+    _crmWorkflowStep: current.hearingType === 'Individual' ? 'i589_individual_hearing' : 'i589_master_hearing',
+    _crmEoirUpdatedAt: updatedAt,
+    _crmEoirSource: { sourceUrl: fields.sourceUrl || '', capturedAt: updatedAt, caseStatus: fields.caseStatus || '' },
+  };
+  const saveResponse = await fetch(`${WORKER}/update-info-sheet`, {
+    method:'POST', headers:{ 'Content-Type':'application/json' },
+    body:JSON.stringify({ caseNumber:client.caseNumber, infoFormData:merged }),
+  });
+  const saveJson = await parseJsonResponse(saveResponse);
+  if (!saveResponse.ok || saveJson.success === false) throw new Error(saveJson.error || `CRM save failed (HTTP ${saveResponse.status}).`);
+  return { caseNumber:String(client.caseNumber), fields:merged };
+}
+
+async function autoRunEoir(tab) {
+  if (eoirAutoBusy || !tab || !isEoirAcisUrl(tab.url)) return;
+  eoirAutoBusy = true;
+  try {
+    if (/\/caseInformation\/?(?:[?#].*)?$/i.test(tab.url || '')) {
+      const captured = await sendToTabContent(tab, { type:'ARREGLO_CAPTURE_EOIR_RESULT' });
+      if (!captured?.ok || !captured.fields) throw new Error(captured?.error || 'Unable to read EOIR result.');
+      const key = [captured.fields.alienNumber, captured.fields.hearingDate, captured.fields.hearingTime, captured.fields.judge].join('|');
+      if (key === eoirLastAutoKey) return;
+      setEoirState(EOIR_STATES.SAVING, 'Automatically syncing the EOIR result to CRM…');
+      const saved = await syncEoirResultDirectly(captured.fields);
+      eoirLastAutoKey = key;
+      eoirDraft = { captureId:crypto.randomUUID(), fields:captured.fields };
+      setEoirState(EOIR_STATES.LINKED, `Updated CRM case ${saved.caseNumber}.`);
+      return;
+    }
+    const aNumber = normalizedEoirIdentity(clientData?.alienNumber);
+    if (aNumber.length === 9) {
+      const key = `submit|${tab.id}|${aNumber}`;
+      if (key !== eoirLastAutoKey) {
+        const submitted = await sendToTabContent(tab, { type:'ARREGLO_EOIR_FILL_SUBMIT', data:clientData });
+        if (!submitted?.ok) throw new Error(submitted?.error || 'EOIR automatic submit failed.');
+        eoirLastAutoKey = key;
+        setEoirState(EOIR_STATES.READING, 'EOIR search submitted automatically…');
+      }
+    }
+  } catch (error) {
+    setEoirState(EOIR_STATES.CONFLICT, error.message);
+  } finally {
+    eoirAutoBusy = false;
+  }
+}
+
+async function captureCbpResult(activeTab) {
+  const statusEl = document.getElementById('fill-status');
+  try {
+    const tab = activeTab || await getActiveBrowserTab();
+    if (!tab || !isCbpI94Url(tab.url)) {
+      throw new Error('The active tab is not i94.cbp.dhs.gov.');
+    }
+    const response = await sendToTabContent(tab, { type: 'EXTRACT_CBP' });
+    if (!response?.success) {
+      throw new Error(response?.error || 'Unable to capture this CBP result.');
+    }
+    if (!response.data?.i94Number) {
+      throw new Error('当前页面没有真实 I-94 号码。请先完成查询，再抓取结果。');
+    }
+    lastCbp = response.data;
+    renderCbpCard('cbp_i94_result');
+  } catch (error) {
+    if (statusEl) setStatus(statusEl, `❌ 抓取失败: ${error.message}`, 'err');
+  }
+}
+
+async function captureAndAutoSaveCbp(activeTab) {
+  if (currentPage === 'cbp_i94_history') {
+    const tab = activeTab || await getActiveBrowserTab();
+    const response = await sendToTabContent(tab, { type: 'EXTRACT_CBP' });
+    if (!response?.success) throw new Error(response?.error || 'Unable to read Traveler History.');
+    const history = response.data || {};
+    const norm = value => String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (!history.docNumber || norm(history.docNumber) !== norm(clientData?.passportNumber)) {
+      throw new Error('Traveler History passport does not match the loaded client.');
+    }
+    if (!clientData?.i94Number) {
+      const opened = await sendToTabContent(tab, { type: 'CBP_OPEN_MOST_RECENT_I94' });
+      if (!opened?.success) throw new Error(opened?.error || 'Unable to reopen Most Recent I-94.');
+      return;
+    }
+    lastCbp = {
+      i94Number: clientData.i94Number,
+      entryDate: clientData.lastEntryDate || history.entryDate || '',
+      classOfAdmission: clientData.lastEntryStatus || '',
+      admitUntil: clientData.dateStatusExpires || clientData.i94StatusExpiry || '',
+      lastName: clientData.familyName || '',
+      firstName: clientData.givenName || '',
+      dob: clientData.dob || '',
+      docNumber: history.docNumber,
+      citizenship: clientData.nationality || clientData.countryOfBirth || '',
+      travelHistory: history.travelHistory || [],
+      arrivalsCount: history.arrivalsCount || 0,
+      portRaw: history.portRaw || '',
+      port: history.port || '',
+      portMapped: !!history.portMapped,
+      capturedAt: new Date().toISOString(),
+      sourceUrl: history.sourceUrl || tab.url || '',
+    };
+    cbpAutoSaveAuthorizedCase = '';
+    await saveCbpToCloudflare('cbp_i94_history');
+    return;
+  }
+  await captureCbpResult(activeTab);
+  const caseNum = document.getElementById('case-number')?.value?.trim() || '';
+  if (!lastCbp || !clientData || !caseNum || cbpAutoSaveAuthorizedCase !== caseNum) return;
+  const identity = cbpStrictIdentityMatch(lastCbp, clientData);
+  if (identity.ok) {
+    const tab = activeTab || await getActiveBrowserTab();
+    // Save the verified I-94 before navigating away. Waiting for Traveler
+    // History here loses the response when CBP replaces the current document.
+    cbpAutoSaveAuthorizedCase = '';
+    await saveCbpToCloudflare('cbp_i94_result');
+    lastCbp = null;
+    // The destination history page is detected and saved as a second pass.
+    sendToTabContent(tab, { type: 'CBP_GET_TRAVELER_HISTORY' }).catch(() => {});
+  }
+}
+
+function startCbpAutoCapture(activeTab) {
+  if (cbpCaptureReading) return;
+  cbpCaptureReading = true;
+  captureAndAutoSaveCbp(activeTab)
+    .catch(error => {
+      const statusEl = document.getElementById('fill-status');
+      if (statusEl) setStatus(statusEl, `❌ ${error.message}`, 'err');
+    })
+    .finally(() => { cbpCaptureReading = false; });
+}
+
+async function captureGovernmentResult() {
+  try {
+    const tab = await getActiveBrowserTab();
+    if (tab && isEoirAcisUrl(tab.url)) {
+      await captureEoirResult(tab);
+      return;
+    }
+    if (tab && isCbpI94Url(tab.url)) {
+      await captureCbpResult(tab);
+      return;
+    }
+    setEoirState(EOIR_STATES.IDLE, 'Open an EOIR ACIS or CBP I-94 result first.');
+  } catch (error) {
+    setEoirState(
+      EOIR_STATES.IDLE,
+      `Unable to read the active browser tab. ${error?.message || String(error)}`,
+    );
+  }
+}
+
+async function saveEoirPending() {
+  let eoirPending = eoirPendingState.getPending();
+  if (!eoirPending) return;
+  setEoirState(EOIR_STATES.SAVING);
+  try {
+    await eoirPendingState.ensurePersisted();
+    eoirPending = eoirPendingState.getPending();
+    const response = await fetch(`${WORKER}${EOIR_SAVE_ENDPOINT}`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(eoirPending),
+    });
+    const result = await parseJsonResponse(response);
+    const savedState = getEoirResultState(result);
+    if (response.status === 409 || savedState === EOIR_STATES.CONFLICT) {
+      setEoirState(EOIR_STATES.CONFLICT, result.error || result.reason || '');
+      return;
+    }
+    const serverFinalUnlinked = isServerFinalUnlinkedCapture(response, result);
+    const savedCaptureId = eoirPending.captureId;
+    const cleared = await eoirPendingState.finishSave({
+      httpOk: response.ok,
+      resultOk: result.success === true || result.ok === true,
+      linkState: savedState,
+    });
+    if (!cleared) {
+      throw new Error(result.error || `Cloudflare did not confirm save (HTTP ${response.status}).`);
+    }
+
+    if (serverFinalUnlinked) {
+      showEoirUnlinkedDecision(savedCaptureId);
+    } else {
+      setEoirState(savedState);
+    }
+  } catch (error) {
+    setEoirState(EOIR_STATES.PENDING_OFFLINE, error.message);
+  }
+}
+
+async function confirmEoirSave() {
+  if (!eoirDraft) return;
+  const persistence = eoirPendingState.beginConfirmation(eoirDraft);
+  setEoirState(EOIR_STATES.SAVING);
+  try {
+    await persistence;
+  } catch (error) {
+    setEoirState(EOIR_STATES.PENDING_OFFLINE, error.message);
+    return;
+  }
+  await saveEoirPending();
+}
+
+async function handleEoirConfirm() {
+  if (eoirPendingState.getPending()) {
+    await saveEoirPending();
+  } else if (eoirDraft && document.getElementById('eoir-card')?.dataset.state === EOIR_STATES.READY) {
+    await confirmEoirSave();
+  } else if (eoirDraft) {
+    await previewEoirMatch();
+  }
+}
+
+async function refreshEoirVisibility() {
+  const card = document.getElementById('eoir-card');
+  if (!card) return false;
+  const tab = await getActiveBrowserTab();
+  const visible = Boolean(tab && isEoirAcisUrl(tab.url));
+  card.classList.toggle('is-visible', visible);
+  const login = document.getElementById('step-login');
+  const fill = document.getElementById('step-fill');
+  const cbpCard = document.getElementById('cbp-card');
+  // EOIR capture identifies the client from the result's A-number. A client
+  // previously loaded for CBP/USCIS must never appear on an EOIR page.
+  if (visible) {
+    if (login) login.style.display = 'none';
+    if (fill) fill.style.display = 'none';
+    if (cbpCard) cbpCard.style.display = 'none';
+  } else {
+    if (cbpCard) cbpCard.style.display = '';
+    if (clientData) {
+      if (login) login.style.display = 'none';
+      if (fill) fill.style.display = 'block';
+    } else {
+      if (login) login.style.display = 'block';
+      if (fill) fill.style.display = 'none';
+    }
+  }
+  if (eoirPendingState.getPending()) return visible;
+  if (visible && !eoirDraft) setEoirState(EOIR_STATES.IDLE);
+  if (visible) autoRunEoir(tab);
+  return visible;
+}
+
+async function initializeEoirCapture() {
+  document.getElementById('btn-eoir-capture')?.addEventListener('click', captureGovernmentResult);
+  document.getElementById('btn-eoir-confirm')?.addEventListener('click', handleEoirConfirm);
+  document.getElementById('btn-eoir-keep-unlinked')?.addEventListener(
+    'click',
+    keepEoirCaseStatusOnly,
+  );
+  document.getElementById('btn-eoir-create-client')?.addEventListener(
+    'click',
+    openEoirClientCreation,
+  );
+
+  const stored = await chrome.storage.local.get([EOIR_PENDING_KEY]);
+  const pending = stored?.[EOIR_PENDING_KEY];
+  if (pending
+      && typeof pending.captureId === 'string'
+      && pending.fields
+      && pending.staffConfirmed === true) {
+    eoirPendingState.restore(pending);
+    eoirDraft = { captureId: pending.captureId, fields: pending.fields };
+    setEoirState(EOIR_STATES.PENDING_OFFLINE);
+    return;
+  }
+  await refreshEoirVisibility();
+}
+
 // ── CBP I-94 capture card (v1.31) ─────────────────────────────────────────────
 // Workflow: staff loads the client (case #) → opens i94.cbp.dhs.gov and runs
 // the passport search → this card captures the results, verifies they belong
 // to the loaded client (name / DOB / passport), and saves to Cloudflare.
 // Saving IS the staff confirmation step required by the field-level data rules.
 let lastCbp = null;
+let cbpAutoSaveAuthorizedCase = '';
+let cbpSavedCase = '';
+let cbpCaptureReading = false;
+let cbpResultClientChosen = false;
 
 function fmtName(d) { return `${(d.familyName||'').toUpperCase()}, ${(d.givenName||'').toUpperCase()}`; }
 
@@ -844,10 +1510,35 @@ function cbpMatchClient(cbp, d) {
   return { ok, checks, reason: checks.length ? '' : 'no comparable fields' };
 }
 
+function cbpStrictIdentityMatch(cbp, d) {
+  const norm = value => String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const required = {
+    familyName: [cbp?.lastName, d?.familyName],
+    givenName: [cbp?.firstName, d?.givenName],
+    dob: [cbp?.dob, d?.dob],
+  };
+  const missing = Object.entries(required)
+    .filter(([, pair]) => !pair[0] || !pair[1])
+    .map(([field]) => field);
+  const mismatched = Object.entries(required)
+    .filter(([, pair]) => pair[0] && pair[1] && norm(pair[0]) !== norm(pair[1]))
+    .map(([field]) => field);
+  if (!cbp?.docNumber) missing.push('passport');
+  if (cbp?.docNumber && d?.passportNumber && norm(cbp.docNumber) !== norm(d.passportNumber)) {
+    mismatched.push('passport');
+  }
+  return { ok: missing.length === 0 && mismatched.length === 0, missing, mismatched };
+}
+
 function renderCbpCard(page) {
   const el = document.getElementById('cbp-card');
   if (!el) return;
-  if (page !== 'cbp_i94') { el.innerHTML = ''; return; }
+  if (page === 'cbp_i94_form') {
+    lastCbp = null;
+    el.innerHTML = '';
+    return;
+  }
+  if (page !== 'cbp_i94_result' && page !== 'cbp_i94_history') { el.innerHTML = ''; return; }
 
   const caseNum = document.getElementById('case-number')?.value?.trim() || '';
   const rows = (o) => Object.entries(o).map(([k,v]) =>
@@ -855,12 +1546,9 @@ function renderCbpCard(page) {
 
   let body = '';
   if (!lastCbp) {
-    body = `<div style="color:#64748b;font-size:11px;margin:4px 0 8px">
-      ${clientData ? '在 CBP 查询出结果后点击抓取。' : '⚠ 先在上方输入案件号加载客户，再抓取（用于身份核对）。'}
-    </div>
-    <button id="btn-cbp-capture" style="width:100%;padding:8px;border:none;border-radius:7px;background:#1e3a5f;color:#fff;font-weight:700;font-size:12px;cursor:pointer">📥 抓取本页 I-94 · Capture I-94</button>
-    <button id="btn-cbp-passport" style="width:100%;margin-top:6px;padding:8px;border:none;border-radius:7px;background:#475569;color:#fff;font-weight:700;font-size:12px;cursor:pointer">📎 注入护照信息页 → CBP Document Capture</button>
-    <div style="color:#94a3b8;font-size:10px;margin-top:3px">先点页面上 CAPTURE DOCUMENT 打开弹窗，再点此按钮（不用点 Files）</div>`;
+    body = clientData
+      ? `<div style="color:#64748b;font-size:11px;margin:4px 0 8px">正在自动读取 I-94 和 Traveler History…</div>`
+      : `<div style="color:#64748b;font-size:11px;margin:4px 0 8px">请先输入案件号，选择这份 I-94 属于哪位客户。</div>`;
   } else {
     const c = lastCbp;
     const match = cbpMatchClient(c, clientData);
@@ -885,26 +1573,78 @@ function renderCbpCard(page) {
         '入境次数': `${c.arrivalsCount}${c.arrivalsCount > 1 ? '（有既往入境 → otherEntries=Yes）' : ''}`,
       })}</div>
       ${matchHtml}
-      <div style="display:flex;gap:6px;margin-top:6px">
-        <button id="btn-cbp-save" ${clientData ? '' : 'disabled'} style="flex:2;padding:8px;border:none;border-radius:7px;background:${clientData?'#166534':'#94a3b8'};color:#fff;font-weight:700;font-size:12px;cursor:pointer">💾 保存到 CRM (case ${caseNum || '?'})</button>
-        <button id="btn-cbp-recapture" style="flex:1;padding:8px;border-radius:7px;border:1px solid #cbd5e1;background:#fff;font-size:12px;cursor:pointer">重新抓取</button>
-      </div>`;
+      <div style="margin-top:6px;padding:6px 8px;background:${cbpSavedCase === caseNum ? '#f0fdf4' : '#eff6ff'};border-radius:6px;color:${cbpSavedCase === caseNum ? '#166534' : '#1e40af'};font-size:11px">${cbpSavedCase === caseNum ? `✅ I-94 已自动保存到 case ${caseNum}` : `I-94 将在身份完全匹配后自动同步到 case ${caseNum || '?'}。`}</div>`;
   }
 
   el.innerHTML = `<div style="background:#f1f5f9;border-radius:8px;padding:8px 10px;margin-bottom:8px;">
-    <div style="font-weight:700;color:#1e3a5f;font-size:12px;margin-bottom:4px">🛂 CBP I-94 捕获</div>${body}</div>`;
+    <div style="font-weight:700;color:#1e3a5f;font-size:12px;margin-bottom:4px">Capture I-94 info</div>${body}</div>`;
 
-  const cap = document.getElementById('btn-cbp-capture') || document.getElementById('btn-cbp-recapture');
-  if (cap) cap.onclick = async () => {
-    const resp = await sendToContent({ type: 'EXTRACT_CBP' });
-    if (resp?.success) { lastCbp = resp.data; renderCbpCard(page); }
-    else setStatus(document.getElementById('fill-status'), `❌ 抓取失败: ${resp?.error || 'no response'}`, 'err');
-  };
-  const save = document.getElementById('btn-cbp-save');
-  if (save) save.onclick = () => saveCbpToCloudflare(page);
-  const pp = document.getElementById('btn-cbp-passport');
-  if (pp) pp.onclick = () => uploadPassportBio();
 }
+
+async function fillCbpTravelerAndContinue() {
+  const statusEl = document.getElementById('fill-status');
+  if (!clientData) { setStatus(statusEl, '❌ 先加载客户', 'err'); return; }
+  const cbpCitizenship = value => {
+    const raw = String(value || '').trim();
+    // Ethnicity is separate from nationality. Repair legacy records that
+    // accidentally exposed "Han Chinese" to the CBP citizenship field.
+    if (/^(?:han|han chinese|chinese|汉|汉族)$/i.test(raw)) return 'China';
+    return raw || 'China';
+  };
+  const payload = {
+    givenName: clientData.givenName || '',
+    familyName: clientData.familyName || '',
+    dob: clientData.dob || '',
+    nationality: cbpCitizenship(clientData.nationality || clientData.countryOfBirth),
+    passportNumber: clientData.passportNumber || '',
+  };
+  const missing = Object.entries(payload).filter(([, value]) => !value).map(([key]) => key);
+  if (missing.length) { setStatus(statusEl, `❌ Info Sheet 缺少: ${missing.join(', ')}`, 'err'); return; }
+  setStatus(statusEl, '正在填写 CBP 查询资料…', 'info');
+  try {
+    const tab = await getActiveBrowserTab();
+    if (!tab || !isCbpI94Url(tab.url)) throw new Error('请打开 CBP I-94 查询页');
+    const response = await sendToTabContent(tab, { type: 'FILL_CBP_TRAVELER', data: payload, continueSearch: true });
+    if (!response?.success) {
+      const failed = response?.results?.filter(item => !item.ok).map(item => item.field).join(', ');
+      throw new Error(response?.error || `未找到字段: ${failed || 'unknown'}`);
+    }
+    cbpAutoSaveAuthorizedCase = document.getElementById('case-number')?.value?.trim() || '';
+    statusEl.textContent = '';
+    statusEl.style.display = 'none';
+  } catch (e) {
+    setStatus(statusEl, `❌ CBP 填写失败: ${e.message}`, 'err');
+  }
+}
+
+chrome.runtime?.onMessage?.addListener((msg) => {
+  if (msg?.type !== 'CBP_RESULT_READY' || !msg.data) return;
+  lastCbp = msg.data;
+  renderCbpCard('cbp_i94_result');
+  // The navigation-driven capture owns the complete result + Traveler History
+  // flow.  Do not save this early event with a partial or stale local client.
+  if (cbpCaptureReading) return;
+  const caseNum = document.getElementById('case-number')?.value?.trim() || '';
+  if (cbpAutoSaveAuthorizedCase && cbpAutoSaveAuthorizedCase === caseNum) {
+    startCbpAutoCapture();
+    return;
+  }
+  const statusEl = document.getElementById('fill-status');
+  if (statusEl) {
+    // Do not leave a vague mismatch banner. Return to client selection so the
+    // staff member can choose the correct owner; the result is not written.
+    statusEl.textContent = '';
+    statusEl.style.display = 'none';
+    clientData = null;
+    lastCbp = null;
+    cbpAutoSaveAuthorizedCase = '';
+    cbpResultClientChosen = false;
+    document.getElementById('step-fill').style.display = 'none';
+    document.getElementById('step-login').style.display = 'block';
+    document.getElementById('case-number').value = '';
+    renderCbpCard('cbp_i94_result');
+  }
+});
 
 async function uploadPassportBio() {
   const statusEl = document.getElementById('fill-status');
@@ -936,31 +1676,60 @@ async function uploadPassportBio() {
 async function saveCbpToCloudflare(page) {
   const statusEl = document.getElementById('fill-status');
   const caseNum = document.getElementById('case-number')?.value?.trim();
-  if (!lastCbp || !clientData || !caseNum) return;
-  const match = cbpMatchClient(lastCbp, clientData);
-  const override = document.getElementById('cbp-override')?.checked;
-  if (!match.ok && !override) {
-    setStatus(statusEl, '❌ 身份不匹配 — 核对后勾选强制保存', 'err');
-    return;
-  }
-  setStatus(statusEl, '保存到 Cloudflare…', 'info');
-  const c = lastCbp;
-  const merged = {
-    ...clientData,
-    i94Number: c.i94Number || clientData.i94Number,
-    lastEntryDate: c.entryDate || clientData.lastEntryDate,
-    lastEntryStatus: c.classOfAdmission || clientData.lastEntryStatus,
-    dateStatusExpires: c.admitUntil || clientData.dateStatusExpires,
-    i94StatusExpiry: c.admitUntil || clientData.i94StatusExpiry,   // legacy mirror
-    entryPort: (c.portMapped && c.port) || clientData.entryPort,
-    passportNumber: clientData.passportNumber || c.docNumber,
-    otherEntries: c.arrivalsCount > 1 ? 'Yes' : (clientData.otherEntries || 'No'),
-    _cbp: { capturedAt: c.capturedAt, sourceUrl: c.sourceUrl, travelHistory: c.travelHistory,
-            docNumber: c.docNumber, arrivalsCount: c.arrivalsCount,
-            classOfAdmission: c.classOfAdmission, portRaw: c.portRaw,
-            confirmedBy: 'staff-extension', matchOverride: !match.ok },
-  };
+  if (!lastCbp || !caseNum) return;
+  setStatus(statusEl, '正在同步 I-94…', 'info');
   try {
+    // /update-info-sheet replaces the entire form. Always re-read the formal
+    // Cloudflare record immediately before writing so an old extension cache
+    // can never erase newer CRM fields.
+    const latestRes = await fetch(`${WORKER}/case/${encodeURIComponent(caseNum)}`);
+    if (!latestRes.ok) throw new Error(`无法读取最新 Info Sheet (HTTP ${latestRes.status})`);
+    const latestJson = await latestRes.json();
+    const latestClient = latestJson?.client || latestJson?.case || latestJson;
+    const latestInfo = latestClient?.infoFormData;
+    if (!latestInfo || typeof latestInfo !== 'object' || Array.isArray(latestInfo)) {
+      throw new Error('未找到 Cloudflare 正式 Info Sheet，已阻止写入');
+    }
+    const identity = cbpStrictIdentityMatch(lastCbp, latestInfo);
+    if (!identity.ok) throw new Error('当前 I-94 与 Cloudflare 最新客户身份不一致，已阻止写入');
+
+    const c = lastCbp;
+    const usEntryHistory = (Array.isArray(c.travelHistory) ? c.travelHistory : [])
+      .filter(row => /arrival/i.test(String(row?.type || row?.event || 'Arrival')))
+      .map(row => ({
+        dateOfEntry: String(row?.dateOfEntry || row?.entryDate || row?.date || '').trim(),
+        placeOfEntry: String(row?.placeOfEntry || row?.entryPort || row?.location || row?.port || '').trim(),
+        status: String(row?.status || row?.classOfAdmission || c.classOfAdmission || latestInfo.lastEntryStatus || '').trim(),
+      }))
+      .filter(row => row.dateOfEntry && row.placeOfEntry)
+      .sort((a, b) => {
+        const key = value => {
+          const m = String(value).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          return m ? Number(`${m[3]}${m[1].padStart(2,'0')}${m[2].padStart(2,'0')}`) : 0;
+        };
+        return key(b.dateOfEntry) - key(a.dateOfEntry);
+      });
+    const [latestEntry, ...previousUsEntries] = usEntryHistory;
+    const merged = {
+      ...latestInfo,
+      i94Number: c.i94Number || latestInfo.i94Number,
+      lastEntryDate: c.entryDate || latestInfo.lastEntryDate,
+      lastEntryStatus: c.classOfAdmission || latestInfo.lastEntryStatus,
+      dateStatusExpires: c.admitUntil || latestInfo.dateStatusExpires,
+      i94StatusExpiry: c.admitUntil || latestInfo.i94StatusExpiry,
+      entryPort: (c.portMapped && c.port) || latestInfo.entryPort,
+      passportNumber: latestInfo.passportNumber || c.docNumber,
+      usEntryHistory,
+      previousUsEntries,
+      otherEntries: previousUsEntries.length ? 'Yes' : 'No',
+      lastEntryDate: latestEntry?.dateOfEntry || c.entryDate || latestInfo.lastEntryDate,
+      entryPort: latestEntry?.placeOfEntry || (c.portMapped && c.port) || latestInfo.entryPort,
+      lastEntryStatus: latestEntry?.status || c.classOfAdmission || latestInfo.lastEntryStatus,
+      _cbp: { capturedAt: c.capturedAt, sourceUrl: c.sourceUrl, travelHistory: c.travelHistory,
+              docNumber: c.docNumber, arrivalsCount: c.arrivalsCount,
+              classOfAdmission: c.classOfAdmission, portRaw: c.portRaw,
+              confirmedBy: 'staff-extension' },
+    };
     const res = await fetch(`${WORKER}/update-info-sheet`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ caseNumber: caseNum, infoFormData: merged }),
@@ -968,16 +1737,15 @@ async function saveCbpToCloudflare(page) {
     const json = await res.json().catch(() => ({}));
     if (res.ok && json.success !== false) {
       clientData = merged;
-      // Keep the same canonical session keys used by load/restore. The old
-      // client_data/case_number pair made the side panel forget the client
-      // after an extension reload and return to the first screen.
+      cbpSavedCase = caseNum;
       chrome.storage.local.set({
         arreglo_data: merged,
         arreglo_case: caseNum,
-        arreglo_address_index: selectedAddressIndex,
-        arreglo_synced_at: new Date().toISOString(),
+        arreglo_client_data: merged,
+        arreglo_case_number: caseNum,
       });
       setStatus(statusEl, `✅ I-94 已保存到 case ${caseNum} — CRM 同步后即生效，USCIS 填表将使用这些数据`, 'ok');
+      renderCbpCard('cbp_i94_result');
     } else {
       setStatus(statusEl, `❌ 保存失败: ${json.error || res.status}`, 'err');
     }
@@ -997,43 +1765,94 @@ async function getSupportedTab() {
   try {
     if (active && SUPPORTED_HOSTS.test(new URL(active.url || '').hostname)) return active;
   } catch (e) {}
-  return await getUscisTab();
+  const cbpTabs = await chrome.tabs.query({ url: 'https://i94.cbp.dhs.gov/*' });
+  return cbpTabs[0] || await getUscisTab();
 }
 
 async function refreshPageTag() {
   try {
+    const onEoirPage = await refreshEoirVisibility();
+    // EOIR has no fields to fill and matches the CRM client in the background
+    // by A-number, so none of the CBP/USCIS client or Fill UI belongs here.
+    if (onEoirPage) return;
     const uscisTab = await getSupportedTab();
     if (!uscisTab) {
+      if (currentPage.startsWith('cbp_i94_') && lastCbp) return;
       document.getElementById('page-tag').innerHTML =
         `<span class="page-tag" style="background:#fffbeb;color:#92400e">⚠️ Open my.uscis.gov or i94.cbp.dhs.gov</span>`;
       return;
     }
+    const directCbpRoute = (() => {
+      try {
+        const url = new URL(uscisTab.url || '');
+        if (url.hostname !== 'i94.cbp.dhs.gov') return '';
+        if (/\/search\/(?:travel-)?history-search\/results\/?$/i.test(url.pathname)) return 'cbp_i94_history';
+        if (/\/search\/recent-search\/results\/?$/i.test(url.pathname)) return 'cbp_i94_result';
+        if (/\/search\/recent-search\/?$/i.test(url.pathname)) return 'cbp_i94_form';
+        return '';
+      } catch (_) { return ''; }
+    })();
+    const isDirectCbpResult = directCbpRoute === 'cbp_i94_result';
+    const isDirectCbpHistory = directCbpRoute === 'cbp_i94_history';
     let resp;
     try {
       resp = await chrome.tabs.sendMessage(uscisTab.id, { type: 'PING' });
       _pingFailCount = 0;
     } catch(pingErr) {
       _pingFailCount++;
-      if (_pingFailCount >= 3) {
-        document.getElementById('page-tag').innerHTML =
-          `<span class="page-tag" style="background:#fffbeb;color:#92400e">⚠️ Reconnecting to USCIS page</span>`;
-      }
-      return;
+      if (_pingFailCount >= 3) document.getElementById('page-tag').innerHTML = '';
+      // An unpacked extension can be reloaded while the CBP tab stays open.
+      // In that case the old content-script port is gone, but the URL still
+      // tells us exactly which CBP screen is visible.  Do not leave the UI as
+      // `unknown`; sendToContent() will inject the current script on action.
+      if (!directCbpRoute) return;
+      resp = { page: directCbpRoute };
     }
-    const detectedPage = resp?.page || 'unknown';
+    // URL is authoritative for the CBP result route. This keeps working even
+    // when an already-open tab still has the pre-reload content script.
+    const detectedPage = cbpCaptureReading && isCbpI94Url(uscisTab.url)
+      ? 'cbp_i94_result'
+      : (directCbpRoute || resp?.page || 'unknown');
+
+    const onCbp = isCbpI94Url(uscisTab.url);
+    const fillBtn = document.getElementById('btn-fill');
+    const startFullBtn = document.getElementById('btn-start-full');
+    // Full USCIS automation never belongs on a CBP page. The single-page
+    // button remains available only on the CBP search form, where it fills the
+    // traveler fields; result/history pages need no fill controls.
+    if (startFullBtn) startFullBtn.style.display = onCbp ? 'none' : '';
+    if (fillBtn) {
+      fillBtn.style.display = onCbp && detectedPage !== 'cbp_i94_form' ? 'none' : '';
+    }
 
     if (detectedPage !== currentPage) {
       currentPage = detectedPage;
+      if (currentPage === 'cbp_i94_result' && !cbpAutoSaveAuthorizedCase && !cbpResultClientChosen) {
+        const loadedCase = document.getElementById('case-number')?.value?.trim() || '';
+        if (clientData && loadedCase) {
+          cbpResultClientChosen = true;
+          cbpAutoSaveAuthorizedCase = loadedCase;
+        } else {
+          clientData = null;
+          lastCbp = null;
+          document.getElementById('client-card').innerHTML = '';
+          document.getElementById('step-fill').style.display = 'none';
+          document.getElementById('step-login').style.display = 'block';
+          document.getElementById('case-number').value = '';
+        }
+      }
       const label = PAGE_LABELS[currentPage] || currentPage;
-      document.getElementById('page-tag').innerHTML =
-        `<span class="page-tag">📄 ${label}</span>`;
-      // Clear old fill results — show fresh preview for new page
-      document.getElementById('fill-status').innerHTML = '';
+      document.getElementById('page-tag').innerHTML = currentPage.startsWith('cbp_i94_')
+        ? ''
+        : `<span class="page-tag">📄 ${label}</span>`;
+      // Preserve the final save message while CBP moves from I-94 to Travel History.
+      if (currentPage !== 'cbp_i94_history') document.getElementById('fill-status').innerHTML = '';
       document.getElementById('fill-results').innerHTML = '';
       renderCbpCard(currentPage);
+      if (clientData && (currentPage === 'cbp_i94_history' || (currentPage === 'cbp_i94_result' && cbpAutoSaveAuthorizedCase)) && !lastCbp && !cbpCaptureReading) {
+        startCbpAutoCapture(uscisTab);
+      }
       // CBP page: capture is the workflow — USCIS fill button makes no sense there
-      const fillBtn = document.getElementById('btn-fill');
-      if (fillBtn) fillBtn.style.display = currentPage === 'cbp_i94' ? 'none' : '';
       if (clientData) {
         renderAddressSelector(currentPage);
         renderSchoolSelector(currentPage);
@@ -1062,6 +1881,13 @@ document.getElementById('btn-load').addEventListener('click', async () => {
   const caseNum = document.getElementById('case-number').value.trim();
   if (!caseNum) return;
 
+  // A new case must never inherit another client's unsaved CBP capture.
+  lastCbp = null;
+  cbpAutoSaveAuthorizedCase = '';
+  cbpSavedCase = '';
+  cbpResultClientChosen = false;
+  document.getElementById('cbp-card').innerHTML = '';
+
   const btn = document.getElementById('btn-load');
   const statusEl = document.getElementById('load-status');
   btn.disabled = true;
@@ -1080,6 +1906,12 @@ document.getElementById('btn-load').addEventListener('click', async () => {
     renderWorkSelector(currentPage);
     renderChildSelector(currentPage);
     renderFieldPreview(currentPage);
+    if (currentPage === 'cbp_i94_result' || currentPage === 'cbp_i94_history') {
+      cbpResultClientChosen = true;
+      cbpAutoSaveAuthorizedCase = caseNum;
+      renderCbpCard(currentPage);
+      startCbpAutoCapture();
+    }
     // Detect USCIS page in background (non-blocking)
     refreshPageTag().catch(() => {});
     startPolling();
@@ -1095,6 +1927,17 @@ document.getElementById('btn-load').addEventListener('click', async () => {
 // ── Fill current page ─────────────────────────────────────────────────────────
 document.getElementById('btn-fill').addEventListener('click', async () => {
   if (!clientData) return;
+
+  // CBP traveler search uses the same single Fill This Page action as USCIS.
+  // There is no second Fill & Continue control in the CBP card.
+  try {
+    const pingResp = await sendToContent({ type: 'PING' });
+    if (pingResp?.page) currentPage = pingResp.page;
+  } catch (_) {}
+  if (currentPage === 'cbp_i94_form') {
+    await fillCbpTravelerAndContinue();
+    return;
+  }
 
   const btn = document.getElementById('btn-fill');
   const statusEl = document.getElementById('fill-status');
@@ -1182,20 +2025,100 @@ document.getElementById('btn-fill').addEventListener('click', async () => {
   btn.textContent = 'Fill This Page 填写此页';
 });
 
+// Guided whole-form run. It advances only after every mapped field on the
+// current page reports success and stops at the first missing/unsupported item.
+// It never clicks applicant signature, certification, fee, or final Submit.
+document.getElementById('btn-start-full').addEventListener('click', async () => {
+  if (!clientData) return;
+  const button = document.getElementById('btn-start-full');
+  const statusEl = document.getElementById('fill-status');
+  button.disabled = true;
+  button.textContent = 'Running...';
+  try {
+    const caseNum = document.getElementById('case-number').value.trim();
+    const refreshed = await loadClientFromCloudflare(caseNum, { silent:true, requireInfoSheet:true });
+    if (!refreshed) throw new Error('Unable to refresh the confirmed Info Sheet.');
+    clientData = refreshed;
+    let tab = await getActiveTab();
+    if (!tab || !/^https:\/\/my\.uscis\.gov\//i.test(tab.url || '')) tab = await getUscisTab();
+    if (!tab) throw new Error('Open the client I-589 in USCIS first.');
+    const match = String(tab.url || '').match(/^(https:\/\/my\.uscis\.gov\/forms\/application-for-asylum-withholding-removal\/\d+)/i);
+    if (!match) throw new Error('Open this client’s I-589 application first.');
+    let previousUrl = '';
+    let previousFailures = [];
+    for (let step = 0; step < 90; step++) {
+      let ping = null;
+      let pageChanged = false;
+      for (let attempt = 0; attempt < 20; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, 400));
+        try { ping = await sendToTabContent(tab, { type:'PING' }, 1); } catch (_) {}
+        const latest = await chrome.tabs.get(tab.id);
+        if (ping?.ready && ping.page && ping.url === latest.url && latest.url !== previousUrl) {
+          tab = latest;
+          pageChanged = true;
+          break;
+        }
+      }
+      if (!pageChanged) {
+        const detail = previousFailures.length
+          ? previousFailures.map(item => `${item.name} — ${item.val}`).join('; ')
+          : 'USCIS did not leave the current page.';
+        throw new Error(detail);
+      }
+      currentPage = ping.page;
+      previousUrl = tab.url;
+      renderAddressSelector(currentPage);
+      renderSchoolSelector(currentPage);
+      renderWorkSelector(currentPage);
+      renderChildSelector(currentPage);
+      renderFieldPreview(currentPage);
+      if (currentPage === 'review') {
+        setStatus(statusEl, 'Complete — stopped at Review for staff verification. No signature or final submission was performed.', 'ok');
+        return;
+      }
+      if (currentPage === 'unknown') throw new Error(`Stopped on an unsupported USCIS page: ${tab.url}`);
+      const opts = {};
+      if (currentPage === 'residence_history_3') opts.fillAllAddresses = true;
+      if (currentPage === 'school') { opts.fillAllSchools = true; opts.sortedSchools = getSortedSchools(); }
+      const response = await sendToTabContent(tab, { type:'FILL_PAGE', data:clientData, opts });
+      const failed = (response?.results || []).filter(result => !result.ok);
+      previousFailures = failed;
+      setStatus(statusEl, `${step + 1}. ${PAGE_LABELS[currentPage] || currentPage} filled; validating with USCIS`, 'info');
+      const advanced = await sendToTabContent(tab, { type:'ADVANCE_PAGE' });
+      if (!advanced?.ok) throw new Error(advanced?.error || 'Could not continue to the next page.');
+    }
+    throw new Error('Safety stop: USCIS exceeded 90 pages.');
+  } catch (error) {
+    setStatus(statusEl, `Stopped safely: ${error.message}`, 'warn');
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Start Filling 从头填写';
+  }
+});
+
 // ── Change client ─────────────────────────────────────────────────────────────
 document.getElementById('btn-clear').addEventListener('click', () => {
   clientData = null;
+  lastCbp = null;
+  cbpAutoSaveAuthorizedCase = '';
+  cbpSavedCase = '';
+  cbpResultClientChosen = false;
   selectedAddressIndex = 0;
   currentPage = 'unknown';
   stopPolling();
   chrome.storage.local.remove([
     'arreglo_data', 'arreglo_case', 'arreglo_address_index',
-    'arreglo_client_data', 'arreglo_case_number',
+    'arreglo_client_data', 'arreglo_case_number', 'arreglo_synced_at',
   ]);
   document.getElementById('step-fill').style.display = 'none';
   document.getElementById('step-login').style.display = 'block';
   document.getElementById('case-number').value = '';
   document.getElementById('load-status').textContent = '';
+  document.getElementById('fill-status').textContent = '';
+  document.getElementById('fill-status').style.display = 'none';
+  document.getElementById('cbp-card').innerHTML = '';
+  document.getElementById('client-card').innerHTML = '';
+  document.getElementById('page-tag').innerHTML = '';
   document.getElementById('fill-results').innerHTML = '';
   document.getElementById('addr-selector').innerHTML = '';
   const schoolSel = document.getElementById('school-selector');
@@ -1206,22 +2129,20 @@ document.getElementById('btn-clear').addEventListener('click', () => {
 });
 
 // ── On popup open: restore session ───────────────────────────────────────────
-chrome.storage.local.get([
-  'arreglo_data', 'arreglo_case', 'arreglo_address_index',
-  'arreglo_client_data', 'arreglo_case_number',
-], async (result) => {
-  // Migrate sessions saved by the earlier CBP capture path so reloading the
-  // extension resumes the selected client instead of starting over.
-  const restoredData = result.arreglo_data || result.arreglo_client_data;
-  const restoredCase = result.arreglo_case || result.arreglo_case_number;
-  if (restoredData && restoredCase) {
-    clientData = restoredData;
+chrome.storage.local.get(['arreglo_data', 'arreglo_case', 'arreglo_address_index'], async (result) => {
+  if (result.arreglo_data && result.arreglo_case) {
+    clientData = result.arreglo_data;
     selectedAddressIndex = Number.isInteger(result.arreglo_address_index)
       ? result.arreglo_address_index
       : 0;
     const saved = clientData;
-    renderLoadedClient(restoredCase, saved);
-    await chrome.storage.local.set({ arreglo_data: saved, arreglo_case: restoredCase });
+    renderLoadedClient(result.arreglo_case, saved);
+    if (currentPage === 'cbp_i94_result' || currentPage === 'cbp_i94_history') {
+      cbpResultClientChosen = true;
+      cbpAutoSaveAuthorizedCase = String(result.arreglo_case);
+      renderCbpCard(currentPage);
+      startCbpAutoCapture();
+    }
     // Render preview immediately from cached data — no USCIS ping needed
     renderAddressSelector('unknown');
     renderSchoolSelector('unknown');
@@ -1229,7 +2150,7 @@ chrome.storage.local.get([
     renderChildSelector('unknown');
     renderFieldPreview('unknown');
     startPolling(); // poll will detect page and update preview within 600ms
-    loadClientFromCloudflare(restoredCase, { silent: true })
+    loadClientFromCloudflare(result.arreglo_case, { silent: true })
       .then(fresh => {
         if (fresh) {
           renderAddressSelector(currentPage);
@@ -1246,4 +2167,10 @@ chrome.storage.local.get([
 // v1.32.1: start polling only after the whole script has initialized —
 // calling it earlier hit the `let _pollInterval` temporal dead zone, threw,
 // and killed every event listener below it (the 'Load Client does nothing' bug).
+initializeEoirCapture().catch((error) => {
+  setEoirState(
+    EOIR_STATES.IDLE,
+    `Unable to initialize EOIR capture. ${error?.message || String(error)}`,
+  );
+});
 startPolling();

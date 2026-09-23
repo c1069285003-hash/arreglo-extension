@@ -1,0 +1,2684 @@
+// Arreglo Content Script — USCIS I-589 Autofill + CBP I-94 Capture v1.32
+// v1.30: CBP port-of-entry code → USCIS display mapping (LAX → LOS ANGELES CA),
+// covering major CN arrival airports + southern land-border crossings.
+// v1.29: CRM alignment — dateStatusExpires (I-94 admit-until, split from visa
+// expiry), otherEntries/uscisNumber/fluentEnglish/otherLanguages from CRM
+// fields, eligibility basis + Y/Ns driven by attorney-set CRM values.
+// v1.28: smart address assignment — LAST_OUTSIDE_US auto-picked with derived
+// persecution-country radio; last-5-years list computed and fill-all loop added.
+// v1.27 changes:
+//  1. SAVE FIX: all text fills commit in MAIN world (execCommand insertText +
+//     _valueTracker reset) so Formik state receives values — fixes "value shows
+//     but USCIS does not save on Next".
+//  2. SCHOOLS: eduList auto-sorted highest-degree-first (Chinese sheet stays
+//     elementary-first, unchanged). Fill-all loop: add → fill → save per school.
+//     Editor index auto-detected; manual per-school selection kept as fallback.
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── React value setter (works with React 16/17/18) ────────────────────────────
+function setReactValue(el, value) {
+  if (!el) return false;
+  try {
+    const proto = el.tagName === 'TEXTAREA'
+      ? window.HTMLTextAreaElement.prototype
+      : window.HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    if (setter) setter.call(el, value);
+    else el.value = value;
+    el.dispatchEvent(new Event('input',  { bubbles: true, cancelable: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+    return true;
+  } catch(e) { return false; }
+}
+
+// ── Grouped "Name" component filler (First / Middle / Last) ───────────────────
+// USCIS renders the First/Middle/Last row as a grouped Name component whose
+// onChange only commits to Formik's SAVED `values` on a real per-character
+// key → beforeinput → input sequence. A programmatic value-set + execCommand
+// (what fillByName/setReactValue do) updates the DISPLAY and the controlled
+// `value` prop, but Formik's serialized state stays empty — so Save persists "".
+// VERIFIED at the network layer 2026-07-21 (form 13277168): with fillByName the
+// save POST carried "firstName":""; with this typed method it carried the real
+// value and reloaded correctly. Use this for every name.firstName/middleName/
+// lastName field (applicant, mother, father, siblings, children, spouse, preparer).
+async function typeIntoField(name, value) {
+  const str = (value === undefined || value === null) ? '' : String(value);
+  if (!str) return false;
+  // content.js runs in the ISOLATED world, where React's _valueTracker is invisible
+  // (same reason plain text fills route through background). Perform the real
+  // per-character typing in the MAIN world via background.js (SET_USCIS_TYPED_VALUE),
+  // which is what makes the grouped Name component actually commit to Formik + save.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const exists = document.querySelector(`[name="${name}"]`);
+    if (!exists) return false;
+    try { await chrome.runtime.sendMessage({ type: 'SET_USCIS_TYPED_VALUE', name, value: str }); } catch (e) {}
+    await sleep(80);
+    const cur = document.querySelector(`[name="${name}"]`);
+    if (cur && cur.value === str) return true;
+    await sleep(120);
+  }
+  return false;
+}
+
+// Kept for reference; the isolated-world variant cannot reset _valueTracker so it is
+// not used — typeIntoField routes to the MAIN world instead (see above).
+async function typeIntoField_isolatedUnused(name, value) {
+  const str = (value === undefined || value === null) ? '' : String(value);
+  if (!str) return false;
+  const el = document.querySelector(`[name="${name}"]`);
+  if (!el) return false;
+  const proto = el.tagName === 'TEXTAREA'
+    ? window.HTMLTextAreaElement.prototype
+    : window.HTMLInputElement.prototype;
+  const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+  el.focus();
+  el.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+  // Clear any existing value first (so we replace, not append).
+  if (setter) setter.call(el, ''); else el.value = '';
+  if (el._valueTracker) el._valueTracker.setValue('\x00');
+  el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'deleteContentBackward' }));
+  for (const ch of str) {
+    el.dispatchEvent(new KeyboardEvent('keydown', { key: ch, bubbles: true }));
+    el.dispatchEvent(new InputEvent('beforeinput', { bubbles: true, cancelable: true, inputType: 'insertText', data: ch }));
+    const prev = el.value;
+    if (setter) setter.call(el, prev + ch); else el.value = prev + ch;
+    if (el._valueTracker) el._valueTracker.setValue(prev); // force React to see a change each keystroke
+    el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: ch }));
+    el.dispatchEvent(new KeyboardEvent('keyup', { key: ch, bubbles: true }));
+    await sleep(12);
+  }
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+  el.dispatchEvent(new FocusEvent('focusout', { bubbles: true })); // real focusout → Formik handleBlur (touched + commit)
+  el.blur();
+  return el.value === str;
+}
+
+// ── Plain text fill — committed in the MAIN world so Formik state receives it ──
+// v1.27: previously this set the value in the ISOLATED world; the DOM displayed
+// it but React/Formik never got onChange, so USCIS saved nothing on Next.
+// Now every text fill routes through background → MAIN world execCommand,
+// with verification and retry. Isolated-world setReactValue kept as last resort.
+async function fillByName(name, value) {
+  if (value === undefined || value === null || value === '') return false;
+  const str = String(value);
+  // Mask-tolerant success test: an inputmask field shows the FORMATTED value
+  // ("(626) 613-7634") which never === the raw input ("6266137634"). Compare
+  // alphanumerics only, so a correctly-masked value counts as success and we
+  // neither retry nor fall back to keystroke (which would garble the mask).
+  const norm = s => String(s).replace(/[^a-z0-9]/gi, '').toLowerCase();
+  const filled = elVal => elVal === str || (norm(elVal).length > 0 && norm(elVal) === norm(str));
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const el = document.querySelector(`[name="${name}"]`);
+    if (!el) return false;
+    if (el.tagName === 'SELECT') { setReactValue(el, str); return filled(el.value); }
+    if (filled(el.value)) return true; // already landed (e.g. a prior attempt) — stop, don't refill
+
+    try {
+      await chrome.runtime.sendMessage({ type: 'SET_USCIS_TEXT_VALUE', name, value: str });
+    } catch (e) { /* resp may be lost; verify from DOM below */ }
+
+    await sleep(60);
+    const cur = document.querySelector(`[name="${name}"]`);
+    if (cur && filled(cur.value)) return true;
+    await sleep(120);
+  }
+
+  const el = document.querySelector(`[name="${name}"]`);
+  if (!el) return false;
+  if (filled(el.value)) return true;
+  // Non-empty but not matching → a masked/partial value is there; keep it rather
+  // than garble it with keystroke typing.
+  if (el.value && el.value.trim()) return true;
+  // Field is genuinely BLANK → execCommand didn't take (plain ZIP, numberOfChildren
+  // reject it). Real per-character typing commits on those.
+  const typed = await typeIntoField(name, str);
+  if (typed) return true;
+  const el2 = document.querySelector(`[name="${name}"]`);
+  if (!el2) return false;
+  el2.focus();
+  setReactValue(el2, str);
+  el2.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+  return filled(el2.value);
+}
+
+// ── USCIS Inputmask-aware field filler ───────────────────────────────────────
+async function fillMasked(name, value) {
+  if (!value) return false;
+  const str = String(value);
+  const norm = s => String(s || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const el = document.querySelector(`[name="${name}"]`);
+    if (!el) return false;
+
+    const response = await chrome.runtime.sendMessage({
+      type: 'SET_USCIS_MASKED_VALUE',
+      name,
+      value: str,
+    });
+
+    await sleep(80);
+    const current = document.querySelector(`[name="${name}"]`);
+    if (response?.ok && (current?.value === str || norm(current?.value) === norm(str))) return true;
+    await sleep(120);
+  }
+  return false;
+}
+
+// ── MUI Autocomplete — SCOPED fill (only looks at THIS field's listbox) ────────
+// This is the correct way: keep focus on THIS input, wait for ITS listbox,
+// find the option inside that specific listbox, click it, then blur.
+async function fillAutocomplete(name, value) {
+  if (!value) return false;
+  const input = document.querySelector(`[name="${name}"]`);
+  if (!input) return false;
+
+  // Close any open dropdown first
+  document.body.click();
+  await sleep(120);
+
+  input.focus();
+  await sleep(80);
+  // USCIS MUI Autocomplete does not accept a plain value + `change` event.
+  // Type only the search query in MAIN world; clicking the real option below
+  // is what commits the structured month/year value to the USCIS form.
+  try {
+    await chrome.runtime.sendMessage({
+      type: 'SET_USCIS_AUTOCOMPLETE_QUERY',
+      name,
+      value: String(value),
+    });
+  } catch (e) { /* verify the listbox below */ }
+  await sleep(900); // wait for this field's listbox to open and populate
+
+  // Find the listbox that belongs to THIS input (via aria-owns or aria-controls)
+  const listboxId = input.getAttribute('aria-owns') ||
+                    input.getAttribute('aria-controls') ||
+                    input.getAttribute('aria-activedescendant')?.replace(/-\d+$/, '');
+
+  let listbox = null;
+  if (listboxId) {
+    listbox = document.getElementById(listboxId) ||
+              document.querySelector(`[id="${listboxId}"]`);
+  }
+  // Fallback: find the only visible listbox in DOM
+  if (!listbox) {
+    const allListboxes = [...document.querySelectorAll('[role="listbox"]')];
+    listbox = allListboxes.find(lb => {
+      const rect = lb.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0; // visible
+    }) || null;
+  }
+
+  if (!listbox) {
+    // No listbox appeared — try arrow down to open
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', keyCode: 40, bubbles: true }));
+    await sleep(400);
+    const allLb = [...document.querySelectorAll('[role="listbox"]')];
+    listbox = allLb.find(lb => lb.getBoundingClientRect().width > 0) || null;
+  }
+
+  if (listbox) {
+    const options = [...listbox.querySelectorAll('[role="option"], li')];
+    let found = options.find(o => (o.textContent||'').trim().toLowerCase() === value.toLowerCase());
+    if (!found) found = options.find(o => (o.textContent||'').trim().toLowerCase().startsWith(value.toLowerCase()));
+    if (found) {
+      found.click();
+      await sleep(200);
+      // Verify the value was committed
+      if (input.value.toLowerCase().includes(value.toLowerCase())) {
+        // Success — blur to commit to Formik
+        input.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+        await sleep(150);
+        return true;
+      }
+    }
+  }
+
+  // Fallback: press Enter on whatever is highlighted
+  input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true }));
+  await sleep(150);
+  input.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+  await sleep(150);
+  return false;
+}
+
+// ── MUI Select (State dropdown on preparer page — has div[role="button"] trigger) ──
+async function fillMuiSelect(name, value) {
+  if (!value) return false;
+  const input = document.querySelector(`[name="${name}"]`);
+  if (!input) return false;
+  document.body.click();
+  await sleep(150);
+  const root = input.closest('.MuiInputBase-root') || input.parentElement;
+  const trigger = root?.querySelector('div[role="button"]') ||
+                  root?.querySelector('.MuiSelect-select') ||
+                  root?.querySelector('[aria-haspopup="listbox"]') || root;
+  trigger.click();
+  await sleep(600);
+  const opts = [...document.querySelectorAll('ul[role="listbox"] li, [role="option"], .MuiMenuItem-root')];
+  for (const opt of opts) {
+    if ((opt.textContent||'').trim() === String(value)) {
+      opt.click(); await sleep(200); return true;
+    }
+  }
+  document.body.click();
+  return false;
+}
+
+async function fillCountry(name, value) {
+  const raw = String(value || 'China').trim();
+  const aliases = {
+    '中国': 'China',
+    '中华人民共和国': 'China',
+    'PR China': 'China',
+    'PRC': 'China',
+    "People's Republic of China": 'China',
+    'United States of America': 'United States',
+    'USA': 'United States',
+    'U.S.A.': 'United States',
+  };
+  const country = aliases[raw] || raw;
+  if (await fillAutocomplete(name, country)) return true;
+  return fillMuiSelect(name, country);
+}
+
+// ── Radio / Checkbox ──────────────────────────────────────────────────────────
+function radioChoiceText(radio) {
+  const labelledBy = (radio.getAttribute('aria-labelledby') || '')
+    .split(/\s+/).map(id => document.getElementById(id)?.textContent || '').join(' ');
+  return [
+    radio.getAttribute('aria-label'), labelledBy,
+    [...(radio.labels || [])].map(label => label.textContent).join(' '),
+    radio.closest('label')?.textContent,
+    radio.parentElement?.parentElement?.textContent,
+    radio.value,
+  ].filter(Boolean).join(' ').trim().toLowerCase();
+}
+
+function clickRadio(name, label) {
+  const radios = [...document.querySelectorAll(`input[type="radio"][name="${name}"]`)];
+  for (const r of radios) {
+    if (radioChoiceText(r).includes(label.toLowerCase())) {
+      r.click(); return true;
+    }
+  }
+  return false;
+}
+
+function clickRadioValue(name, value) {
+  const target = String(value);
+  const radios = [...document.querySelectorAll(`input[type="radio"][name="${name}"]`)];
+  const radio = radios.find(r => String(r.value) === target);
+  if (!radio) return false;
+  if (!radio.checked) radio.click();
+  return true;
+}
+
+function findVisibleYesNoRadioGroup() {
+  const radios = [...document.querySelectorAll('input[type="radio"][name]')]
+    .filter(radio => {
+      const rect = radio.getBoundingClientRect();
+      return rect.width > 0 || rect.height > 0;
+    });
+  const names = [...new Set(radios.map(radio => radio.name))];
+  return names.find(name => {
+    const values = radios.filter(radio => radio.name === name).map(radio => {
+      const label = radio.closest('label') || document.querySelector(`label[for="${radio.id}"]`);
+      return `${label?.textContent || ''} ${radio.value || ''}`.toLowerCase();
+    });
+    return values.some(value => value.includes('yes')) && values.some(value => value.includes('no'));
+  }) || '';
+}
+
+async function selectYesNo(preferredName, answer) {
+  const boolValue = answer.toLowerCase() === 'yes' ? 'true' : 'false';
+  const exact = document.querySelector(
+    `input[type="radio"][name="${preferredName}"][value="${boolValue}"]`
+  );
+  if (exact) {
+    if (!exact.checked) (exact.closest('label') || exact).click();
+    await sleep(250);
+    return !!document.querySelector(
+      `input[type="radio"][name="${preferredName}"][value="${boolValue}"]:checked`
+    );
+  }
+  const escaped = CSS.escape(preferredName);
+  const named = [...document.querySelectorAll(`input[type="radio"][name="${preferredName}"]`)];
+  const group = document.getElementById(preferredName)
+    || document.querySelector(`[role="radiogroup"]#${escaped}`);
+  const grouped = group ? [...group.querySelectorAll('input[type="radio"], [role="radio"]')] : [];
+  const fallbackName = named.length || grouped.length ? '' : findVisibleYesNoRadioGroup();
+  const radios = named.length ? named : grouped.length ? grouped
+    : [...document.querySelectorAll(`input[type="radio"][name="${fallbackName}"]`)];
+  if (!radios.length) return false;
+  const target = radios.find(radio => radioChoiceText(radio).includes(answer.toLowerCase()))
+    || radios[answer.toLowerCase() === 'yes' ? 0 : 1];
+  if (!target) return false;
+  if (!(target.checked || target.getAttribute('aria-checked') === 'true')) target.click();
+  await sleep(150);
+  return radios.some(radio => {
+    const selected = radio.checked || radio.getAttribute('aria-checked') === 'true';
+    return selected && radioChoiceText(radio).includes(answer.toLowerCase());
+  }) || target.checked || target.getAttribute('aria-checked') === 'true';
+}
+
+function religionRequiresGroupDisclosure(data = {}) {
+  if (data.religionNone) return false;
+  const normalized = String(data.religion || '').trim().toLowerCase();
+  return Boolean(normalized && !['none', 'no religion', 'n/a', '无', '无宗教', '无宗教信仰'].includes(normalized));
+}
+function setCheckbox(name, checked) {
+  const el = document.querySelector(`input[type="checkbox"][name="${name}"]`);
+  if (!el) return false;
+  if (el.checked !== checked) el.click();
+  return true;
+}
+
+function setCheckboxById(id, checked) {
+  const el = document.getElementById(id);
+  if (!el || el.type !== 'checkbox') return false;
+  if (el.checked !== checked) el.click();
+  return el.checked === checked;
+}
+
+// ── USPS dialog ───────────────────────────────────────────────────────────────
+async function handleUspsDialog() {
+  for (let i = 0; i < 8; i++) {
+    await sleep(500);
+    if (!document.body.innerText.includes('Verify your address') &&
+        !document.body.innerText.includes('recommended address')) continue;
+    for (const label of [...document.querySelectorAll('label, [role="radio"]')]) {
+      if ((label.textContent||'').toLowerCase().includes('recommended')) { label.click(); await sleep(300); break; }
+    }
+    for (const btn of [...document.querySelectorAll('button')]) {
+      if (/use selected|use recommended|confirm/i.test(btn.textContent||'')) {
+        btn.click(); await sleep(500); return true;
+      }
+    }
+  }
+  return false;
+}
+
+// ── Date helpers ──────────────────────────────────────────────────────────────
+function fmtDate(d) {
+  if (!d) return '';
+  const raw = String(d).trim();
+  let m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) return `${m[1].padStart(2,'0')}/${m[2].padStart(2,'0')}/${m[3]}`;
+  m = raw.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+  if (m) return `${m[2].padStart(2,'0')}/${m[3].padStart(2,'0')}/${m[1]}`;
+  return raw;
+}
+function dateSortKey(d) {
+  const m = fmtDate(d).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return m ? Number(`${m[3]}${m[1]}${m[2]}`) : -1;
+}
+function normalizePassportForEntry(value) {
+  return String(value || '').replace(/[^A-Z0-9]/gi, '').toUpperCase();
+}
+function normalizeImmigrationEntry(row, fallbackStatus = '') {
+  const dateOfEntry = fmtDate(row?.dateOfEntry || row?.entryDate || row?.date || '');
+  const placeOfEntry = String(row?.placeOfEntry || row?.entryPort || row?.location || row?.port || '').trim();
+  const status = String(row?.status || row?.classOfAdmission || row?.lastEntryStatus || fallbackStatus || '').trim();
+  if (!dateOfEntry || !placeOfEntry) return null;
+  return { dateOfEntry, placeOfEntry, status };
+}
+function getApplicantUsEntries(d) {
+  const explicit = Array.isArray(d.usEntryHistory) ? d.usEntryHistory : [];
+  const source = explicit.length
+    ? explicit
+    : (Array.isArray(d._cbp?.travelHistory) ? d._cbp.travelHistory.filter(row => /arrival/i.test(String(row?.type || row?.event || 'Arrival'))) : []);
+  const currentPassport = normalizePassportForEntry(d.passportNumber);
+  const sourcePassport = normalizePassportForEntry(d._cbp?.docNumber || d._cbp?.passportNumber || d.travelHistoryPassportNumber);
+  if (!explicit.length && currentPassport && sourcePassport && currentPassport !== sourcePassport) return [];
+  const seen = new Set();
+  return source
+    .map(row => normalizeImmigrationEntry(row, d.lastEntryStatus || ''))
+    .filter(Boolean)
+    .sort((a, b) => dateSortKey(b.dateOfEntry) - dateSortKey(a.dateOfEntry))
+    .filter(row => {
+      const key = `${row.dateOfEntry}|${row.placeOfEntry}|${row.status}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+function parseYM(ym) {
+  if (!ym) return { month: '', year: '' };
+  let m = String(ym).match(/^(\d{4})[\/\-](\d{1,2})$/);
+  if (m) return { year: m[1], month: m[2].padStart(2,'0') };
+  m = String(ym).match(/^(\d{1,2})\/(\d{4})$/);
+  if (m) return { year: m[2], month: m[1].padStart(2,'0') };
+  m = String(ym).match(/^(\d{4})$/);
+  if (m) return { year: m[1], month: '' };
+  return { month: '', year: '' };
+}
+function workStartYM(work = {}) {
+  return work.startDate || work.fromDate || work.employmentDateFrom ||
+    (work.startYear ? `${work.startYear}/${work.startMonth || ''}` : '');
+}
+function workEndYM(work = {}) {
+  return work.endDate || work.toDate || work.employmentDateTo ||
+    (work.endYear ? `${work.endYear}/${work.endMonth || ''}` : '');
+}
+function addrFromDate(addr) {
+  if (addr.fromDate) return addr.fromDate;
+  if (addr.fromYear) return `${addr.fromYear}/${String(addr.fromMonth||'01').padStart(2,'0')}`;
+  return '';
+}
+function addrToDate(addr) {
+  if (addr.toDate) return addr.toDate;
+  if (addr.toYear) return `${addr.toYear}/${String(addr.toMonth||'01').padStart(2,'0')}`;
+  return '';
+}
+function cleanPhone(p) { return (p||'').replace(/\D/g,'').slice(-10); }
+
+const MONTH_NAMES = {
+  '01':'January','02':'February','03':'March','04':'April',
+  '05':'May','06':'June','07':'July','08':'August',
+  '09':'September','10':'October','11':'November','12':'December',
+};
+function monthName(m) { return MONTH_NAMES[String(m).padStart(2,'0')] || ''; }
+
+const STATE_FULL = {
+  'AL':'ALABAMA','AK':'ALASKA','AZ':'ARIZONA','AR':'ARKANSAS','CA':'CALIFORNIA',
+  'CO':'COLORADO','CT':'CONNECTICUT','DE':'DELAWARE','FL':'FLORIDA','GA':'GEORGIA',
+  'HI':'HAWAII','ID':'IDAHO','IL':'ILLINOIS','IN':'INDIANA','IA':'IOWA',
+  'KS':'KANSAS','KY':'KENTUCKY','LA':'LOUISIANA','ME':'MAINE','MD':'MARYLAND',
+  'MA':'MASSACHUSETTS','MI':'MICHIGAN','MN':'MINNESOTA','MS':'MISSISSIPPI','MO':'MISSOURI',
+  'MT':'MONTANA','NE':'NEBRASKA','NV':'NEVADA','NH':'NEW HAMPSHIRE','NJ':'NEW JERSEY',
+  'NM':'NEW MEXICO','NY':'NEW YORK','NC':'NORTH CAROLINA','ND':'NORTH DAKOTA','OH':'OHIO',
+  'OK':'OKLAHOMA','OR':'OREGON','PA':'PENNSYLVANIA','RI':'RHODE ISLAND','SC':'SOUTH CAROLINA',
+  'SD':'SOUTH DAKOTA','TN':'TENNESSEE','TX':'TEXAS','UT':'UTAH','VT':'VERMONT',
+  'VA':'VIRGINIA','WA':'WASHINGTON','WV':'WEST VIRGINIA','WI':'WISCONSIN','WY':'WYOMING',
+  'DC':'DISTRICT OF COLUMBIA',
+};
+function toFullState(s) {
+  if (!s) return '';
+  const up = s.toUpperCase().trim();
+  return STATE_FULL[up] || up;
+}
+
+const PREPARER = {
+  firstName:'Lauren', lastName:'Zhou', phone:'6266137634',
+  address1:'3380 Flair Dr', address2:'', city:'El Monte',
+  stateCode:'CA', stateFull:'CALIFORNIA', zip:'91731',
+};
+
+// ── Page detection ────────────────────────────────────────────────────────────
+function detectPage() {
+  if (location.hostname === 'i94.cbp.dhs.gov') {
+    const text = document.body?.innerText || '';
+    const historyUrl = /\/search\/(?:travel-)?history-search\/results\/?(?:[?#]|$)/i.test(location.pathname + location.search + location.hash);
+    const historyContent = /View Travel History/i.test(text) && /Travel History Results/i.test(text);
+    if (historyUrl || historyContent) return 'cbp_i94_history';
+    const resultUrl = /\/search\/recent-search\/results\/?(?:[?#]|$)/i.test(location.pathname + location.search + location.hash);
+    const resultContent = /Admission\s*I-?94\s*Record\s*Number\s*:?\s*[A-Z0-9-]{9,14}/i.test(text)
+      || (/Most Recent I-?94/i.test(text) && /Admit Until Date/i.test(text) && /Document Number/i.test(text));
+    return resultUrl || resultContent
+      ? 'cbp_i94_result'
+      : 'cbp_i94_form';
+  }
+  const inputs = [...document.querySelectorAll('input,select,textarea')];
+  const names = new Set(inputs.map(e => e.name).filter(Boolean));
+  const url = window.location.href;
+  const bodyText = document.body?.innerText || '';
+
+  if (/have you or your family members ever belonged to or been associated with any organizations or groups/i.test(bodyText)) {
+    return 'organizations_groups';
+  }
+  if (/have you or your family members ever been accused, charged, arrested, detained, interrogated, convicted and sentenced, or imprisoned in any country other than the united states/i.test(bodyText)) {
+    return 'criminal_history_outside_us';
+  }
+
+  if (url.includes('/evidence/evidence-personal')) return 'evidence_personal';
+  if (url.includes('/review-and-submit/preparer-signature/preparer-signature-upload')) return 'preparer_signature_upload';
+  if (/\/review-and-submit(?:\/|$)/i.test(new URL(url).pathname) || /check your answers|review your application/i.test(bodyText)) return 'review';
+  if (url.includes('/evidence/')) return 'evidence_optional';
+  if (url.includes('/additional-information/')) return 'additional_information_optional';
+
+  if (url.includes('/getting-started/legal-assistance'))                     return 'legal_assistance';
+  if (url.includes('family-member-preparer') && !url.includes('preparer-page-2')) return 'preparer_family';
+  if (url.includes('preparer-page-2'))                                       return 'preparer_info';
+  if (url.includes('/basis-of-eligibility/reason-for-asylum-withholding-removal')) return 'eligibility_reason';
+  // School/employment list views mount ZERO inputs until an editor is open —
+  // name-based detection fails there, so detect by URL first.
+  if (url.includes('/about-you/your-school-history'))                        return 'school';
+  if (url.includes('/about-you/employment-history'))                         return 'employment';
+  if ([...names].some(n => n.includes('preparer.nonFamilyMemberAsPreparer.name'))) return 'preparer_info';
+  if ([...names].some(n => n.includes('applicant.yourName.name.firstName')))  return 'your_name';
+  if ([...names].some(n => n.includes('applicant.background.physicalAddress'))) return 'contact';
+  if ([...names].some(n => n.includes('applicant.whenAndWhereYouWereBorn.dateOfBirth'))) return 'birth';
+  if ([...names].some(n => n.includes('applicant.background2.gender')))       return 'describe_yourself';
+  if ([...names].some(n => n.includes('residenceHistory1.lastAddressOutsideUs'))) return 'residence_history_1';
+  if ([...names].some(n => n.includes('residenceHistory3')))                  return 'residence_history_3';
+  // The 5-year "Where you have lived" list mounts ZERO inputs until an editor is
+  // open (like school/employment), so name-based detection returns 'unknown' and
+  // "Fill ALL Addresses" never fires. Fall back to URL so the fill-all loop (which
+  // clicks "Add address" itself) can run on the empty list page.
+  if (url.includes('/your-residence-history')) return 'residence_history_3';
+  if ([...names].some(n => n.includes('applicant.schoolHistory')))            return 'school';
+  if ([...names].some(n => n.includes('applicant.employmentHistory')))        return 'employment';
+  if ([...names].some(n => n.includes('immigrationInformation1')))            return 'immigration_info_1';
+  if ([...names].some(n => n.includes('immigrationInformation2')))            return 'immigration_info_2';
+  if ([...names].some(n => n.includes('applicant.maritalStatus')))            return 'marital_status';
+  if (url.includes('/your-family/your-spouse/your-spouse-page-2') ||
+      names.has('applicant.spouse.spouse2.dateOfBirth') ||
+      names.has('applicant.spouse.spouse2.countryOfBirth'))                   return 'spouse_2';
+  if ((url.includes('/your-family/your-spouse/your-spouse') && !url.includes('your-spouse-page-2') && !url.includes('your-spouse-page-3')) ||
+      names.has('applicant.spouse.spouse1.name.firstName') ||
+      names.has('applicant.spouse.spouse1.name.lastName'))                    return 'spouse_1';
+  if (url.includes('/your-family/your-spouse/your-spouse-page-3') ||
+      names.has('applicant.spouse.spouse3.currentLocation') ||
+      names.has('applicant.spouse.spouse3.isYourSpouseInUs'))                 return 'spouse_3';
+  if (names.has('applicant.children.doYouHaveChildren'))                      return 'children_yn';
+  if ([...names].some(n => n.includes('childrenDetails.numberOfChildren')))   return 'children_count';
+  if ([...names].some(n => n.includes('childrenInformation1.name.firstName'))) return 'child_0_name';
+  if ([...names].some(n => n.includes('childrenInformation2.dateOfBirth')))   return 'child_0_info';
+  if ([...names].some(n => n.includes('childrenInformation3.isYourChildInUs'))) return 'child_0_us';
+  if ([...names].some(n => n.includes('applicant.mother.name.firstName')))    return 'mother';
+  if ([...names].some(n => n.includes('applicant.father.name.firstName')))    return 'father';
+  if ([...names].some(n => /applicant\.siblings\.\d+/.test(n)))               return 'siblings';
+  if (url.includes('sibling'))                                                return 'siblings';
+  return 'unknown';
+}
+
+// ── Click "Save address" button on USCIS address pages ──────────────────────────
+async function verifyAddressBeforeSave(addr, p, isUS) {
+  const expected = [
+    ['addressLineOne', addr.addressLine1 || '', true],
+    ['addressLineTwo', addr.addressLine2 || '', false],
+    ['city', addr.city || '', true],
+    [isUS ? 'state' : 'province', isUS ? toFullState(addr.province || '') : (addr.province || ''), true],
+    [isUS ? 'zipCode' : 'postalCode', addr.postalCode || addr.zip || '', false],
+  ];
+
+  const failures = [];
+  for (const [field, value, required] of expected) {
+    if (!value && !required) continue;
+    const el = document.querySelector(`[name="${p}.address.${field}"]`);
+    if (!el || (value && el.value !== String(value))) {
+      failures.push({ field, expected: value, actual: el?.value || '' });
+    }
+  }
+  return failures;
+}
+
+async function clickSaveAddress(addr, p, isUS) {
+  await sleep(150);
+
+  const failures = addr && p
+    ? await verifyAddressBeforeSave(addr, p, isUS)
+    : [];
+  if (failures.length) {
+    return { ok: false, reason: 'fields-not-committed', failures };
+  }
+
+  const btns = [...document.querySelectorAll('button')];
+  const saveBtn = btns.find(btn => {
+    const txt = (btn.textContent || '').trim().toLowerCase();
+    return txt === 'save address' || txt.includes('save address');
+  });
+  if (saveBtn && !saveBtn.disabled) {
+    saveBtn.click();
+    // A successful save closes the editor and removes the Save button.
+    for (let i = 0; i < 20; i++) {
+      await sleep(150);
+      if (!document.body.contains(saveBtn)) return { ok: true };
+    }
+    return { ok: false, reason: 'save-did-not-close-editor' };
+  }
+  return { ok: false, reason: 'save-button-unavailable' };
+}
+
+// ── Fill one address entry (residence_history_3) ──────────────────────────────
+// Commit a plain-text address field through the MAIN-world TEXT committer
+// (fillByName → SET_USCIS_TEXT_VALUE → execCommand), then verify and retry once.
+// Used instead of fillMasked for addressLineOne / addressLineTwo / city, which are
+// plain inputs and were left blank by the inputmask path.
+async function commitAddrText(name, value) {
+  if (value === undefined || value === null || value === '') return false;
+  const str = String(value);
+  // Residence address text (addressLineOne / addressLineTwo / city) behaves like
+  // the grouped Name fields: execCommand only updates the display, the SAVED value
+  // stays empty (needs a real click to persist). They are passthrough inputs, so
+  // per-character typing is clean AND commits — same fix as names/contact.
+  let ok = await typeIntoField(name, str);
+  let el = document.querySelector(`[name="${name}"]`);
+  if (!ok || (el && el.value !== str)) {
+    await sleep(150);
+    ok = await typeIntoField(name, str);
+    el = document.querySelector(`[name="${name}"]`);
+  }
+  return !!(el && el.value === str) || ok;
+}
+
+async function fillAddressEntry(addr, p, isUS, extraData) {
+  const log = [];
+
+  // 1. Country — fill first, then wait for React to re-render the form
+  //    (Country selection changes State label to Province, may unmount/remount fields)
+  const country = isUS ? 'United States' : (addr.country || 'China');
+  await fillAutocomplete(`${p}.address.country`, country);
+  await sleep(800); // must wait for full re-render before touching any other field
+
+  // FIELD TYPES on residenceHistory3 (verified live 2026-07-21 on form 13277168):
+  //   country  = MUI Autocomplete
+  //   state    = MUI Autocomplete (US)   province = plain text (non-US)
+  //   addressLineOne / addressLineTwo / city = PLAIN TEXT (NOT inputmask)
+  //   zipCode / postalCode = the only genuine Inputmask field
+  // BUG (fixed here): these plain-text fields were filled with fillMasked. The
+  // masked committer takes the `el.inputmask?.setValue` branch and, finding no
+  // inputmask, dispatches CustomEvent('setvalue') — which does nothing on a plain
+  // input, so Address 1 / City stayed blank in both the DOM and Formik. Route them
+  // through the MAIN-world TEXT committer (execCommand) instead.
+
+  // 2. State (US Autocomplete) / Province (plain text) BEFORE the text lines —
+  //    selecting state re-renders the address block and wipes text typed earlier.
+  if (isUS) {
+    const fullState = toFullState(addr.province || '');
+    if (fullState) {
+      log.push({ field: 'state', ok: await fillAutocomplete(`${p}.address.state`, fullState) });
+      await sleep(600); // let the state-driven re-render settle before typing text
+    }
+  } else {
+    if (addr.province) {
+      log.push({ field: 'province', ok: await commitAddrText(`${p}.address.province`, addr.province) });
+    }
+  }
+
+  // 3. Plain-text fields via the text committer, filled AFTER state to survive
+  //    the re-render. Each verifies and retries once.
+  if (addr.addressLine1) log.push({ field: 'addressLineOne', ok: await commitAddrText(`${p}.address.addressLineOne`, addr.addressLine1) });
+  if (addr.addressLine2) log.push({ field: 'addressLineTwo', ok: await commitAddrText(`${p}.address.addressLineTwo`, addr.addressLine2) });
+  if (addr.city)         log.push({ field: 'city',           ok: await commitAddrText(`${p}.address.city`,           addr.city) });
+
+  // 4. Postal / ZIP — the only real Inputmask field; text committer as fallback.
+  const zip = addr.postalCode || addr.zip || '';
+  if (zip) {
+    const primaryPostalName = `${p}.address.${isUS ? 'zipCode' : 'postalCode'}`;
+    const fallbackPostalName = `${p}.address.${isUS ? 'postalCode' : 'zipCode'}`;
+    // These controls currently render as ordinary text inputs even though their
+    // test id says "masked-input". The masked committer could report success
+    // while leaving the visible value blank. Type first, then verify exactly.
+    let postalOk = await commitAddrText(primaryPostalName, zip);
+    if (!postalOk) postalOk = await commitAddrText(fallbackPostalName, zip);
+    if (!postalOk) postalOk = await fillMasked(primaryPostalName, zip);
+    const postalEl = document.querySelector(`[name="${primaryPostalName}"]`) || document.querySelector(`[name="${fallbackPostalName}"]`);
+    postalOk = !!postalEl && postalEl.value === String(zip);
+    log.push({ field: isUS ? 'zipCode' : 'postalCode', ok: postalOk });
+  }
+
+  // 5. Final safety pass — re-commit any plain-text field a late re-render wiped.
+  for (const [field, val] of [['addressLineOne', addr.addressLine1], ['city', addr.city]]) {
+    if (!val) continue;
+    const el = document.querySelector(`[name="${p}.address.${field}"]`);
+    if (el && el.value !== String(val)) { await sleep(150); await commitAddrText(`${p}.address.${field}`, val); }
+  }
+
+  // 6. From date
+  let fromStr = addrFromDate(addr);
+  // US current address: use lastEntryDate as fromDate
+  if (isUS && !fromStr && extraData?.lastEntryDate) {
+    const m2 = extraData.lastEntryDate.match(/^(\d{2})\/\d{2}\/(\d{4})$/);
+    if (m2) fromStr = `${m2[2]}/${m2[1]}`;
+    else fromStr = extraData.lastEntryDate;
+  }
+  const from = parseYM(fromStr);
+  const to   = parseYM(addrToDate(addr));
+
+  if (from.month) { await fillAutocomplete(`${p}.dates.fromDate.month`, monthName(from.month)); await sleep(200); }
+  if (from.year)  { await fillAutocomplete(`${p}.dates.fromDate.year`,  from.year);             await sleep(200); }
+
+  // 7. To date
+  if (to.month) {
+    await fillAutocomplete(`${p}.dates.toDate.month`, monthName(to.month)); await sleep(200);
+    if (to.year) { await fillAutocomplete(`${p}.dates.toDate.year`, to.year); await sleep(200); }
+  } else if (isUS) {
+    // USCIS renders "To: Present" when only the month control is Present.
+    // Filling both controls produces the invalid display "Present Present".
+    await fillAutocomplete(`${p}.dates.toDate.month`, 'Present'); await sleep(200);
+  } else if (to.year) {
+    await fillAutocomplete(`${p}.dates.toDate.year`, to.year); await sleep(200);
+  }
+
+  return log;
+}
+
+// ── Port of Entry: CBP I-94 code → USCIS combo-box display (v1.30) ──────────
+// CBP I-94 prints port codes (LAX, SFR, NYC…); the USCIS I-589 combo-box wants
+// "CITY ST" display strings (LOS ANGELES CA). No official cross-table exists,
+// so this map covers the ports that matter for CN asylum intake: major airport
+// arrivals + southern land-border crossings (走线). Both CBP codes and common
+// IATA aliases are keys. Unknown codes pass through with a result warning.
+const PORT_OF_ENTRY_MAP = {
+  // ── Air: primary CN arrival airports ──
+  LAX:'LOS ANGELES CA', LOS:'LOS ANGELES CA',
+  SFR:'SAN FRANCISCO CA', SFO:'SAN FRANCISCO CA',
+  NYC:'NEW YORK NY', JFK:'NEW YORK NY',
+  NEW:'NEWARK NJ', EWR:'NEWARK NJ',
+  SEA:'SEATTLE WA',
+  CHI:'CHICAGO IL', ORD:'CHICAGO IL',
+  HHW:'HONOLULU HI', HNL:'HONOLULU HI',
+  ATL:'ATLANTA GA',
+  DAL:'DALLAS/FT WORTH TX', DFW:'DALLAS/FT WORTH TX',
+  HOU:'HOUSTON TX', IAH:'HOUSTON TX',
+  BOS:'BOSTON MA',
+  DET:'DETROIT MI', DTW:'DETROIT MI',
+  MSP:'MINNEAPOLIS/ST PAUL MN',
+  PHI:'PHILADELPHIA PA', PHL:'PHILADELPHIA PA',
+  WAS:'WASHINGTON DC', IAD:'WASHINGTON DC',
+  MIA:'MIAMI FL',
+  ORL:'ORLANDO FL', MCO:'ORLANDO FL',
+  LVG:'LAS VEGAS NV', LAS:'LAS VEGAS NV',
+  DEN:'DENVER CO',
+  PHO:'PHOENIX AZ', PHX:'PHOENIX AZ',
+  POO:'PORTLAND OR', PDX:'PORTLAND OR',
+  SLC:'SALT LAKE CITY UT',
+  SNJ:'SAN JOSE CA', SJC:'SAN JOSE CA',
+  ONT:'ONTARIO CA',
+  SPM:'SAIPAN MP', SPN:'SAIPAN MP',
+  AGA:'AGANA GU', GUM:'AGANA GU',
+  ANC:'ANCHORAGE AK',
+  // ── Land: southern border (走线 entries / EWI processing) ──
+  SYS:'SAN YSIDRO CA',
+  OTM:'OTAY MESA CA', OTA:'OTAY MESA CA',
+  CAL:'CALEXICO CA', CAE:'CALEXICO EAST CA',
+  NOG:'NOGALES AZ',
+  DGL:'DOUGLAS AZ',
+  SLU:'SAN LUIS AZ',
+  ELP:'EL PASO TX',
+  LAR:'LAREDO TX',
+  HID:'HIDALGO TX',
+  BRO:'BROWNSVILLE TX',
+  DLR:'DEL RIO TX',
+  EGP:'EAGLE PASS TX', EGL:'EAGLE PASS TX',
+  RMA:'ROMA TX',
+  PRO:'PROGRESO TX',
+  TEC:'TECATE CA',
+};
+function normalizePortOfEntry(raw) {
+  const v = String(raw || '').trim();
+  if (!v) return { value: '', mapped: false };
+  // CRM keeps a human-readable label like "Honolulu, HI (HHW)".
+  // USCIS autocomplete wants the official display value, e.g. "HONOLULU HI".
+  const parenCode = v.toUpperCase().match(/\(([A-Z]{3})\)/);
+  if (parenCode && PORT_OF_ENTRY_MAP[parenCode[1]]) {
+    return { value: PORT_OF_ENTRY_MAP[parenCode[1]], mapped: true };
+  }
+  const up = v.toUpperCase();
+  // 3-letter CBP/IATA code
+  if (/^[A-Z]{3}$/.test(up) && PORT_OF_ENTRY_MAP[up]) return { value: PORT_OF_ENTRY_MAP[up], mapped: true };
+  // "Los Angeles, CA" → "LOS ANGELES CA"
+  const cleaned = up.replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (/ [A-Z]{2}$/.test(cleaned)) return { value: cleaned, mapped: true };
+  // Known city without state → map by search
+  const hit = Object.values(PORT_OF_ENTRY_MAP).find(d => d.startsWith(cleaned + ' '));
+  if (hit) return { value: hit, mapped: true };
+  return { value: v, mapped: false };
+}
+
+// ── CBP assists (v1.32) ──────────────────────────────────────────────────────
+// ToS auto-scroll: the dialog requires scrolling to the bottom before
+// "I Acknowledge and Agree" enables. We pre-scroll it so the button is
+// instantly clickable. THE CLICK STAYS HUMAN — CBP terms prohibit automated
+// interaction; the acknowledgment must be a real human act.
+function cbpAutoScrollTos() {
+  const dialogs = [...document.querySelectorAll('div,section,mat-dialog-container,[role="dialog"]')]
+    .filter(el => /terms of service/i.test(el.textContent || '') && el.getBoundingClientRect().height > 100);
+  for (const dlg of dialogs) {
+    const scrollables = [dlg, ...dlg.querySelectorAll('*')].filter(el => el.scrollHeight > el.clientHeight + 10);
+    for (const s of scrollables) s.scrollTop = s.scrollHeight;
+  }
+}
+try {
+  if (location.hostname === 'i94.cbp.dhs.gov') {
+    const tosObserver = new MutationObserver(() => {
+      if (/terms of service/i.test(document.body.textContent || '')) {
+        cbpAutoScrollTos();
+        setTimeout(cbpAutoScrollTos, 400);
+      }
+    });
+    tosObserver.observe(document.body, { childList: true, subtree: true });
+    setTimeout(cbpAutoScrollTos, 800);
+  }
+} catch (e) { /* non-fatal */ }
+
+// Passport bio-page injection into CBP "Document Capture": the Files button
+// only triggers a hidden <input type="file">; we set its files directly via
+// DataTransfer so the OS picker never opens. Staff reviews CBP's OCR result
+// in the dialog and submits manually.
+async function cbpInjectPassportBio(dataUrl, fileName) {
+  const inputs = [...document.querySelectorAll('input[type="file"]')];
+  if (!inputs.length) return { success: false, error: 'file input not found — 先点 CAPTURE DOCUMENT 打开弹窗' };
+  const input = inputs[inputs.length - 1];
+  const resp = await fetch(dataUrl);
+  const blob = await resp.blob();
+  const file = new File([blob], fileName || 'passport_bio.jpg', { type: blob.type || 'image/jpeg' });
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  input.files = dt.files;
+  input.dispatchEvent(new Event('input',  { bubbles: true }));
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+  return { success: true };
+}
+
+// Fill CBP's traveler search from confirmed CRM data. The legal Terms of
+// Service acknowledgment remains a human-only action; this helper only fills
+// traveler fields and may click the ordinary Search/Continue button.
+function cbpSetInputValue(input, value) {
+  if (!input || value == null || value === '') return false;
+  const setter = Object.getOwnPropertyDescriptor(
+    input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,
+    'value',
+  )?.set;
+  if (setter) setter.call(input, String(value));
+  else input.value = String(value);
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+  input.dispatchEvent(new Event('blur', { bubbles: true }));
+  return true;
+}
+
+function cbpOwnFieldText(input) {
+  const explicitLabels = input.labels ? [...input.labels].map(label => label.textContent) : [];
+  const field = input.closest('mat-form-field, .mat-mdc-form-field, .mat-form-field');
+  const floatingLabel = field?.querySelector('mat-label, .mdc-floating-label, .mat-form-field-label')?.textContent;
+  return [input.name, input.id, input.placeholder, input.getAttribute('aria-label'),
+    input.getAttribute('formcontrolname'), ...explicitLabels, floatingLabel]
+    .filter(Boolean).join(' ');
+}
+
+function cbpFindTravelerInput(patterns, usedInputs) {
+  const controls = [...document.querySelectorAll('input:not([type="hidden"]), textarea')];
+  return controls.find(input => !usedInputs.has(input)
+    && patterns.some(pattern => pattern.test(cbpOwnFieldText(input))));
+}
+
+function cbpCountryCode(country) {
+  const normalized = String(country || '').trim().toUpperCase();
+  const codes = {
+    CHINA: 'CHN', 'PEOPLE\'S REPUBLIC OF CHINA': 'CHN',
+    CHINESE: 'CHN', 'HAN CHINESE': 'CHN', HAN: 'CHN', '汉': 'CHN', '汉族': 'CHN',
+    'UNITED STATES': 'USA', USA: 'USA',
+    CANADA: 'CAN', MEXICO: 'MEX',
+  };
+  return codes[normalized] || (normalized.length === 3 ? normalized : country);
+}
+
+async function cbpFillTravelerInfo(data, { continueSearch = true } = {}) {
+  if (location.hostname !== 'i94.cbp.dhs.gov') throw new Error('Open the CBP I-94 traveler search page first.');
+  const values = [
+    { key: 'givenName', value: data.givenName, patterns: [/first.*given/i, /given.*name/i] },
+    { key: 'familyName', value: data.familyName, patterns: [/last.*family/i, /family.*surname/i, /last.*surname/i] },
+    { key: 'dob', value: cbpToUSDate(data.dob), patterns: [/date.*birth/i, /birth.*date/i, /dob/i] },
+    { key: 'nationality', value: cbpCountryCode(data.nationality), patterns: [/country\s*of\s*citizenship/i, /countryofcitizenship/i] },
+    { key: 'passportNumber', value: data.passportNumber, patterns: [/document\s*number/i, /passport\s*number/i, /documentnumber/i] },
+  ];
+  const results = [];
+  const usedInputs = new Set();
+  for (const item of values) {
+    const input = cbpFindTravelerInput(item.patterns, usedInputs);
+    const ok = cbpSetInputValue(input, item.value);
+    if (ok) usedInputs.add(input);
+    results.push({ field: item.key, ok, value: item.value || '' });
+    if (ok && item.key === 'nationality') {
+      input.focus();
+      await new Promise(resolve => setTimeout(resolve, 350));
+      const option = [...document.querySelectorAll('[role="option"], mat-option, .mat-mdc-option')]
+        .find(el => /\b(CHN|CHINA)\b/i.test(String(el.textContent || '')));
+      if (option) option.click();
+    }
+  }
+  const missing = results.filter(result => !result.ok);
+  let continued = false;
+  if (continueSearch && !missing.length) {
+    // Angular enables Continue only after its validators and the country
+    // autocomplete settle. Wait briefly rather than reporting success early.
+    for (let attempt = 0; attempt < 30; attempt++) {
+      const button = [...document.querySelectorAll('button, input[type="submit"]')].find(el => {
+        const text = `${el.textContent || ''} ${el.value || ''} ${el.getAttribute('aria-label') || ''}`.trim();
+        return /^(continue|next|search|get most recent i-?94)/i.test(text)
+          && !/(acknowledge|agree|terms|consent)/i.test(text)
+          && !el.disabled
+          && el.getAttribute('aria-disabled') !== 'true';
+      });
+      if (button) {
+        button.click();
+        continued = true;
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+  return {
+    success: missing.length === 0 && (!continueSearch || continued),
+    results,
+    continued,
+    error: continueSearch && !continued ? 'CBP Continue is still disabled; check the highlighted field.' : '',
+  };
+}
+
+// ── CBP I-94 extraction (v1.31) ──────────────────────────────────────────────
+// Label/regex-based (no brittle CSS selectors — CBP is an Angular app whose
+// class names churn). Extracts the most-recent I-94 block + travel history.
+function cbpToUSDate(s) {
+  const v = String(s || '').trim();
+  let m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);                        // 2024-01-15
+  if (m) return `${m[2]}/${m[3]}/${m[1]}`;
+  m = v.match(/^(\d{4})\s+([A-Za-z]+)\s+(\d{1,2})$/);                 // 2026 May 05 (CBP format!)
+  if (m) {
+    const mo = 'january february march april may june july august september october november december'
+      .split(' ').indexOf(m[2].toLowerCase()) + 1;
+    if (mo) return `${String(mo).padStart(2,'0')}/${String(m[3]).padStart(2,'0')}/${m[1]}`;
+  }
+  m = v.match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);               // January 15, 2024
+  if (m) {
+    const mo = 'january february march april may june july august september october november december'
+      .split(' ').indexOf(m[1].toLowerCase()) + 1;
+    if (mo) return `${String(mo).padStart(2,'0')}/${String(m[2]).padStart(2,'0')}/${m[3]}`;
+  }
+  m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);                    // US already
+  if (m) return `${m[1].padStart(2,'0')}/${m[2].padStart(2,'0')}/${m[3]}`;
+  return v; // D/S etc. pass through
+}
+
+function extractCbpI94() {
+  const text = (document.body.innerText || '').replace(/\u00a0/g, ' ');
+  const grab = (patterns) => {
+    for (const p of patterns) { const m = text.match(p); if (m) return m[1].trim(); }
+    return '';
+  };
+  const out = {
+    // Verified against the real results page (2026-07): labels are
+    // "Admission I-94 Record Number / Arrival/Issued Date / Class of
+    //  Admission / Admit Until Date / Last/Surname / First (Given) Name /
+    //  Birth Date / Document Number / Country of Citizenship"
+    i94Number: grab([
+      /Admission\s*I-?94\s*Record\s*Number\s*:?\s*([A-Z0-9]{9,12})/i,
+      /I-?94[^\n]*Record\s*(?:Number|#)\s*:?\s*([A-Z0-9]{9,12})/i,
+    ]),
+    entryDate: cbpToUSDate(grab([
+      /Arrival\/?Issued\s*Date\s*:?\s*([0-9A-Za-z ,\/-]+)/i,
+      /Most Recent Date of Entry\s*:?\s*([0-9A-Za-z ,\/-]+)/i,
+    ])),
+    classOfAdmission: grab([/Class of Admission\s*:?\s*([A-Z][0-9A-Z]{0,3})/i]),
+    admitUntil: cbpToUSDate(grab([/Admit\s*Until\s*Date\s*:?\s*(D\/S|[0-9A-Za-z ,\/-]+)/i])),
+    lastName: grab([/Last\/?(?:Surname)?\s*:?\s*([A-Za-z' -]{2,})/i, /(?:Last|Family)\s*Name\s*:?\s*([A-Za-z' -]{2,})/i]),
+    firstName: grab([/First\s*\(?(?:Given)?\)?\s*Name\s*:?\s*([A-Za-z' -]{2,})/i]),
+    dob: cbpToUSDate(grab([/Birth\s*Date\s*:?\s*([0-9A-Za-z ,\/-]+)/i, /Date of Birth\s*:?\s*([0-9A-Za-z ,\/-]+)/i])),
+    docNumber: grab([/Document\s*Number\s*:?\s*([A-Z0-9]+)/i, /Passport\s*Number\s*:?\s*([A-Z0-9]+)/i]),
+    citizenship: grab([/Country of Citizenship\s*:?\s*([A-Za-z ,()]+)/i]),
+  };
+
+  // Travel history: table rows OR text lines "2024-01-15  Arrival  LOS"
+  const history = [];
+  for (const tr of document.querySelectorAll('table tr')) {
+    const cells = [...tr.querySelectorAll('td')].map(td => td.innerText.trim());
+    if (cells.length >= 3 && /(Arrival|Departure)/i.test(cells.join(' '))) {
+      const date = cells.find(c => /\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4}|^\d{4}\s+[A-Za-z]+\s+\d{1,2}$/.test(c)) || '';
+      const type = cells.find(c => /^(Arrival|Departure)$/i.test(c)) || '';
+      const loc  = cells.find(c => /^[A-Z]{3}$/.test(c)) || '';
+      if (date && type) history.push({ date: cbpToUSDate(date), type, location: loc.toUpperCase() });
+    }
+  }
+  if (!history.length) {
+    let m; const re = /(\d{4}-\d{2}-\d{2}|\d{4}\s+[A-Za-z]+\s+\d{1,2})\s+(Arrival|Departure)\s+([A-Z]{3})\b/gi;
+    while ((m = re.exec(text))) history.push({ date: cbpToUSDate(m[1]), type: m[2], location: m[3].toUpperCase() });
+  }
+
+  const arrivals = history.filter(h => /arrival/i.test(h.type));
+  const latestArrival = arrivals[0] || null;
+  const rawPort = (latestArrival && latestArrival.location) || '';
+  const poe = normalizePortOfEntry(rawPort);
+  if (!out.entryDate && latestArrival) out.entryDate = latestArrival.date;
+
+  return {
+    ...out,
+    portRaw: rawPort,
+    port: poe.value,
+    portMapped: poe.mapped,
+    travelHistory: history,
+    arrivalsCount: arrivals.length,
+    capturedAt: new Date().toISOString(),
+    sourceUrl: location.href,
+  };
+}
+
+async function cbpOpenAndExtractTravelerHistory() {
+  const button = [...document.querySelectorAll('button, a, [role="button"]')]
+    .find(el => /^get\s+travell?er\s+history$/i.test(String(el.textContent || '').trim()));
+  if (!button) return { success: false, error: 'Get Traveler History button not found.' };
+  button.click();
+  for (let attempt = 0; attempt < 80; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const text = document.body?.innerText || '';
+    const hasHistory = /Travel(?:er)? History/i.test(text)
+      && (/\bArrival\b/i.test(text) || /\bDeparture\b/i.test(text));
+    if (!hasHistory) continue;
+    const data = extractCbpI94();
+    if (data.travelHistory?.length) return { success: true, data };
+  }
+  return { success: false, error: 'Traveler History did not finish loading.' };
+}
+
+function cbpOpenMostRecentI94() {
+  const button = [...document.querySelectorAll('button, a, [role="button"]')]
+    .find(el => /get\s+most\s+recent\s+i-?94(?:\/i-?95)?/i.test(String(el.textContent || '').trim()));
+  if (!button) return { success: false, error: 'Get Most Recent I-94/I-95 button not found.' };
+  button.click();
+  return { success: true };
+}
+
+// ── Smart address classification (v1.28) ─────────────────────────────────────
+// Replaces manual prev/next selection. Roles derived automatically:
+//  US_CURRENT      = top-level usAddress; from = lastEntryDate, to = Present
+//  LAST_OUTSIDE_US = non-US address with the latest toDate (residenceHistory1);
+//                    persecution-country radio auto-set: country === nationality
+//  LAST_5_YEARS    = every address whose [from,to] intersects the past 5 years,
+//                    most recent first (residenceHistory3 / I-589 Part A.I Q9)
+function ymToNum(ym) {
+  const { year, month } = parseYM(ym);
+  if (!year) return null;
+  return parseInt(year) * 12 + (parseInt(month || '1') - 1);
+}
+function addrToNum(addr)   { const v = ymToNum(addrToDate(addr));   return v; } // null = present
+function addrFromNum(addr) { return ymToNum(addrFromDate(addr)); }
+
+function normCountry(c) { return (c || '').trim().toLowerCase().replace(/^people'?s republic of\s+/,'').replace(/^pr\s+/,''); }
+
+function classifyAddresses(d) {
+  const warnings = [];
+  const persecutionCountry = normCountry(d.nationality || d.countryOfBirth || 'China');
+  const now = new Date();
+  const nowNum = now.getFullYear() * 12 + now.getMonth();
+  const fiveYearsAgo = nowNum - 60;
+
+  // US current address from top-level fields
+  let usCurrent = null;
+  if (d.usAddressLine1 || d.usCity) {
+    let fromDate = '';
+    const m = (d.lastEntryDate || '').match(/^(\d{2})\/\d{2}\/(\d{4})$/);
+    if (m) fromDate = `${m[2]}/${m[1]}`;
+    usCurrent = {
+      addressLine1: d.usAddressLine1 || '', addressLine2: d.usAddressLine2 || '',
+      city: d.usCity || '', province: d.usState || '', country: 'United States',
+      postalCode: d.usZip || '', fromDate, toDate: '', _isUS: true, _role: 'US_CURRENT',
+    };
+  } else warnings.push('缺少美国现住址 no US address');
+
+  const hist = (d.addressHistory || []).map(a => ({ ...a }));
+
+  // Recency key: a real toDate wins; blank toDate BUT a fromDate present = ongoing →
+  // present (latest); NO dates at all = unknown → OLDEST. (The old code ranked an
+  // undated address as latest, so a date-less China address wrongly became "last
+  // outside US" ahead of the one with real dates up to the US-entry month.)
+  const recencyKey = a => { const t = addrToNum(a); if (t !== null) return t; return addrFromNum(a) !== null ? Infinity : -Infinity; };
+  // Last address outside the US = non-US with the most recent recencyKey.
+  const nonUS = hist.filter(a => normCountry(a.country || 'china') !== 'united states');
+  nonUS.sort((a, b) => recencyKey(b) - recencyKey(a));
+  const lastOutsideUs = nonUS[0] || null;
+  if (lastOutsideUs) {
+    lastOutsideUs._role = 'LAST_OUTSIDE_US';
+    const c = normCountry(lastOutsideUs.country || 'china');
+    lastOutsideUs._fromPersecutionCountry = (c === persecutionCountry || c === '');
+    if (!lastOutsideUs._fromPersecutionCountry) {
+      warnings.push(`来美前最后地址在 ${lastOutsideUs.country}，不是受迫害国 — USCIS 会要求补受迫害国最后地址`);
+    }
+  } else warnings.push('没有非美国地址记录 no address outside the US');
+
+  // Last-5-years list: date range intersects the window; unknown dates = include + warn
+  const last5 = [];
+  for (const a of hist) {
+    const from = addrFromNum(a);
+    const to = addrToNum(a); // null = present
+    const intersects = (to === null || to >= fiveYearsAgo) && (from === null || from <= nowNum);
+    if (from === null && to === null) {
+      warnings.push(`地址缺日期，已包含请核对: ${a.addressLine1 || a.city || ''}`);
+      last5.push(a);
+    } else if (intersects) last5.push(a);
+  }
+  last5.sort((a, b) => recencyKey(b) - recencyKey(a));
+  const fiveYearList = usCurrent ? [usCurrent, ...last5] : last5;
+  fiveYearList.forEach(a => { if (!a._role) a._role = 'LAST_5_YEARS'; });
+
+  return { usCurrent, lastOutsideUs, fiveYearList, warnings, persecutionCountry };
+}
+
+// Which residenceHistory3 editor is open?
+function detectOpenResidenceIndex() {
+  const els = [...document.querySelectorAll('input[name*="residenceHistory3."], textarea[name*="residenceHistory3."]')];
+  let max = null;
+  for (const el of els) {
+    const m = el.name.match(/residenceHistory3\.(\d+)\./);
+    if (!m) continue;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) continue;
+    const idx = parseInt(m[1]);
+    if (max === null || idx > max) max = idx;
+  }
+  return max;
+}
+
+async function openAddAddressEditor() {
+  const before = detectOpenResidenceIndex();
+  const btns = [...document.querySelectorAll('button, a[role="button"]')];
+  const addBtn = btns.find(b => /\badd\b[\s\S]*\b(address|residence)\b/i.test((b.textContent || '').trim()))
+              || btns.find(b => /^\+?\s*add(\s+(a|an|another))?\s*$/i.test((b.textContent || '').trim()));
+  if (!addBtn || addBtn.disabled) return false;
+  addBtn.click();
+  for (let i = 0; i < 20; i++) {
+    await sleep(200);
+    const now = detectOpenResidenceIndex();
+    if (now !== null && now !== before) return true;
+    if (now !== null && before === null) return true;
+  }
+  return detectOpenResidenceIndex() !== null;
+}
+
+// ── School history (v1.27) ────────────────────────────────────────────────────
+// The Chinese info sheet lists schools elementary-first (Chinese convention —
+// DO NOT change the Chinese form). USCIS expects highest degree first.
+// We sort here: highest level first, tiebreak by end year descending.
+const EDU_LEVEL_RANK = [
+  { rank: 7, match: /博士|doctor|phd|ph\.d/i },
+  { rank: 6, match: /硕士|master|研究生|graduate school/i },
+  { rank: 5, match: /本科|大学|bachelor|university|undergrad/i },
+  { rank: 4, match: /大专|专科|associate|college/i },
+  { rank: 3, match: /高中|职高|中专|技校|high school|vocational|technical/i },
+  { rank: 2, match: /初中|middle school|junior/i },
+  { rank: 1, match: /小学|elementary|primary/i },
+];
+function eduRank(edu) {
+  const s = `${edu.level || ''} ${edu.school || ''}`;
+  for (const { rank, match } of EDU_LEVEL_RANK) if (match.test(s)) return rank;
+  return 0;
+}
+function sortEduHighestFirst(list) {
+  return [...(list || [])]
+    .filter(e => e && (e.school || e.level))
+    .sort((a, b) => {
+      const r = eduRank(b) - eduRank(a);
+      if (r !== 0) return r;
+      return (parseInt(b.endYear || b.endDate || 0) || 0) - (parseInt(a.endYear || a.endDate || 0) || 0);
+    });
+}
+
+// Which schoolHistory editor is currently mounted? Returns highest visible index or null.
+function detectOpenSchoolEditorIndex() {
+  const els = [...document.querySelectorAll('input[name^="applicant.schoolHistory."], textarea[name^="applicant.schoolHistory."]')];
+  let max = null;
+  for (const el of els) {
+    const m = el.name.match(/^applicant\.schoolHistory\.(\d+)\./);
+    if (!m) continue;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) continue; // hidden (saved/collapsed entry)
+    const idx = parseInt(m[1]);
+    if (max === null || idx > max) max = idx;
+  }
+  return max;
+}
+
+// Click the "Add school" / "Add another school" button and wait for a new editor.
+async function openAddSchoolEditor() {
+  const before = detectOpenSchoolEditorIndex();
+  const btns = [...document.querySelectorAll('button, a[role="button"]')];
+  // The live button reads "Add a school" — the old /add (another )?school/ regex
+  // missed the "a", so no editor ever opened and every school after the first was
+  // skipped. Match "Add a school" / "Add another school" / "Add school" / "Add".
+  const addBtn = btns.find(b => /\badd\b[\s\S]*\bschool\b/i.test((b.textContent || '').trim()))
+              || btns.find(b => /^\+?\s*add(\s+(a|another))?\s*$/i.test((b.textContent || '').trim()));
+  if (!addBtn || addBtn.disabled) return false;
+  addBtn.click();
+  for (let i = 0; i < 20; i++) {
+    await sleep(200);
+    const now = detectOpenSchoolEditorIndex();
+    if (now !== null && now !== before) return true;
+    if (now !== null && before === null) return true;
+  }
+  return detectOpenSchoolEditorIndex() !== null;
+}
+
+// Click the per-entry Save button for schools (mirrors clickSaveAddress).
+async function clickSchoolSave() {
+  await sleep(150);
+  const btns = [...document.querySelectorAll('button')];
+  const saveBtn =
+    btns.find(b => /save\s+school/i.test((b.textContent || '').trim())) ||
+    btns.find(b => /^save$/i.test((b.textContent || '').trim()));
+  if (!saveBtn) return { ok: true, reason: 'no-save-button-on-this-layout' };
+  if (saveBtn.disabled) return { ok: false, reason: 'save-button-disabled' };
+  saveBtn.click();
+  for (let i = 0; i < 20; i++) {
+    await sleep(150);
+    if (!document.body.contains(saveBtn)) return { ok: true };
+  }
+  return { ok: false, reason: 'save-did-not-close-editor' };
+}
+
+// USCIS school address city/province/postalCode are plain React text inputs,
+// not Inputmask fields. Like name/address text fields, they may DISPLAY a value
+// but fail to persist on "Save school" unless committed through real typing.
+async function commitSchoolText(name, value) {
+  if (value === undefined || value === null || value === '') return false;
+  const str = String(value);
+  let ok = await typeIntoField(name, str);
+  let el = document.querySelector(`[name="${name}"]`);
+  if (!ok || (el && el.value !== str)) {
+    await sleep(150);
+    ok = await typeIntoField(name, str);
+    el = document.querySelector(`[name="${name}"]`);
+  }
+  return !!(el && el.value === str) || ok;
+}
+
+// Fill one school entry at a given index.
+async function fillOneSchool(idx, edu, results) {
+  const p = `applicant.schoolHistory.${idx}`;
+  const push = (name, val, ok) => results.push({ name: `school${idx}.${name}`, val, ok });
+
+  push('name', edu.school || '', await fillByName(`${p}.name`, edu.school || ''));
+  if (edu.level) push('type', edu.level, await fillByName(`${p}.type`, edu.level));
+  push('country', edu.country || 'China', await fillAutocomplete(`${p}.address.country`, edu.country || 'China'));
+  await sleep(400);
+  if (edu.addressLine1) push('addressLineOne', edu.addressLine1, await commitSchoolText(`${p}.address.addressLineOne`, edu.addressLine1));
+  if (edu.addressLine2) push('addressLineTwo', edu.addressLine2, await commitSchoolText(`${p}.address.addressLineTwo`, edu.addressLine2));
+  if (edu.city)         push('city', edu.city, await commitSchoolText(`${p}.address.city`, edu.city));
+  if (edu.province)     push('province', edu.province, await commitSchoolText(`${p}.address.province`, edu.province));
+  if (edu.zipcode)      push('zip', edu.zipcode, await commitSchoolText(`${p}.address.postalCode`, edu.zipcode) ||
+                                                 await commitSchoolText(`${p}.address.zipCode`, edu.zipcode));
+  const fromYM = parseYM(edu.startDate || (edu.startYear ? `${edu.startYear}/09` : ''));
+  const toYM   = parseYM(edu.endDate   || (edu.endYear   ? `${edu.endYear}/07`   : ''));
+  if (fromYM.month || edu.startYear) { await fillAutocomplete(`${p}.dates.fromDate.month`, monthName(fromYM.month) || 'September'); await sleep(200); }
+  if (fromYM.year  || edu.startYear) { await fillAutocomplete(`${p}.dates.fromDate.year`,  fromYM.year || edu.startYear); await sleep(200); }
+  if (toYM.month   || edu.endYear)   { await fillAutocomplete(`${p}.dates.toDate.month`,   monthName(toYM.month) || 'July'); await sleep(200); }
+  if (toYM.year    || edu.endYear)   { await fillAutocomplete(`${p}.dates.toDate.year`,    toYM.year || edu.endYear); await sleep(200); }
+}
+
+// ── Employment editor helpers ────────────────────────────────────────────────
+// USCIS mounts an employment editor with a dynamic index. Hardcoding
+// applicant.employmentHistory.0.* makes visible data in Arreglo show as skipped
+// when the currently open editor is not index 0 or when the DOM path shifts.
+function detectOpenEmploymentEditorIndex() {
+  const els = [...document.querySelectorAll('input[name^="applicant.employmentHistory."], textarea[name^="applicant.employmentHistory."]')];
+  let max = null;
+  for (const el of els) {
+    const m = el.name.match(/^applicant\.employmentHistory\.(\d+)\./);
+    if (!m) continue;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) continue;
+    const idx = parseInt(m[1], 10);
+    if (max === null || idx > max) max = idx;
+  }
+  return max;
+}
+
+function employmentFieldName(idx, ...suffixes) {
+  const base = `applicant.employmentHistory.${idx}`;
+  const inputs = [...document.querySelectorAll(`input[name^="${base}."], textarea[name^="${base}."], select[name^="${base}."]`)];
+  const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  for (const suffix of suffixes) {
+    const sfx = String(suffix || '').toLowerCase();
+    const hit = inputs.find(el => {
+      const n = String(el.name || '');
+      const lower = n.toLowerCase();
+      return n === `${base}.${suffix}`
+        || lower === `${base}.${suffix}`.toLowerCase()
+        || lower.endsWith(`.${sfx}`)
+        || norm(n).endsWith(norm(suffix));
+    });
+    if (hit) return hit.name;
+  }
+  return `${base}.${suffixes[0]}`;
+}
+
+function fitUscisTextToMax(value, maxLength) {
+  const limit = Number(maxLength);
+  let s = String(value || '').replace(/\s+/g, ' ').trim();
+  if (!Number.isFinite(limit) || limit <= 0 || s.length <= limit) return s;
+
+  const replacements = [
+    [/\bManagement\b/g, 'Mgmt'],
+    [/\bConsultation\b/g, 'Consulting'],
+    [/\bCompany\b/g, 'Co'],
+    [/\bCorporation\b/g, 'Corp'],
+    [/\bLimited\b/g, 'Ltd'],
+    [/\bIncorporated\b/g, 'Inc'],
+    [/\bBuilding\b/g, 'Bldg'],
+    [/\bApartment\b/g, 'Apt'],
+    [/\bStreet\b/g, 'St'],
+    [/\bAvenue\b/g, 'Ave'],
+    [/\bRoad\b/g, 'Rd'],
+    [/\bSuite\b/g, 'Ste'],
+    [/\bFloor\b/g, 'Fl'],
+    [/,\s*Ltd\.?$/g, ' Ltd'],
+    [/Co\.,?\s*Ltd\.?$/g, 'Co'],
+    [/[.,]+$/g, ''],
+  ];
+  for (const [pattern, repl] of replacements) {
+    if (s.length <= limit) break;
+    s = s.replace(pattern, repl).replace(/\s+/g, ' ').trim();
+  }
+  return s.length <= limit ? s : s.slice(0, limit).trimEnd();
+}
+
+function inferredUscisTextMax(name, el) {
+  const direct = Number(el?.maxLength);
+  if (Number.isFinite(direct) && direct > 0) return direct;
+  const attr = Number(el?.getAttribute?.('maxlength'));
+  if (Number.isFinite(attr) && attr > 0) return attr;
+
+  // USCIS employment editor hides maxlength in DOM (maxLength=-1), but verified
+  // 2026-07-23: applicant.employmentHistory.N.name persists exactly 40 chars.
+  if (/applicant\.employmentHistory\.\d+\.name$/.test(name)) return 40;
+  if (/applicant\.employmentHistory\.\d+\.occupation$/.test(name)) return 40;
+  if (/applicant\.employmentHistory\.\d+\.address\.addressLine(One|Two)$/.test(name)) return 40;
+  return -1;
+}
+
+async function commitEmploymentText(name, value) {
+  if (value === undefined || value === null || value === '') return false;
+  const str = String(value);
+  let el = document.querySelector(`[name="${name}"]`);
+  if (!el) return false;
+  const maxLength = inferredUscisTextMax(name, el);
+  const fitted = fitUscisTextToMax(str, maxLength);
+  if (el.value === fitted) return true;
+
+  // USCIS/Formik accepts the real MAIN-world typing path. Do it directly once,
+  // not through the retrying grouped-name wrapper, because that wrapper retries up to 3 times and
+  // can visibly repeat long company names.
+  const msg = { type: 'SET_USCIS_TYPED_VALUE', name, value: fitted };
+  try { await chrome.runtime.sendMessage(msg); } catch (e) {}
+  await sleep(120);
+  el = document.querySelector(`[name="${name}"]`);
+  return !!(el && el.value === fitted);
+}
+
+async function fillOneEmployment(idx, work, results) {
+  const push = (name, val, ok) => results.push({ name: `employment${idx}.${name}`, val, ok });
+  const field = (...suffixes) => employmentFieldName(idx, ...suffixes);
+
+  push('name', work.company || '', await commitEmploymentText(field('name', 'employerName', 'nameOfEmployer'), work.company || ''));
+  push('occupation', work.position || '', await commitEmploymentText(field('occupation', 'occupationTitle', 'position', 'jobTitle'), work.position || ''));
+  push('country', work.country || 'China', await fillAutocomplete(field('address.country'), work.country || 'China'));
+  await sleep(400);
+  if (work.addressLine1) push('addressLineOne', work.addressLine1, await commitEmploymentText(field('address.addressLineOne'), work.addressLine1));
+  if (work.addressLine2) push('addressLineTwo', work.addressLine2, await commitEmploymentText(field('address.addressLineTwo'), work.addressLine2));
+  if (work.city)         push('city', work.city, await commitEmploymentText(field('address.city'), work.city));
+  if (work.province)     push('province', work.province, await commitEmploymentText(field('address.province'), work.province));
+  if (work.zipcode || work.postalCode || work.zip) {
+    const zip = work.zipcode || work.postalCode || work.zip;
+    push('zip', zip, await commitEmploymentText(field('address.postalCode', 'address.zipCode'), zip));
+  }
+  // Accept both the current CRM schema (startDate/endDate) and older imported
+  // records that stored the same date as fromDate/toDate or split year/month.
+  // Date fields used to fail silently, making it look as if Arreglo ignored a
+  // date that staff had entered. Report every source/mapping failure instead.
+  const fromSource = workStartYM(work);
+  const toSource   = workEndYM(work);
+  const from = parseYM(fromSource);
+  const to   = parseYM(toSource);
+
+  if (!from.year || !from.month) {
+    push('fromDate', fromSource || 'CRM missing Start (Year/Month)', false);
+  } else {
+    const monthOk = await fillAutocomplete(field('dates.fromDate.month'), monthName(from.month));
+    await sleep(200);
+    const yearOk = await fillAutocomplete(field('dates.fromDate.year'), from.year);
+    await sleep(200);
+    push('fromDate', `${from.year}/${from.month}`, monthOk && yearOk);
+  }
+  if (!to.year || !to.month) {
+    push('toDate', toSource || 'CRM missing End (Year/Month)', false);
+  } else {
+    const monthOk = await fillAutocomplete(field('dates.toDate.month'), monthName(to.month));
+    await sleep(200);
+    const yearOk = await fillAutocomplete(field('dates.toDate.year'), to.year);
+    await sleep(200);
+    push('toDate', `${to.year}/${to.month}`, monthOk && yearOk);
+  }
+}
+
+// ── Fill page ─────────────────────────────────────────────────────────────────
+// ── Children helpers ──────────────────────────────────────────────────────────
+// USCIS mounts each child editor as
+//   applicant.childrenDetails.childrenInformation.<idx>.childrenInformation1.name.*
+//   applicant.childrenDetails.childrenInformation.<idx>.childrenInformation2.*
+// The "Add child" editor mounts ONE child index at a time. Old code hardcoded
+// index .0. everywhere, so editing the 2nd/3rd child filled nothing. Detect the
+// open editor's index from the DOM (like siblings do) and resolve exact field
+// names by suffix so we don't depend on guessed naming for gender/race.
+function detectChildIndex() {
+  const el = document.querySelector('[name*="childrenDetails.childrenInformation."]');
+  const m = el && el.name.match(/childrenInformation\.(\d+)\./);
+  return m ? parseInt(m[1], 10) : 0;
+}
+function childFieldName(idx, ...suffixes) {
+  const inputs = [...document.querySelectorAll('[name*="childrenDetails.childrenInformation."]')];
+  for (const sfx of suffixes) {
+    const hit = inputs.find(el => {
+      const n = el.name || '';
+      return n.includes(`childrenInformation.${idx}.`) && n.toLowerCase().includes(sfx.toLowerCase());
+    });
+    if (hit) return hit.name;
+  }
+  return null;
+}
+
+// ── Spouse current-location formatter ───────────────────────────────────────
+// CRM stores this as two fields:
+//   spouseLocation       = "In China" / "In the United States" / "In another country"
+//   spouseLocationDetail = city for China/US, country-or-full-location for other
+// USCIS spouse page 3 asks one text question: "Where is your spouse currently
+// located?" So Arreglo composes the filing-only output here, without changing CRM.
+function formatSpouseCurrentLocation(d) {
+  const loc = String(d?.spouseLocation || '').trim();
+  const detail = String(
+    d?.spouseLocationDetail ||
+    d?.spouseCity ||
+    d?.spouseCurrentCity ||
+    ''
+  ).trim();
+
+  if (/in\s+china|china|中国/i.test(loc)) {
+    if (!detail) return 'China';
+    if (/(^|,\s*)china$/i.test(detail)) return detail;
+    return `${detail}, China`;
+  }
+
+  if (/united\s+states|usa|u\.s\.|美国/i.test(loc)) {
+    if (!detail) return 'United States';
+    if (/(united\s+states|usa|u\.s\.)$/i.test(detail)) return detail;
+    return `${detail}, United States`;
+  }
+
+  return detail || loc;
+}
+
+// ── Most-recent-entry status combobox (CRM label → USCIS option) ──────────────
+// USCIS lists 997 statuses as "B2 - VISITOR FOR PLEASURE" etc.; CRM stores human
+// labels like "B-2 Visitor". Old code typed "B-2" as PLAIN TEXT into the combobox
+// and never selected an option, so it saved nothing. Map the CRM label to a filter
+// query that narrows the list (typing "B-2" → the single "B2 - VISITOR FOR
+// PLEASURE"), then click the matching option. Verified live 2026-07-21.
+function statusQuery(crm) {
+  const s = String(crm || '').trim();
+  if (!s) return 'B2 - VISITOR FOR PLEASURE';
+  if (/b\s*-?\s*1\s*\/\s*b\s*-?\s*2|b\s*-?\s*2|visitor.*pleasure|tourist|旅游|pleasure/i.test(s)) return 'B2 - VISITOR FOR PLEASURE';
+  if (/b\s*-?\s*1|business|商务/i.test(s)) return 'B1 - TEMPORARY VISITOR FOR BUSINESS';
+  if (/f\s*-?\s*1|student|学生/i.test(s)) return 'F-1';
+  if (/j\s*-?\s*1|exchange/i.test(s))     return 'J-1';
+  if (/ewi|without inspection|未经检查|无检查/i.test(s)) return 'Entry Without Inspection (EWI)';
+  if (/unknown|不知道|不详/i.test(s)) return 'Unknown';
+  if (/no legal|out of status|no status|无合法/i.test(s)) return 'No Status';
+  return s.split(/\s+/)[0]; // e.g. "H-1B Worker" → "H-1B"
+}
+async function fillEntryStatus(name, crm) {
+  const input = document.querySelector(`[name="${name}"]`);
+  if (!input) return false;
+  const q = statusQuery(crm);
+  document.body.click(); await sleep(150);
+  input.focus(); await sleep(60);
+  setReactValue(input, q);            // native setter + input → combobox filters
+  await sleep(900);
+  const lbId = input.getAttribute('aria-controls') || input.getAttribute('aria-owns');
+  let lb = lbId ? document.getElementById(lbId) : null;
+  if (!lb) lb = [...document.querySelectorAll('[role="listbox"]')].find(x => x.getBoundingClientRect().width > 0);
+  const opts = (lb ? [...lb.querySelectorAll('[role="option"]')] : [...document.querySelectorAll('[role="option"]')])
+    .filter(o => (o.textContent || '').trim());
+  if (!opts.length) { input.dispatchEvent(new FocusEvent('blur', { bubbles: true })); return false; }
+  // Prefer an option whose code matches the query ("B-2" → "B2 …"); else the first.
+  const codeRx = new RegExp('^' + q.replace(/[^a-z0-9]/gi, '\\W?'), 'i');
+  const hit = opts.find(o => codeRx.test((o.textContent || '').trim())) || opts[0];
+  hit.click();
+  await sleep(250);
+  input.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+  return (input.value || '').length > 0;
+}
+
+function detectPreviousEntryRows() {
+  const indices = [...document.querySelectorAll('input[name^="applicant.immigrationInformation.immigrationInformation1.previousEntries."]')]
+    .map(el => {
+      const m = el.name.match(/previousEntries\.(\d+)\./);
+      return m ? Number(m[1]) : null;
+    })
+    .filter(Number.isInteger);
+  return indices.length ? Math.max(...indices) + 1 : 0;
+}
+async function ensurePreviousEntryRows(count) {
+  if (!count) return true;
+  for (let tries = 0; tries < 20 && detectPreviousEntryRows() < count; tries++) {
+    const before = detectPreviousEntryRows();
+    const btn = [...document.querySelectorAll('button, a[role="button"]')]
+      .find(b => /add\s+(another\s+)?entry/i.test((b.textContent || '').trim()));
+    if (!btn || btn.disabled) break;
+    btn.click();
+    for (let wait = 0; wait < 10; wait++) {
+      await sleep(200);
+      if (detectPreviousEntryRows() > before) break;
+    }
+  }
+  return detectPreviousEntryRows() >= count;
+}
+async function fillPreviousUsEntry(idx, entry, results) {
+  const p = `applicant.immigrationInformation.immigrationInformation1.previousEntries.${idx}`;
+  const dateValue = fmtDate(entry.dateOfEntry);
+  const dateOk = await fillByName(`${p}.dateOfEntry`, dateValue);
+  const poe = normalizePortOfEntry(entry.placeOfEntry);
+  const portOk = await fillAutocomplete(`${p}.placeOfEntry.referenceSelectOption`, poe.value);
+  const statusOk = await fillEntryStatus(`${p}.status`, entry.status || 'B-2 Tourist');
+  results.push({ name: `previousUsEntries.${idx}.dateOfEntry`, val: dateValue, ok: dateOk });
+  results.push({ name: `previousUsEntries.${idx}.placeOfEntry`, val: poe.mapped ? poe.value : `${poe.value} — 口岸未识别，请核对`, ok: portOk && poe.mapped });
+  results.push({ name: `previousUsEntries.${idx}.status`, val: statusQuery(entry.status || 'B-2 Tourist'), ok: statusOk });
+}
+
+async function fillPage(page, d, opts = {}) {
+  const results = [];
+  const fill = async (name, val) => {
+    const ok = await fillByName(name, val);
+    results.push({ name: name.split('.').pop(), val, ok });
+    return ok;
+  };
+  const auto = async (name, val) => {
+    const ok = await fillAutocomplete(name, val);
+    results.push({ name: name.split('.').pop(), val, ok });
+    return ok;
+  };
+  // Grouped First/Middle/Last Name fields MUST be typed char-by-char or they save
+  // as "" (see typeIntoField). Route every name.firstName/middleName/lastName here.
+  const fillName = async (name, val) => {
+    const ok = await typeIntoField(name, val);
+    results.push({ name: name.split('.').pop(), val, ok });
+    return ok;
+  };
+
+  switch(page) {
+    case 'evidence_personal': {
+      const files = Array.isArray(d._arregloFiles) ? d._arregloFiles : [];
+      const wanted = ['passport', 'i94', 'travel'];
+      const classify = file => {
+        const label = `${file.name || ''} ${file.type || ''}`.toLowerCase();
+        if (/passport/.test(label)) return 'passport';
+        if (/travel\s*history/.test(label)) return 'travel';
+        if (/i[-\s]?94/.test(label)) return 'i94';
+        return '';
+      };
+      const byKind = new Map(files.map(file => [classify(file), file]).filter(([kind]) => kind));
+      const existingRows = [...document.querySelectorAll('table tbody tr')];
+      const existingKind = row => classify({ name:row.textContent || '' });
+      for (const kind of wanted) {
+        if (!byKind.has(kind) && !existingRows.some(row => existingKind(row) === kind)) {
+          results.push({ name:`upload.${kind}`, val:'Missing from Cloudflare', ok:false });
+        }
+      }
+      if (results.some(row => !row.ok)) break;
+      const input = document.querySelector('input[type="file"]');
+      const missingKinds = wanted.filter(kind => !existingRows.some(row => existingKind(row) === kind));
+      if (missingKinds.length && !input) {
+        results.push({ name:'upload', val:'USCIS file input not found', ok:false });
+        break;
+      }
+      try {
+        if (missingKinds.length) {
+          const transfer = new DataTransfer();
+          for (const kind of missingKinds) {
+            const remote = byKind.get(kind);
+            const response = await fetch(remote.url);
+            if (!response.ok) throw new Error(`${remote.name}: Cloudflare HTTP ${response.status}`);
+            const blob = await response.blob();
+            transfer.items.add(new File([blob], remote.name, { type:blob.type || remote.mimeType || 'application/pdf' }));
+          }
+          input.files = transfer.files;
+          input.dispatchEvent(new Event('input', { bubbles:true }));
+          input.dispatchEvent(new Event('change', { bubbles:true }));
+          await sleep(2200);
+        }
+        const categories = { passport:'Passport', i94:'I-94', travel:'Other Identification' };
+        for (const kind of wanted) {
+          const row = [...document.querySelectorAll('table tbody tr')].find(candidate => existingKind(candidate) === kind);
+          const typeInput = row?.querySelector('input[name$=".documentType"]');
+          const category = categories[kind];
+          let categoryOk = !!typeInput && typeInput.value === category;
+          if (typeInput && !categoryOk) categoryOk = await fillAutocomplete(typeInput.name, category);
+          results.push({ name:`upload.${kind}`, val:category, ok:!!row && categoryOk });
+        }
+      } catch (error) {
+        results.push({ name:'upload', val:error.message, ok:false });
+      }
+      break;
+    }
+
+    case 'preparer_signature_upload': {
+      const files = Array.isArray(d._arregloFiles) ? d._arregloFiles : [];
+      const signed = files.find(file => /preparer.*(?:signature|details)|signature.*preparer/i.test(`${file.name || ''} ${file.type || ''}`));
+      const alreadyUploaded = [...document.querySelectorAll('a')].some(a => /preparer.*(?:signature|details)|signature.*preparer/i.test(a.textContent || ''));
+      if (alreadyUploaded) {
+        results.push({ name:'preparerSignature', val:'Already uploaded', ok:true });
+        break;
+      }
+      if (!signed) {
+        results.push({ name:'preparerSignature', val:'Preparer Details file missing from CRM Documents/Cloudflare', ok:false });
+        break;
+      }
+      const input = document.querySelector('input[type="file"]');
+      if (!input) {
+        results.push({ name:'preparerSignature', val:'USCIS file input not found', ok:false });
+        break;
+      }
+      try {
+        const response = await fetch(signed.url);
+        if (!response.ok) throw new Error(`Cloudflare HTTP ${response.status}`);
+        const blob = await response.blob();
+        const transfer = new DataTransfer();
+        transfer.items.add(new File([blob], signed.name, { type:blob.type || signed.mimeType || 'application/pdf' }));
+        input.files = transfer.files;
+        input.dispatchEvent(new Event('input', { bubbles:true }));
+        input.dispatchEvent(new Event('change', { bubbles:true }));
+        await sleep(1800);
+        results.push({ name:'preparerSignature', val:signed.name, ok:(document.body?.innerText || '').includes(signed.name) });
+      } catch (error) {
+        results.push({ name:'preparerSignature', val:error.message, ok:false });
+      }
+      break;
+    }
+
+    case 'evidence_optional':
+    case 'additional_information_optional':
+      results.push({ name:page, val:'No required mapped field on this page', ok:true });
+      break;
+    case 'legal_assistance': {
+      const ok = await selectYesNo('preparer.legalAssistance.providedWithListOfCounsel', 'Yes');
+      results.push({ name: 'legalAssistance', val: 'Yes', ok });
+      break;
+    }
+
+    case 'preparer_family':
+      clickRadio('preparer.familyMemberAsPreparer.familyMemberAsPreparer', 'No');
+      results.push({ name: 'familyMember', val: 'No', ok: true });
+      break;
+
+    case 'preparer_info': {
+      clickRadio('preparer.nonFamilyMemberAsPreparer.nonFamilyMemberAsPreparer', 'Yes');
+      await sleep(400);
+      await fillName('preparer.nonFamilyMemberAsPreparer.name.firstName', PREPARER.firstName);
+      await fillName('preparer.nonFamilyMemberAsPreparer.name.lastName',  PREPARER.lastName);
+      await fill('preparer.nonFamilyMemberAsPreparer.daytimePhone',   PREPARER.phone);
+      await fillName('preparer.nonFamilyMemberAsPreparer.address.addressLineOne', PREPARER.address1);
+      if (PREPARER.address2) await fillName('preparer.nonFamilyMemberAsPreparer.address.addressLineTwo', PREPARER.address2);
+      await fillName('preparer.nonFamilyMemberAsPreparer.address.city', PREPARER.city);
+      // State on preparer page: try MUI Select first (has div[role=button]), fallback autocomplete
+      const stateOk = await fillMuiSelect('preparer.nonFamilyMemberAsPreparer.address.state', PREPARER.stateFull);
+      if (!stateOk) await fillAutocomplete('preparer.nonFamilyMemberAsPreparer.address.state', PREPARER.stateCode);
+      await sleep(600);
+      // Preparer ZIP is a PLAIN text field (not inputmask) and rejects execCommand —
+      // fillMasked no-oped (CustomEvent 'setvalue' does nothing here). Type it.
+      for (let i = 0; i < 4; i++) {
+        const ok = await typeIntoField('preparer.nonFamilyMemberAsPreparer.address.zipCode', PREPARER.zip);
+        if (ok) break;
+        await sleep(200);
+      }
+      results.push({ name: 'preparer', val: `${PREPARER.firstName} ${PREPARER.lastName}`, ok: true });
+      break;
+    }
+
+    case 'your_name': {
+      await fillName('applicant.yourName.name.firstName',  d.givenName);
+      if (d.middleName) await fillName('applicant.yourName.name.middleName', d.middleName);
+      await fillName('applicant.yourName.name.lastName',   d.familyName);
+      const aliasFirstName = String(d.aliasFirstName || '').trim();
+      const aliasLastName = String(d.aliasLastName || '').trim();
+      const hasAlias = Boolean(aliasFirstName || aliasLastName);
+      const aliasRadioName = 'formikFactoryUIMeta.applicant.yourName.additionalNames.hasAdditionalNames';
+
+      // A populated alias always wins over a stale aliasNone flag. Selecting Yes
+      // causes USCIS to render the additional-name inputs asynchronously.
+      if (hasAlias) {
+        const radioOk = clickRadio(aliasRadioName, 'Yes');
+        results.push({ name: 'additionalNames', val: 'Yes', ok: radioOk });
+        await sleep(400);
+
+        const additionalNameInputs = [...document.querySelectorAll('input, select, textarea')]
+          .filter(el => {
+            const name = String(el.name || '');
+            return name.includes('applicant.yourName') &&
+              name.includes('additionalNames') &&
+              name !== aliasRadioName;
+          });
+        const findNameInput = part => additionalNameInputs.find(el =>
+          String(el.name || '').endsWith(`.${part}`)
+        );
+        const firstInput = findNameInput('firstName');
+        const middleInput = findNameInput('middleName');
+        const lastInput = findNameInput('lastName');
+
+        if (firstInput) await fillName(firstInput.name, aliasFirstName);
+        else results.push({ name: 'aliasFirstName', val: aliasFirstName, ok: !aliasFirstName });
+        if (middleInput) await fillName(middleInput.name, '');
+        if (lastInput) await fillName(lastInput.name, aliasLastName);
+        else results.push({ name: 'aliasLastName', val: aliasLastName, ok: !aliasLastName });
+      } else if (d.aliasNone) {
+        const radioOk = clickRadio(aliasRadioName, 'No');
+        results.push({ name: 'additionalNames', val: 'No', ok: radioOk });
+      }
+      break;
+    }
+
+    case 'contact':
+      // Address lines + city behave like the grouped Name fields: execCommand only
+      // updates the display, the SAVED Formik value stays empty (needs a real click
+      // to persist). They are passthrough (non-reformatting) inputs, so per-character
+      // typing is CLEAN here and actually commits — same fix as names. Phone is a
+      // REFORMATTING mask, so it must stay on execCommand (typing garbles it).
+      await fillName('applicant.background.physicalAddress.usAddress.addressLineOne', d.usAddressLine1);
+      if (d.usAddressLine2) await fillName('applicant.background.physicalAddress.usAddress.addressLineTwo', d.usAddressLine2);
+      await fillName('applicant.background.physicalAddress.usAddress.city',           d.usCity);
+      await auto('applicant.background.physicalAddress.usAddress.state',    d.usState || 'CA');
+      await fillName('applicant.background.physicalAddress.usAddress.zipCode',        d.usZip);
+      await fill('applicant.background.physicalAddress.phoneNumber',              cleanPhone(d.phone));
+      setCheckbox('formikFactoryUIMeta.applicant.background.mailingAddress.mailingAddressSameAsPhysicalAddress', true);
+      await handleUspsDialog();
+      break;
+
+    case 'birth':
+      await fill('applicant.whenAndWhereYouWereBorn.dateOfBirth',    fmtDate(d.dob));
+      await fill('applicant.whenAndWhereYouWereBorn.cityOfBirth',    d.cityOfBirth);
+      await auto('applicant.whenAndWhereYouWereBorn.countryOfBirth',   d.countryOfBirth  || 'China');
+      await auto('applicant.whenAndWhereYouWereBorn.birthNationality', d.nationality     || 'China');
+      break;
+
+    case 'describe_yourself':
+      clickRadio('applicant.background2.gender', d.sex === 'Female' ? 'Female' : 'Male');
+      await auto('applicant.background2.race',           d.ethnicity === 'Han' ? 'Chinese' : (d.ethnicity || 'Chinese'));
+      await auto('applicant.background2.religion',       d.religionNone ? 'None' : (d.religion || 'None'));
+      await auto('applicant.background2.nativeLanguage', d.nativeLanguage || 'Mandarin');
+      clickRadio('applicant.background2.fluentEnglish', d.fluentEnglish === 'Yes' ? 'Yes' : 'No');
+      if (d.otherLanguages) await fill('applicant.background2.otherLanguages.0', d.otherLanguages.split(/[,，、]/)[0].trim());
+      break;
+
+    case 'residence_history_1': {
+      // v1.28 smart: auto-pick the last address outside the US — no manual selection.
+      // Manual override still honored if sidebar sent one.
+      const cls = classifyAddresses(d);
+      const addr = opts.selectedAddr || cls.lastOutsideUs;
+      if (!addr) { results.push({ name: 'address', val: 'no non-US address found 无非美地址', ok: false }); break; }
+      const country = addr.country || 'China';
+      await auto('applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs.country', country);
+      await sleep(400);
+      // USCIS labels these controls data-testid="masked-input", but on the live
+      // residence-history page they are ordinary React text inputs with no
+      // inputmask instance. SET_USCIS_MASKED_VALUE therefore left City,
+      // Province and Postal Code blank in Formik. Use real per-character typing
+      // for every address text field, blur it, and report the exact result.
+      const addressBase = 'applicant.residenceHistory.residenceHistory1.lastAddressOutsideUs';
+      const addressTextFields = [
+        ['province', addr.province],
+        ['addressLineOne', addr.addressLine1],
+        ['addressLineTwo', addr.addressLine2],
+        ['city', addr.city],
+        ['postalCode', addr.postalCode],
+      ];
+      const addressTextResults = [];
+      for (const [field, value] of addressTextFields) {
+        if (!value) continue; // Postal Code remains optional when CRM is blank.
+        const ok = await commitAddrText(`${addressBase}.${field}`, value);
+        addressTextResults.push({ field, value, ok });
+        results.push({ name: field, val: value, ok });
+      }
+      const from1 = parseYM(addrFromDate(addr));
+      const to1   = parseYM(addrToDate(addr));
+      if (from1.month) { await fillAutocomplete('applicant.residenceHistory.residenceHistory1.dates.fromDate.month', monthName(from1.month)); await sleep(200); }
+      if (from1.year)  { await fillAutocomplete('applicant.residenceHistory.residenceHistory1.dates.fromDate.year',  from1.year); await sleep(200); }
+      if (to1.month)   { await fillAutocomplete('applicant.residenceHistory.residenceHistory1.dates.toDate.month',   monthName(to1.month)); await sleep(200); }
+      if (to1.year)    { await fillAutocomplete('applicant.residenceHistory.residenceHistory1.dates.toDate.year',    to1.year); await sleep(200); }
+      // Persecution-country radio: DERIVED, not hardcoded. country === nationality → Yes.
+      const fromPersec = addr._fromPersecutionCountry !== undefined
+        ? addr._fromPersecutionCountry
+        : normCountry(addr.country || 'china') === cls.persecutionCountry;
+      clickRadio('formikFactoryUIMeta.applicant.residenceHistory.residenceHistory1.isFromCountryWhereFearedPersecution', fromPersec ? 'Yes' : 'No');
+      results.push({ name: 'fromPersecutionCountry', val: fromPersec ? 'Yes' : 'No — 需补受迫害国地址', ok: true });
+      await sleep(400);
+      results.push({
+        name: 'address',
+        val: addr.addressLine1 || addr.city,
+        ok: addressTextResults.every(item => item.ok),
+      });
+      for (const w of cls.warnings) results.push({ name: '⚠ warning', val: w, ok: false });
+      break;
+    }
+
+    case 'residence_history_3': {
+      // v1.28 smart: fill ALL last-5-years addresses automatically (most recent
+      // first, US current included), same add→fill→save loop as schools.
+      // Single-entry manual override still works via opts.selectedAddr.
+      const cls = classifyAddresses(d);
+      const queue = opts.fillAllAddresses
+        ? cls.fiveYearList
+        : [opts.selectedAddr || null].filter(Boolean);
+
+      if (opts.fillAllAddresses) {
+        if (!queue.length) { results.push({ name: 'address', val: 'no addresses in 5-year window', ok: false }); break; }
+        for (let i = 0; i < queue.length; i++) {
+          const a = queue[i];
+          const isUS = !!a._isUS;
+          // Skip addresses with no usable dates FIRST — USCIS requires From (and To
+          // unless it's the current address), so Save stays disabled and the whole
+          // run would stall on that entry (this is why only the US address filled:
+          // the 2nd address had no dates → save failed → the loop broke). Flag it
+          // for staff to complete in the CRM, and keep filling the complete ones.
+          const hasFrom = !!addrFromDate(a);
+          const hasTo   = !!addrToDate(a) || isUS;
+          if (!hasFrom || !hasTo) {
+            results.push({ name: `address ${i + 1}`, val: `${a.city || a.addressLine1 || ''} ⚠ 缺日期，CRM 补录后再填`, ok: false });
+            continue;
+          }
+          let idx = detectOpenResidenceIndex();
+          if (idx === null) {
+            const opened = await openAddAddressEditor();
+            if (!opened) {
+              results.push({ name: `address ${i + 1}`, val: 'Add-address button not found', ok: false });
+              break;
+            }
+            await sleep(300);
+            idx = detectOpenResidenceIndex();
+            if (idx === null) {
+              results.push({ name: `address ${i + 1}`, val: 'editor did not mount', ok: false });
+              break;
+            }
+          }
+          const p = `applicant.residenceHistory.residenceHistory3.${idx}`;
+          const fieldLog = await fillAddressEntry(a, p, isUS, d);
+          const save = await clickSaveAddress(a, p, isUS);
+          results.push({
+            name: `address ${i + 1}`,
+            val: `${a.city || a.addressLine1 || ''} ${save.ok ? '✓ saved' : '✗ ' + (save.reason || '')}`,
+            ok: save.ok && fieldLog.every(f => f.ok !== false),
+          });
+          // Never advance after an unconfirmed save: the next address would
+          // overwrite this same editor. This matches the proven school loop.
+          if (!save.ok) { results.push(...fieldLog.map(it => ({ name: it.field, val: it.ok ? 'committed' : 'failed', ok: it.ok }))); break; }
+          await sleep(500);
+        }
+        for (const w of cls.warnings) results.push({ name: '⚠ warning', val: w, ok: false });
+      } else {
+        const addr = queue[0];
+        if (!addr) { results.push({ name: 'address', val: 'none selected', ok: false }); break; }
+        const isUS = !!addr._isUS;
+        // Detect actual index dynamically
+        const anyField = document.querySelector('input[name*="residenceHistory3."]');
+        const idxMatch = anyField?.name.match(/residenceHistory3\.(\d+)\./);
+        const idx = idxMatch ? idxMatch[1] : '0';
+        const p = `applicant.residenceHistory.residenceHistory3.${idx}`;
+        const fieldLog = await fillAddressEntry(addr, p, isUS, d);
+        const save = await clickSaveAddress(addr, p, isUS);
+        results.push(...fieldLog.map(item => ({
+          name: item.field,
+          val: item.ok ? 'committed' : 'failed',
+          ok: item.ok,
+        })));
+        results.push({
+          name: 'saveAddress',
+          val: save.ok ? 'saved' : (save.reason || 'not saved'),
+          ok: save.ok,
+        });
+      }
+      break;
+    }
+
+    case 'school': {
+      // v1.27: Chinese sheet stays elementary-first; here we sort highest-first
+      // for USCIS and map schools to editor indices automatically.
+      const sorted = (opts.sortedSchools && opts.sortedSchools.length)
+        ? opts.sortedSchools
+        : sortEduHighestFirst(d.eduList || []);
+      if (!sorted.length) { results.push({ name: 'school', val: 'no education history', ok: false }); break; }
+
+      if (opts.fillAllSchools === true) {
+        // One click fills every school: open editor → fill → save → add next.
+        // BUG FIXED: after saving school N, USCIS may leave the same editor open
+        // (or reuse its index), so the old code re-detected the SAME index and
+        // filled school N+1 on top of school N — the 2nd name got appended onto
+        // the 1st ("Zaoshi Middle School" + "Yanwan…" → garbled) and the type was
+        // overwritten. Now each school must go into a FRESH, empty editor: accept
+        // the current editor only if its index advanced past the last one we filled
+        // OR its name field is empty; otherwise click "Add another school" and, if
+        // it still won't advance, STOP cleanly (never overwrite the previous entry).
+        const nameElOf = (k) => document.querySelector(`[name="applicant.schoolHistory.${k}.name"]`);
+        let lastIdx = -1;
+        for (let i = 0; i < sorted.length; i++) {
+          let idx = detectOpenSchoolEditorIndex();
+          const isFresh = (k) => k !== null && (k > lastIdx || !(nameElOf(k)?.value));
+          if (!isFresh(idx)) {
+            await openAddSchoolEditor();
+            await sleep(300);
+            idx = detectOpenSchoolEditorIndex();
+          }
+          if (!isFresh(idx)) {
+            results.push({ name: `school ${i + 1}`, val: `无法打开新的空白学校编辑器（仍停在索引 ${idx}）——已停止以免覆盖上一所，请手动 Add school 后用 Prev/Next 逐所填`, ok: false });
+            break;
+          }
+          await fillOneSchool(idx, sorted[i], results);
+          lastIdx = idx;
+          const save = await clickSchoolSave();
+          results.push({ name: `save school ${i + 1}`, val: save.ok ? 'saved' : (save.reason || 'not saved'), ok: save.ok });
+          if (!save.ok) break; // stop so staff can fix, instead of stacking errors
+          await sleep(500);
+        }
+      } else {
+        // Single-entry mode: fill whichever editor is open. Auto-pick the school
+        // matching this editor's position in the sorted list; sidebar can override.
+        let idx = detectOpenSchoolEditorIndex();
+        if (idx === null) {
+          const opened = await openAddSchoolEditor();
+          idx = opened ? detectOpenSchoolEditorIndex() : null;
+        }
+        if (idx === null) { results.push({ name: 'school', val: 'no editor open — click Add school first', ok: false }); break; }
+        const pick = Number.isInteger(opts.selectedSchoolIndex)
+          ? sorted[opts.selectedSchoolIndex]
+          : (sorted[idx] || sorted[sorted.length - 1]);
+        if (!pick) { results.push({ name: 'school', val: 'no school for this slot', ok: false }); break; }
+        await fillOneSchool(idx, pick, results);
+      }
+      break;
+    }
+
+    case 'employment': {
+      const idx = detectOpenEmploymentEditorIndex();
+      if (idx === null) { results.push({ name: 'employment', val: 'no editor open — click Add employment first', ok: false }); break; }
+      const work = (d.workList || [])[opts.selectedWorkIndex ?? idx] || (d.workList || [])[0];
+      if (work) await fillOneEmployment(idx, work, results);
+      break;
+    }
+
+    case 'organizations_groups': {
+      const yes = religionRequiresGroupDisclosure(d);
+      const answer = yes ? 'Yes' : 'No';
+      const radioName = findVisibleYesNoRadioGroup();
+      const radioOk = radioName ? clickRadio(radioName, answer) : false;
+      results.push({ name: 'organizationsOrGroups', val: answer, ok: radioOk });
+      if (yes) {
+        await sleep(350);
+        const controls = [...document.querySelectorAll('textarea[name], input[type="text"][name]')]
+          .filter(el => {
+            const rect = el.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+          });
+        const explanation = controls.find(el => /organi|group|associat|explain|description|detail/i.test(el.name))
+          || controls.find(el => el.tagName === 'TEXTAREA');
+        const text = 'Please refer to my statement.';
+        const explanationOk = explanation ? await fillByName(explanation.name, text) : false;
+        results.push({ name: 'organizationsOrGroupsExplanation', val: text, ok: explanationOk });
+      }
+      break;
+    }
+
+    case 'criminal_history_outside_us': {
+      const yes = religionRequiresGroupDisclosure(d);
+      const answer = yes ? 'Yes' : 'No';
+      const radioName = findVisibleYesNoRadioGroup();
+      const radioOk = radioName ? clickRadio(radioName, answer) : false;
+      results.push({ name: 'criminalHistoryOutsideUS', val: answer, ok: radioOk });
+      if (yes) {
+        await sleep(350);
+        const controls = [...document.querySelectorAll('textarea[name], input[type="text"][name]')]
+          .filter(el => {
+            const rect = el.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+          });
+        const explanation = controls.find(el => /accus|charg|arrest|detain|interrog|convict|sentence|imprison|explain|description|detail/i.test(el.name))
+          || controls.find(el => el.tagName === 'TEXTAREA');
+        const text = 'Please refer to my statement.';
+        const explanationOk = explanation ? await fillByName(explanation.name, text) : false;
+        results.push({ name: 'criminalHistoryOutsideUSExplanation', val: text, ok: explanationOk });
+      }
+      break;
+    }
+
+    case 'immigration_info_1':
+      await auto('applicant.immigrationInformation.immigrationInformation1.presentNationality', d.nationality || 'China');
+      clickRadio('formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation1.hasPassportOrTravelDocument', d.passportNumber ? 'Yes' : 'No');
+      // Passport fields only mount AFTER "Yes" — old code clicked Yes but never
+      // filled them. countryOfIssuance is a MUI autocomplete; number/expiration are
+      // plain text. CRM keys: passportCountry / passportNumber / passportExpiry
+      // (passportExpiry may be blank until staff captures it from the bio page).
+      if (d.passportNumber) {
+        await sleep(500); // wait for the three passport fields to render
+        await auto('applicant.immigrationInformation.immigrationInformation1.passportOrTravelDocCountryOfIssuance', d.passportCountry || d.nationality || 'China');
+        await fill('applicant.immigrationInformation.immigrationInformation1.passportOrTravelDocNumber', d.passportNumber);
+        if (d.passportExpiry) {
+          await fill('applicant.immigrationInformation.immigrationInformation1.passportOrTravelDocExpirationDate', fmtDate(d.passportExpiry));
+        } else {
+          results.push({ name: 'passportExpiry', val: '⚠ CRM 未录护照到期日，请手动补', ok: false });
+        }
+      }
+      const applicantUsEntries = getApplicantUsEntries(d);
+      const mostRecentEntry = applicantUsEntries[0] || {
+        dateOfEntry: d.lastEntryDate,
+        placeOfEntry: d.entryPort,
+        status: d.lastEntryStatus || 'B-2 Tourist',
+      };
+      const previousUsEntries = applicantUsEntries.slice(1).length
+        ? applicantUsEntries.slice(1)
+        : (Array.isArray(d.previousUsEntries) ? d.previousUsEntries : []);
+      // "When did you last leave your country?" — separate USCIS field from date
+      // of entry. Direct CN→US flights are same-day; default to lastEntryDate,
+      // CRM field dateOfLastDeparture overrides when client transited a 3rd country.
+      await fill('applicant.immigrationInformation.immigrationInformation1.dateOfLastDeparture', fmtDate(d.dateOfLastDeparture || mostRecentEntry.dateOfEntry || d.lastEntryDate));
+      await fill('applicant.immigrationInformation.immigrationInformation1.i94Number', d.i94Number || '');
+      await fill('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateOfEntry', fmtDate(mostRecentEntry.dateOfEntry || d.lastEntryDate));
+      {
+        // v1.30: convert CBP I-94 code (LAX) → USCIS display (LOS ANGELES CA)
+        const poe = normalizePortOfEntry(mostRecentEntry.placeOfEntry || d.entryPort);
+        await auto('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.placeOfEntry.referenceSelectOption', poe.value);
+        results.push({ name: 'portOfEntry', val: poe.mapped ? poe.value : `${poe.value} — 口岸未识别，请核对`, ok: poe.mapped });
+      }
+      {
+        const st = await fillEntryStatus('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.status', mostRecentEntry.status || d.lastEntryStatus || 'B-2 Tourist');
+        results.push({ name: 'entryStatus', val: statusQuery(mostRecentEntry.status || d.lastEntryStatus || 'B-2 Tourist') + ' → USCIS 选项', ok: st });
+      }
+      // v1.29: dateStatusExpires = I-94 Admit Until (CBP), NOT the visa stamp date.
+      await fill('applicant.immigrationInformation.immigrationInformation1.mostRecentEntry.dateStatusExpires', fmtDate(d.dateStatusExpires || d.i94StatusExpiry || d.visaExpiry));
+      clickRadio('formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation1.otherEntries', previousUsEntries.length || d.otherEntries === 'Yes' ? 'Yes' : 'No');
+      if (previousUsEntries.length) {
+        await sleep(500);
+        const rowsReady = await ensurePreviousEntryRows(previousUsEntries.length);
+        results.push({ name: 'previousUsEntries', val: `${previousUsEntries.length} entries`, ok: rowsReady });
+        if (rowsReady) {
+          for (let idx = 0; idx < previousUsEntries.length; idx++) {
+            await fillPreviousUsEntry(idx, previousUsEntries[idx], results);
+          }
+        }
+      }
+      break;
+
+    case 'immigration_info_2': {
+      const court = d.courtHistory || 'No';
+      if (court.toLowerCase().includes('currently') || court.toLowerCase().includes('now'))
+        clickRadio('applicant.immigrationInformation.immigrationInformation2.immigrationCourtProceedings', 'now');
+      else if (court.toLowerCase().includes('previously') || court.toLowerCase().includes('past'))
+        clickRadio('applicant.immigrationInformation.immigrationInformation2.immigrationCourtProceedings', 'past');
+      else
+        clickRadio('applicant.immigrationInformation.immigrationInformation2.immigrationCourtProceedings', 'never');
+      if (d.alienNumber) await fill('applicant.immigrationInformation.immigrationInformation2.alienNumber.number', d.alienNumber);
+      else setCheckbox('formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation2.alienNumber.none', true);
+      if (d.ssn) await fill('applicant.immigrationInformation.immigrationInformation2.socialSecurityNumber.number', d.ssn);
+      else setCheckbox('formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation2.socialSecurityNumber.none', true);
+      if (d.uscisOnlineAccountNumber) await fill('applicant.immigrationInformation.immigrationInformation2.uscisNumber.number', d.uscisOnlineAccountNumber);
+      else setCheckbox('formikFactoryUIMeta.applicant.immigrationInformation.immigrationInformation2.uscisNumber.none', true);
+      break;
+    }
+
+    case 'marital_status': {
+      const ms = d.maritalStatus || 'Single';
+      clickRadio('applicant.maritalStatus.maritalStatus', ms);
+      if (ms === 'Married') {
+        await sleep(300);
+        await fillMasked('applicant.maritalStatus.marriageDate', fmtDate(d.marriageDate));
+        await fill('applicant.maritalStatus.marriageLocation', d.marriagePlace || '');
+      }
+      break;
+    }
+
+    case 'spouse_1': {
+      await fillName('applicant.spouse.spouse1.name.firstName', d.spouseGivenName || '');
+      if (d.spouseMiddleName) await fillName('applicant.spouse.spouse1.name.middleName', d.spouseMiddleName);
+      await fillName('applicant.spouse.spouse1.name.lastName', d.spouseFamilyName || '');
+      clickRadioValue('formikFactoryUIMeta.applicant.spouse.spouse1.hasAdditionalNames', 'false');
+      results.push({
+        name: 'spouseName',
+        val: [d.spouseGivenName, d.spouseMiddleName, d.spouseFamilyName].filter(Boolean).join(' '),
+        ok: Boolean(d.spouseGivenName || d.spouseFamilyName),
+      });
+      break;
+    }
+
+    case 'spouse_2': {
+      await fillMasked('applicant.spouse.spouse2.dateOfBirth', fmtDate(d.spouseDob));
+      const spouseGender = String(d.spouseGender || '').toLowerCase().startsWith('f') ? 'female' : 'male';
+      if (d.spouseGender) clickRadioValue('applicant.spouse.spouse2.gender', spouseGender);
+      {
+        const spouseRace = d.spouseEthnicity || d.spouseRaceEthnicity || d.spouseRace || 'Han Chinese';
+        const raceOk = await typeIntoField('applicant.spouse.spouse2.race', spouseRace);
+        results.push({ name: 'spouseRace', val: spouseRace, ok: raceOk });
+      }
+      await fill('applicant.spouse.spouse2.cityOfBirth', d.spouseBirthCity || '');
+      await auto('applicant.spouse.spouse2.countryOfBirth', d.spouseCountry || 'China');
+      await auto('applicant.spouse.spouse2.presentNationality', d.spouseNationality || d.spouseCountry || 'China');
+
+      if (d.spouseANumberNone || !d.spouseANumber) {
+        setCheckbox('formikFactoryUIMeta.applicant.spouse.spouse2.alienNumber.none', true);
+      } else {
+        await fillMasked('applicant.spouse.spouse2.alienNumber.number', String(d.spouseANumber).replace(/\D/g, ''));
+      }
+
+      if (d.spousePassportNumberNone || !d.spousePassportNumber) {
+        setCheckbox('formikFactoryUIMeta.applicant.spouse.spouse2.passportNumber.none', true);
+      } else {
+        await fill('applicant.spouse.spouse2.passportNumber.number', d.spousePassportNumber);
+      }
+
+      if (d.spouseSsnNone || !d.spouseSsn) {
+        setCheckbox('formikFactoryUIMeta.applicant.spouse.spouse2.socialSecurityNumber.none', true);
+      } else {
+        await fillMasked('applicant.spouse.spouse2.socialSecurityNumber.number', String(d.spouseSsn).replace(/\D/g, ''));
+      }
+
+      results.push({ name: 'spousePage2', val: 'DOB/gender/birth/nationality/IDs', ok: true });
+      break;
+    }
+
+    case 'spouse_3': {
+      const inUs = /united\s+states|usa|u\.s\.|美国/i.test(String(d.spouseLocation || ''));
+      const radioOk = clickRadioValue('applicant.spouse.spouse3.isYourSpouseInUs', inUs ? 'true' : 'false');
+      results.push({ name: 'spouseInUS', val: inUs ? 'Yes' : 'No', ok: radioOk });
+      if (inUs) {
+        await sleep(500);
+        if (d.spouseEntryPort) {
+          const spouseEntryPort = normalizePortOfEntry(d.spouseEntryPort);
+          const ok = await auto('applicant.spouse.spouse3.placeOfEntry.referenceSelectOption', spouseEntryPort.value);
+          results.push({ name: 'spouseEntryPort', val: spouseEntryPort.value, ok });
+        }
+        if (d.spouseLastEntryDate) {
+          const ok = await fillMasked('applicant.spouse.spouse3.dateOfEntry', fmtDate(d.spouseLastEntryDate));
+          results.push({ name: 'spouseLastEntryDate', val: fmtDate(d.spouseLastEntryDate), ok });
+        }
+        if (d.spouseI94Number) {
+          const ok = await fillMasked('applicant.spouse.spouse3.currentI94Number.i94Number', String(d.spouseI94Number).replace(/\s/g, ''));
+          results.push({ name: 'spouseI94Number', val: d.spouseI94Number, ok });
+        }
+        if (d.spouseLastEntryStatus) {
+          const ok = await fillEntryStatus('applicant.spouse.spouse3.statusOnAdmission', d.spouseLastEntryStatus);
+          results.push({ name: 'spouseLastEntryStatus', val: statusQuery(d.spouseLastEntryStatus), ok });
+        }
+        if (d.spouseCurrentStatus) {
+          const ok = await fillEntryStatus('applicant.spouse.spouse3.statusCurrent', d.spouseCurrentStatus);
+          results.push({ name: 'spouseCurrentStatus', val: statusQuery(d.spouseCurrentStatus), ok });
+        }
+        if (d.spouseStatusExpiry) {
+          const ok = await fillMasked('applicant.spouse.spouse3.dateOfExpiration', fmtDate(d.spouseStatusExpiry));
+          results.push({ name: 'spouseStatusExpiry', val: fmtDate(d.spouseStatusExpiry), ok });
+        }
+        if (d.spouseInImmigrationProceedings) {
+          const yes = /^y/i.test(String(d.spouseInImmigrationProceedings));
+          const ok = clickRadioValue('applicant.spouse.spouse3.isYourSpouseInImmigration', yes ? 'true' : 'false');
+          results.push({ name: 'spouseInImmigrationProceedings', val: yes ? 'Yes' : 'No', ok });
+        }
+        if (d.spousePrevArrivalDate) {
+          const ok = await fillMasked('applicant.spouse.spouse3.dateOfPrevArrival', fmtDate(d.spousePrevArrivalDate));
+          results.push({ name: 'spousePrevArrivalDate', val: fmtDate(d.spousePrevArrivalDate), ok });
+        }
+        if (d.spouseInPetition) {
+          const included = /^y/i.test(String(d.spouseInPetition));
+          const ok = clickRadioValue('applicant.spouse.spouse3.includedOnApplication', included ? 'true' : 'false');
+          results.push({ name: 'spouseInPetition', val: included ? 'Yes' : 'No', ok });
+        }
+      } else {
+        await sleep(300);
+        const currentLocation = formatSpouseCurrentLocation(d);
+        if (currentLocation) {
+          const ok = await typeIntoField('applicant.spouse.spouse3.currentLocation', currentLocation);
+          results.push({ name: 'spouseCurrentLocation', val: currentLocation, ok });
+        } else {
+          results.push({ name: 'spouseCurrentLocation', val: '⚠ CRM 未录配偶所在地', ok: false });
+        }
+      }
+      break;
+    }
+
+    case 'children_yn':
+      clickRadio('applicant.children.doYouHaveChildren', (d.children||[]).length > 0 ? 'Yes' : 'No');
+      break;
+
+    case 'children_count': {
+      const n = String((d.children||[]).length || 0);
+      // "Number of children" is a numeric/masked field — the plain-text commit
+      // path often does not stick (shows blank → validates empty on Next).
+      // Try text → masked → React setter, and report the real outcome.
+      const nameExact = document.querySelector('[name="applicant.childrenDetails.numberOfChildren"]')
+        ? 'applicant.childrenDetails.numberOfChildren'
+        : (document.querySelector('[name*="childrenDetails.numberOfChildren"]')?.name
+           || 'applicant.childrenDetails.numberOfChildren');
+      // numberOfChildren rejects execCommand (like the Name component) — it only
+      // commits on real per-character typing (verified live: execCommand → blank,
+      // typed → "2" in DOM + Formik). Type it first, then fall back.
+      let ok = await typeIntoField(nameExact, n);
+      if (!ok) ok = await fillByName(nameExact, n);
+      if (!ok) ok = await fillMasked(nameExact, n);
+      if (!ok) {
+        const el = document.querySelector(`[name="${nameExact}"]`);
+        if (el) { el.focus(); ok = setReactValue(el, n); el.dispatchEvent(new FocusEvent('blur', { bubbles: true })); ok = el.value === n; }
+      }
+      results.push({ name: 'numberOfChildren', val: n, ok });
+      break;
+    }
+
+    case 'child_0_name': {
+      const formIdx = detectChildIndex();               // where to write on the page
+      const dataIdx = opts.childIndex ?? formIdx;        // which child's data to read
+      const c = (d.children||[])[dataIdx];
+      if (c) {
+        const base = `applicant.childrenDetails.childrenInformation.${formIdx}.childrenInformation1.name`;
+        await fillName(`${base}.firstName`, c.firstName||'');
+        if (c.middleName) await fillName(`${base}.middleName`, c.middleName);
+        await fillName(`${base}.lastName`,  c.lastName||'');
+        results.push({ name: 'child', val: `#${dataIdx+1} ${c.firstName||''} ${c.lastName||''}`.trim(), ok: true });
+      } else {
+        results.push({ name: 'child', val: `⚠ 没有第 ${dataIdx+1} 个孩子的数据`, ok: false });
+      }
+      break;
+    }
+
+    case 'child_0_info': {
+      const formIdx = detectChildIndex();
+      const dataIdx = opts.childIndex ?? formIdx;
+      const c = (d.children||[])[dataIdx];
+      if (!c) { results.push({ name: 'child', val: `⚠ 没有第 ${dataIdx+1} 个孩子的数据`, ok: false }); break; }
+
+      // Sex — CRM info sheet stores this as `gender` (Male/Female); accept `sex` too.
+      const sexName = childFieldName(formIdx, 'gender', 'sex');
+      const childSex = c.sex || c.gender || '';
+      if (childSex && sexName) {
+        const sexOk = clickRadio(sexName, childSex === 'Female' ? 'Female' : 'Male');
+        results.push({ name: 'sex', val: childSex, ok: sexOk });
+      } else {
+        results.push({ name: 'sex', val: childSex ? '⚠ 页面无性别字段' : '⚠ CRM 未录入孩子性别，请手选', ok: false });
+      }
+
+      // Race — child race box is PLAIN TEXT; use the CRM ethnicity verbatim
+      // ("Han Chinese"), NOT the dropdown-style "Chinese" mapping. This text field,
+      // like numberOfChildren, rejects execCommand — keystroke commits.
+      const raceName = childFieldName(formIdx, 'race', 'ethnic');
+      const eth = c.ethnicity || d.ethnicity || 'Han Chinese';
+      if (raceName) { const rok = await typeIntoField(raceName, eth); results.push({ name: 'race', val: eth, ok: rok }); }
+
+      // DOB
+      const dobName = childFieldName(formIdx, 'dateOfBirth');
+      if (dobName && c.dob) await fill(dobName, fmtDate(c.dob));
+
+      // Birth city / town / village (plain text — was never filled)
+      const cityName = childFieldName(formIdx, 'birthCityOrTownOrVillage', 'birthCity');
+      const childCity = c.birthCity || c.locationCity || '';
+      if (cityName && childCity) { const ck = await typeIntoField(cityName, childCity); results.push({ name: 'birthCity', val: childCity, ok: ck }); }
+
+      // Country of birth + country of citizenship (MUI comboboxes)
+      const cobName = childFieldName(formIdx, 'countryOfBirth');
+      if (cobName) await auto(cobName, c.birthCountry || 'China');
+      const cocName = childFieldName(formIdx, 'countryOfCitizenship');
+      if (cocName) { const zk = await fillAutocomplete(cocName, c.citizenship || c.birthCountry || 'China'); results.push({ name: 'citizenship', val: c.citizenship || c.birthCountry || 'China', ok: zk }); }
+
+      // Marital status — child is Single unless CRM says otherwise.
+      const cmName = childFieldName(formIdx, 'maritalStatus');
+      if (cmName) clickRadio(cmName, c.maritalStatus || 'Single');
+
+      // A-number / passport / SSN. If CRM has a value, uncheck "None" and fill it;
+      // only check "None" when the value is genuinely absent or explicitly marked none.
+      const meta = `formikFactoryUIMeta.applicant.childrenDetails.childrenInformation.${formIdx}.childrenInformation2`;
+      if (c.aNumber && !c.aNumberNone) {
+        setCheckbox(`${meta}.alienNumber.none`, false);
+        await sleep(120);
+        const aName = childFieldName(formIdx, 'alienNumber.number', 'alienNumber');
+        const aOk = aName ? await fillByName(aName, c.aNumber) : false;
+        results.push({ name: 'aNumber', val: c.aNumber, ok: aOk });
+      } else {
+        setCheckbox(`${meta}.alienNumber.none`, true);
+      }
+      if (c.passportNumber && !c.passportNumberNone) {
+        setCheckbox(`${meta}.passportNumber.none`, false);
+        await sleep(120);
+        const ppName = childFieldName(formIdx, 'passportNumber.number', 'passportNumber');
+        const ppOk = ppName ? await fillByName(ppName, c.passportNumber) : false;
+        results.push({ name: 'passportNumber', val: c.passportNumber, ok: ppOk });
+      } else {
+        setCheckbox(`${meta}.passportNumber.none`, true);
+      }
+      if (c.ssn && !c.ssnNone) {
+        setCheckbox(`${meta}.socialSecurityNumber.none`, false);
+        await sleep(120);
+        const ssnName = childFieldName(formIdx, 'socialSecurityNumber.number', 'socialSecurityNumber');
+        const ssnOk = ssnName ? await fillMasked(ssnName, String(c.ssn).replace(/\D/g, '')) : false;
+        results.push({ name: 'ssn', val: c.ssn, ok: ssnOk });
+      } else {
+        setCheckbox(`${meta}.socialSecurityNumber.none`, true);
+      }
+
+      results.push({ name: 'child', val: `#${dataIdx+1} ${c.firstName||''} ${c.lastName||''}`.trim(), ok: true });
+      break;
+    }
+
+    case 'child_0_us': {
+      const formIdx = detectChildIndex();
+      const dataIdx = opts.childIndex ?? formIdx;
+      const c = (d.children||[])[dataIdx];
+      if (!c) { results.push({ name: 'child', val: `⚠ 没有第 ${dataIdx+1} 个孩子的数据`, ok: false }); break; }
+      const inUs = /^y/i.test(String(c.inUS || c.inUs || 'No'));
+      const inUsName = childFieldName(formIdx, 'isYourChildInUs');
+      if (inUsName) { clickRadio(inUsName, inUs ? 'Yes' : 'No'); await sleep(300); }
+      if (!inUs) {
+        // "Where is your child currently located?" (plain text) = city, country
+        const addrName = childFieldName(formIdx, 'childrenInformation3.address', 'address');
+        const loc = [c.locationCity, c.locationCountry].filter(Boolean).join(', ');
+        if (addrName && loc) { const ok = await typeIntoField(addrName, loc); results.push({ name: 'childLocation', val: loc, ok }); }
+        else if (!loc) results.push({ name: 'childLocation', val: '⚠ CRM 未录孩子所在地', ok: false });
+      }
+      results.push({ name: 'childInUS', val: `#${dataIdx+1} inUS=${inUs ? 'Yes' : 'No'}`, ok: true });
+      break;
+    }
+
+    case 'mother':
+      await fillName('applicant.mother.name.firstName', d.motherFirstName||'');
+      await fillName('applicant.mother.name.lastName',  d.motherLastName||'');
+      await fill('applicant.mother.placeOfBirth',   d.motherBirthCity||'');
+      {
+        const country = d.motherBirthCountry || 'China';
+        const ok = await fillCountry('applicant.mother.countryOfBirth', country);
+        results.push({ name: 'motherCountryOfBirth', val: country, ok });
+      }
+      if (d.motherDeceased) setCheckbox('applicant.mother.noCurrentLocation', true);
+      else await fill('applicant.mother.currentLocation', [d.motherCurrentCity, d.motherCurrentCountry].filter(Boolean).join(', '));
+      break;
+
+    case 'father':
+      await fillName('applicant.father.name.firstName', d.fatherFirstName||'');
+      await fillName('applicant.father.name.lastName',  d.fatherLastName||'');
+      await fill('applicant.father.placeOfBirth',   d.fatherBirthCity||'');
+      {
+        const country = d.fatherBirthCountry || 'China';
+        const ok = await fillCountry('applicant.father.countryOfBirth', country);
+        results.push({ name: 'fatherCountryOfBirth', val: country, ok });
+      }
+      if (d.fatherDeceased) setCheckbox('applicant.father.noCurrentLocation', true);
+      else await fill('applicant.father.currentLocation', [d.fatherCurrentCity, d.fatherCurrentCountry].filter(Boolean).join(', '));
+      break;
+
+    case 'siblings': {
+      const anyF = document.querySelector('input[name*="applicant.siblings."]');
+      const siIdx = parseInt(anyF?.name.match(/siblings\.(\d+)\./)?.[1] || '0');
+      const sib = (d.siblings||[])[opts.siblingIndex ?? siIdx];
+      if (sib) {
+        const sp = `applicant.siblings.${siIdx}`;
+        await fillName(`${sp}.name.firstName`, sib.firstName||'');
+        await fillName(`${sp}.name.lastName`,  sib.lastName||'');
+        await fill(`${sp}.placeOfBirth`,   sib.birthCity||'');
+        await auto(`${sp}.countryOfBirth`, sib.birthCountry||'China');
+        const loc = [sib.locationCity, sib.locationCountry].filter(Boolean).join(', ');
+        if (loc) await fill(`${sp}.currentLocation`, loc);
+        else setCheckbox(`${sp}.noCurrentLocation`, true);
+        results.push({ name: 'sibling', val: `${sib.firstName} ${sib.lastName}`, ok: true });
+      }
+      break;
+    }
+
+    case 'eligibility_reason': {
+      // v1.29: basis of claim is per-case LEGAL STRATEGY set by the attorney in
+      // the CRM — no longer hardcoded CAT-only. Falls back to CAT-only when
+      // nothing is set, matching prior behavior.
+      const explanation = d.eligibilityExplanationText || 'Please refer to my statement.';
+
+      const anyBasisSet = d.basisRace || d.basisReligion || d.basisNationality ||
+        d.basisPoliticalOpinion || d.basisSocialGroup || d.basisTortureConvention;
+
+      const catYes = anyBasisSet ? !!d.basisTortureConvention : true;
+      const catOk = clickRadio(
+        'eligibility.reasonForAsylum.conventionAgainstTorture',
+        catYes ? 'Yes' : 'No'
+      );
+      results.push({ name: 'conventionAgainstTorture', val: catYes ? 'Yes' : 'No', ok: catOk });
+
+      const bases = anyBasisSet ? {
+        race: !!d.basisRace,
+        politicalOpinion: !!d.basisPoliticalOpinion,
+        religion: !!d.basisReligion,
+        membershipSocialGroup: !!d.basisSocialGroup,
+        nationality: !!d.basisNationality,
+        tortureConvention: !!d.basisTortureConvention,
+      } : {
+        race: false,
+        politicalOpinion: false,
+        religion: false,
+        membershipSocialGroup: false,
+        nationality: false,
+        tortureConvention: true,
+      };
+      for (const [id, checked] of Object.entries(bases)) {
+        results.push({
+          name: id,
+          val: checked ? 'Checked' : 'Unchecked',
+          ok: setCheckboxById(id, checked),
+        });
+      }
+
+      const questions = [
+        {
+          name: 'eligibility.reasonForAsylum.experiencedMistreatment.question',
+          explanation: 'eligibility.reasonForAsylum.experiencedMistreatment.additionalExplanation',
+          resultName: 'experiencedMistreatment',
+        },
+        {
+          name: 'eligibility.reasonForAsylum.fearMistreatment.question',
+          explanation: 'eligibility.reasonForAsylum.fearMistreatment.additionalExplanation',
+          resultName: 'fearMistreatment',
+        },
+        {
+          name: 'eligibility.reasonForAsylum.afraidOfTorture.question',
+          explanation: 'eligibility.reasonForAsylum.afraidOfTorture.additionalExplanation',
+          resultName: 'afraidOfTorture',
+        },
+      ];
+
+      const qAnswers = {
+        experiencedMistreatment: d.experiencedMistreatment === 'No' ? 'No' : 'Yes',
+        fearMistreatment:        d.fearMistreatment        === 'No' ? 'No' : 'Yes',
+        afraidOfTorture:         d.afraidOfTorture         === 'No' ? 'No' : 'Yes',
+      };
+      for (const question of questions) {
+        const ans = qAnswers[question.resultName] || 'Yes';
+        const radioOk = clickRadio(question.name, ans);
+        results.push({ name: question.resultName, val: ans, ok: radioOk });
+        if (ans === 'No') continue; // explanation textarea mounts only on Yes
+
+        // The explanation textarea mounts only after Yes is selected.
+        let textarea = null;
+        for (let i = 0; i < 20; i++) {
+          textarea = document.querySelector(`[name="${question.explanation}"]`);
+          if (textarea) break;
+          await sleep(50);
+        }
+
+        // BUG FIX: this is a plain TEXTAREA, not an inputmask field. fillMasked
+        // routed through the inputmask committer (CustomEvent 'setvalue'), which
+        // no-ops on a textarea → the explanation was never typed (skipped).
+        // fillByName → MAIN-world execCommand works on these textareas (verified).
+        const explanationOk = textarea
+          ? await fillByName(question.explanation, explanation)
+          : false;
+        results.push({
+          name: `${question.resultName}Explanation`,
+          val: explanation,
+          ok: explanationOk,
+        });
+      }
+      break;
+    }
+
+    default:
+      results.push({ name: 'page', val: page, ok: false });
+  }
+  return results;
+}
+
+// ── Message listener ──────────────────────────────────────────────────────────
+async function eoirFillAndSubmit(data = {}) {
+  if (location.hostname !== 'acis.eoir.justice.gov') return { ok:false, error:'Not on EOIR ACIS.' };
+  if (/\/caseInformation\/?$/i.test(location.pathname)) return { ok:true, alreadyResult:true };
+  const digits = String(data.alienNumber || '').replace(/\D/g, '');
+  if (digits.length !== 9) return { ok:false, error:'CRM client has no valid nine-digit A-Number.' };
+  const boxes = [...document.querySelectorAll('input')]
+    .filter(el => el.type === 'number' || el.getAttribute('inputmode') === 'numeric')
+    .slice(0, 9);
+  if (boxes.length !== 9) return { ok:false, error:'EOIR A-Number boxes were not found.' };
+  for (let i = 0; i < 9; i++) {
+    const el = boxes[i];
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+    if (setter) setter.call(el, digits[i]); else el.value = digits[i];
+    el.dispatchEvent(new Event('input', { bubbles:true }));
+    el.dispatchEvent(new Event('change', { bubbles:true }));
+  }
+  const country = String(data.nationality || data.countryOfBirth || 'China').trim();
+  const combo = document.querySelector('[role="combobox"], input[id*="react-select"]');
+  if (combo && !/china/i.test(document.body.innerText || '')) {
+    combo.focus();
+    combo.value = country;
+    combo.dispatchEvent(new InputEvent('input', { bubbles:true, data:country, inputType:'insertText' }));
+    await sleep(250);
+    combo.dispatchEvent(new KeyboardEvent('keydown', { key:'ArrowDown', code:'ArrowDown', bubbles:true }));
+    combo.dispatchEvent(new KeyboardEvent('keydown', { key:'Enter', code:'Enter', bubbles:true }));
+  }
+  await sleep(350);
+  const submit = [...document.querySelectorAll('button')].find(b => /^submit$/i.test((b.textContent || '').trim()));
+  if (!submit || submit.disabled) return { ok:false, error:'EOIR Submit is not ready.' };
+  submit.click();
+  return { ok:true, submitted:true };
+}
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.type === 'ARREGLO_EOIR_FILL_SUBMIT') {
+    eoirFillAndSubmit(msg.data || {}).then(sendResponse).catch(error => sendResponse({ ok:false, error:error.message }));
+    return true;
+  }
+  if (msg.type === 'ARREGLO_CAPTURE_EOIR_RESULT') {
+    // EOIR capture is deliberately click-driven. Keep the parser as an ES
+    // module and load it only for this explicit staff request; content.js is a
+    // classic content script and must not duplicate or auto-run parser logic.
+    import(chrome.runtime.getURL('eoirAcisCapture.js'))
+      .then(({ parseEoirAcisResult }) => {
+        const result = parseEoirAcisResult(document);
+        sendResponse({
+          ok: result.ok,
+          fields: result.fields,
+          error: result.error,
+        });
+      })
+      .catch(error => {
+        sendResponse({
+          ok: false,
+          fields: undefined,
+          error: error.message || 'Unable to load the EOIR ACIS parser.',
+        });
+      });
+    return true;
+  }
+  if (msg.type === 'PING') {
+    const page = detectPage();
+    const next = [...document.querySelectorAll('button')].some(button =>
+      /^next(?:\s|$)/i.test((button.textContent || '').trim()) && !button.disabled
+    );
+    const formReady = page === 'review' || (next && !!document.querySelector(
+      'input, textarea, select, [role="radio"], [role="combobox"], input[type="file"]'
+    ));
+    sendResponse({ ok:true, page, url:location.href, ready:formReady });
+    return false;
+  }
+  if (msg.type === 'UPLOAD_PASSPORT_BIO') {
+    cbpInjectPassportBio(msg.dataUrl, msg.fileName)
+      .then(sendResponse)
+      .catch(e => sendResponse({ success: false, error: e.message }));
+    return true;
+  }
+  if (msg.type === 'FILL_CBP_TRAVELER') {
+    cbpFillTravelerInfo(msg.data || {}, { continueSearch: msg.continueSearch !== false })
+      .then(sendResponse)
+      .catch(e => sendResponse({ success: false, error: e.message }));
+    return true;
+  }
+  if (msg.type === 'EXTRACT_CBP') {
+    try { sendResponse({ success: true, data: extractCbpI94() }); }
+    catch (e) { sendResponse({ success: false, error: e.message }); }
+    return false;
+  }
+  if (msg.type === 'CBP_GET_TRAVELER_HISTORY') {
+    cbpOpenAndExtractTravelerHistory()
+      .then(sendResponse)
+      .catch(e => sendResponse({ success: false, error: e.message }));
+    return true;
+  }
+  if (msg.type === 'CBP_OPEN_MOST_RECENT_I94') {
+    sendResponse(cbpOpenMostRecentI94());
+    return false;
+  }
+  if (msg.type === 'DETECT_PAGE') { sendResponse({ page: detectPage() }); return false; }
+  if (msg.type === 'FILL_PAGE') {
+    fillPage(detectPage(), msg.data, msg.opts || {}).then(results => {
+      sendResponse({ page: detectPage(), results });
+    }).catch(error => {
+      sendResponse({
+        page: detectPage(),
+        results: [{ name: 'error', val: error?.message || String(error), ok: false }],
+      });
+    });
+    return true;
+  }
+  if (msg.type === 'ADVANCE_PAGE') {
+    const page = detectPage();
+    if (page === 'review') { sendResponse({ ok:true, page, terminal:true }); return false; }
+    const next = [...document.querySelectorAll('button')].find(button =>
+      /^next(?:\s|$)/i.test((button.textContent || '').trim()) && !button.disabled
+    );
+    if (!next) { sendResponse({ ok:false, page, error:'Next button unavailable' }); return false; }
+    next.click();
+    sendResponse({ ok:true, page, terminal:false });
+    return false;
+  }
+  return false;
+});
+
+// When CBP renders a result after the staff-initiated search, send it to the
+// side panel for preview. Saving still requires the explicit staff button.
+if (location.hostname === 'i94.cbp.dhs.gov') {
+  let lastCbpFingerprint = '';
+  setInterval(() => {
+    if (!/Admission\s*I-?94\s*Record\s*Number/i.test(document.body?.innerText || '')) return;
+    try {
+      const data = extractCbpI94();
+      if (!data.i94Number || data.i94Number === lastCbpFingerprint) return;
+      lastCbpFingerprint = data.i94Number;
+      chrome.runtime.sendMessage({ type: 'CBP_RESULT_READY', data }).catch(() => {});
+    } catch (e) { /* result may still be rendering */ }
+  }, 1000);
+}
+
+// ── Persistent USPS "Verify your address" auto-handler ────────────────────────
+// The address-verification dialog appears AFTER the user clicks Next (not during
+// fill), so a one-shot call at fill time misses it. This watcher runs for the life
+// of the page: whenever the dialog shows, it selects the Recommended address and
+// clicks "Use selected address" (click sequence verified 2026-07-21 on 13289793).
+// USPS standardization only — NOT a legal acknowledgment (the CBP "I Acknowledge
+// and Agree" is a compliance red line and is always left to a human).
+(function startUspsAddressWatcher() {
+  if (location.hostname !== 'my.uscis.gov') return;
+  let busy = false;
+  async function handle() {
+    if (busy) return;
+    const body = document.body ? document.body.innerText : '';
+    if (!/verify your address/i.test(body) && !/recommended address/i.test(body)) return;
+    const btn = [...document.querySelectorAll('button')]
+      .find(b => /use selected address|use recommended address/i.test((b.textContent || '').trim()));
+    if (!btn || btn.disabled) return; // dialog not actionable yet
+    busy = true;
+    try {
+      // Prefer the "Recommended address" radio.
+      const radios = [...document.querySelectorAll('input[type="radio"], [role="radio"]')];
+      for (const r of radios) {
+        const lbl = r.closest('label') || document.querySelector(`label[for="${r.id}"]`);
+        if (lbl && /recommended/i.test(lbl.textContent || '')) { r.click(); break; }
+      }
+      await new Promise(res => setTimeout(res, 250));
+      const b2 = [...document.querySelectorAll('button')]
+        .find(b => /use selected address|use recommended address/i.test((b.textContent || '').trim()));
+      if (b2 && !b2.disabled) b2.click();
+    } catch (e) { /* ignore */ }
+    setTimeout(() => { busy = false; }, 1200);
+  }
+  setInterval(handle, 600);
+})();
