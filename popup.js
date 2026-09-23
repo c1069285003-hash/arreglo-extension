@@ -3,6 +3,10 @@ const EOIR_PENDING_KEY = 'arreglo_eoir_pending_capture';
 const EOIR_PREVIEW_ENDPOINT = '/eoir-captures/preview-match';
 const EOIR_SAVE_ENDPOINT = '/eoir-captures';
 const EOIR_CRM_CREATE_URL = 'https://xinyuan-crm.pages.dev/';
+const EOIR_LOCAL_CRM_ORIGINS = new Set([
+  'http://127.0.0.1:5173',
+  'http://localhost:5173',
+]);
 const EOIR_STATES = Object.freeze({
   IDLE: 'idle',
   READING: 'reading',
@@ -1036,16 +1040,41 @@ function keepEoirCaseStatusOnly() {
   setEoirState(EOIR_STATES.UNLINKED);
 }
 
+async function resolveEoirCrmDestination() {
+  try {
+    const openTabs = await chrome.tabs.query({});
+    const localCrmTab = (openTabs || []).find((tab) => {
+      try {
+        return EOIR_LOCAL_CRM_ORIGINS.has(new URL(tab?.url || '').origin);
+      } catch (error) {
+        return false;
+      }
+    });
+    if (localCrmTab?.url && Number.isInteger(localCrmTab.id)) {
+      return {
+        baseUrl: `${new URL(localCrmTab.url).origin}/`,
+        tabId: localCrmTab.id,
+      };
+    }
+  } catch (error) {
+    // Production CRM remains the safe fallback when tab inspection is unavailable.
+  }
+  return { baseUrl: EOIR_CRM_CREATE_URL, tabId: null };
+}
+
 async function openEoirClientCreation() {
   if (!eoirUnlinkedCaptureId || eoirCreateOpening) return;
   const captureId = eoirUnlinkedCaptureId;
-  const createUrl = `${EOIR_CRM_CREATE_URL}?view=caseStatus`
-    + `&eoirCaptureId=${encodeURIComponent(captureId)}&action=create`;
 
   eoirCreateOpening = true;
   setEoirState(EOIR_STATES.UNLINKED_CREATE_CHOICE, 'Opening XY CRM…');
   try {
-    const openedTab = await chrome.tabs.create({ url: createUrl });
+    const destination = await resolveEoirCrmDestination();
+    const createUrl = `${destination.baseUrl}?view=caseStatus`
+      + `&eoirCaptureId=${encodeURIComponent(captureId)}&action=create`;
+    const openedTab = Number.isInteger(destination.tabId)
+      ? await chrome.tabs.update(destination.tabId, { url: createUrl, active: true })
+      : await chrome.tabs.create({ url: createUrl });
     if (!openedTab) throw new Error('Chrome did not open the CRM tab.');
     eoirUnlinkedCaptureId = '';
     eoirCreateOpening = false;

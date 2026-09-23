@@ -30,7 +30,7 @@ function makePopupElement(id) {
   };
 }
 
-function loadPopupWithTabsQuery(tabsQuery, { tabsCreate } = {}) {
+function loadPopupWithTabsQuery(tabsQuery, { tabsCreate, tabsUpdate } = {}) {
   const popupHtml = readFileSync(popupHtmlPath, "utf8");
   const ids = [...popupHtml.matchAll(/id="([^"]+)"/g)].map((match) => match[1]);
   const elements = Object.fromEntries(ids.map((id) => [id, makePopupElement(id)]));
@@ -62,6 +62,7 @@ function loadPopupWithTabsQuery(tabsQuery, { tabsCreate } = {}) {
       tabs: {
         query: tabsQuery,
         create: tabsCreate || (() => Promise.resolve({ id: 1 })),
+        update: tabsUpdate || ((tabId) => Promise.resolve({ id: tabId })),
         sendMessage() {
           return Promise.resolve({});
         },
@@ -303,6 +304,39 @@ test("unlinked decision keeps Case Status only or opens CRM creation without req
 
   const popup = readFileSync(popupJsPath, "utf8");
   assert.doesNotMatch(popup, /fetch\([^)]*\/next-case-number/s);
+});
+
+test("client creation prefers an already-open local CRM during office testing", async () => {
+  const opened = [];
+  const updated = [];
+  const { elements, context } = loadPopupWithTabsQuery(
+    async () => [
+      { id: 17, url: "https://acis.eoir.justice.gov/en/caseInformation" },
+      { id: 18, url: "http://127.0.0.1:5173/case-status" },
+    ],
+    {
+      tabsCreate: async (options) => {
+        opened.push(options);
+        return { id: 44 };
+      },
+      tabsUpdate: async (tabId, options) => {
+        updated.push({ tabId, options });
+        return { id: tabId };
+      },
+    },
+  );
+
+  context.showEoirUnlinkedDecision("local-capture");
+  await elements["btn-eoir-create-client"].listeners.click();
+
+  assert.equal(opened.length, 0);
+  assert.equal(updated.length, 1);
+  assert.equal(updated[0].tabId, 18);
+  assert.equal(
+    updated[0].options.url,
+    "http://127.0.0.1:5173/?view=caseStatus&eoirCaptureId=local-capture&action=create",
+  );
+  assert.equal(updated[0].options.active, true);
 });
 
 test("a failed CRM tab open leaves the unlinked question visible and retryable", async () => {
